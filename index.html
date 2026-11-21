@@ -213,6 +213,56 @@ const zoneLooks={
 };
 function mat(color,roughness=.85,extra={}){return new THREE.MeshStandardMaterial({color,roughness,...extra})}
 
+
+function makeTerrainGeometry(region){
+ const size=120,segments=96,geo=new THREE.PlaneGeometry(size,size,segments,segments);
+ const pos=geo.attributes.position;
+ for(let i=0;i<pos.count;i++){
+  const x=pos.getX(i),z=-pos.getY(i),d=Math.hypot(x,z);
+  const edge=Math.max(0,Math.min(1,(d-30)/27));
+  const ridge=Math.sin(x*.19+Math.sin(z*.11)*1.8)*.42+Math.cos(z*.16-x*.07)*.3+Math.sin((x+z)*.31)*.16;
+  const regionLift=region==='霜晶雪原'?Math.abs(Math.sin(x*.13+z*.09))*.34:region==='熾焰山脈'?Math.max(0,Math.sin(x*.12-z*.17))*.48:Math.max(0,ridge)*.36;
+  const h=(ridge+regionLift)*edge*1.65;
+  pos.setZ(i,h);
+ }
+ geo.computeVertexNormals();return geo;
+}
+function addSkyDome(region){
+ const colors={
+ '風語草原':['#6b9fc0','#d8c89d','#e7d9b5'],
+ '蒼翠森林':['#365b62','#78918a','#c2b88d'],
+ '霜晶雪原':['#527b9c','#b7d4e1','#e5edf0'],
+ '熾焰山脈':['#382d45','#925b52','#e3a16a']
+ };
+ const palette=colors[region]||colors['風語草原'];
+ const uniforms={topColor:{value:new THREE.Color(palette[0])},midColor:{value:new THREE.Color(palette[1])},bottomColor:{value:new THREE.Color(palette[2])}};
+ const material=new THREE.ShaderMaterial({uniforms,side:THREE.BackSide,depthWrite:false,fog:false,vertexShader:'varying vec3 vWorldPosition; void main(){vec4 worldPosition=modelMatrix*vec4(position,1.0);vWorldPosition=worldPosition.xyz;gl_Position=projectionMatrix*viewMatrix*worldPosition;}',fragmentShader:'uniform vec3 topColor;uniform vec3 midColor;uniform vec3 bottomColor;varying vec3 vWorldPosition;void main(){float h=normalize(vWorldPosition).y;float a=smoothstep(-0.12,0.28,h);float b=smoothstep(0.28,0.82,h);vec3 low=mix(bottomColor,midColor,a);gl_FragColor=vec4(mix(low,topColor,b),1.0);}'});
+ const dome=new THREE.Mesh(new THREE.SphereGeometry(115,32,20),material);dome.position.y=5;dome.renderOrder=-10;dome.userData.zoneObject=true;scene3d.add(dome);
+}
+function addDistantRidges(region){
+ const palettes={
+ '風語草原':[0x687e70,0x87927a,0xa2a184],
+ '蒼翠森林':[0x294a43,0x416557,0x6a8070],
+ '霜晶雪原':[0x819daa,0xb4cbd1,0xdce8e9],
+ '熾焰山脈':[0x493940,0x67474a,0x8a5b50]
+ };
+ const colors=palettes[region]||palettes['風語草原'];
+ for(let layer=0;layer<3;layer++){
+  const verts=[],indices=[],base=39+layer*5,steps=72;
+  for(let i=0;i<=steps;i++){
+   const a=i/steps*Math.PI*2;
+   const variation=Math.sin(i*1.73+layer)*2.4+Math.sin(i*.51+layer*2)*3.2;
+   const radius=base+variation;
+   const x=Math.cos(a)*radius,z=Math.sin(a)*radius;
+   const peak=5+layer*1.4+Math.max(0,Math.sin(i*.83+layer*1.7))*((region==='霜晶雪原'?15:region==='熾焰山脈'?13:9)+layer*2);
+   verts.push(x,0,z,x,peak,z);
+   if(i<steps){const n=i*2;indices.push(n,n+1,n+2,n+1,n+3,n+2)}
+  }
+  const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));geo.setIndex(indices);geo.computeVertexNormals();
+  const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:colors[layer],roughness:1,side:THREE.DoubleSide,fog:true}));mesh.userData.zoneObject=true;scene3d.add(mesh);
+ }
+}
+
 function makeGroundTexture(region){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d');
  const palettes={'風語草原':['#667c45','#829052','#9a995b'],'蒼翠森林':['#263f31','#38543a','#536342'],'霜晶雪原':['#9db8c3','#c1d4d8','#e2e9e7'],'熾焰山脈':['#403638','#59413b','#765044']};
@@ -392,7 +442,7 @@ function buildZone(){
  const look=zoneLooks[state.region]||zoneLooks['風語草原'];
  scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,18,66);
  scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];worldObstacles.length=0;
- const groundTexture=makeGroundTexture(state.region);const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,map:groundTexture,roughness:1});const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,1,1),groundMat,0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;addBiomeWater(state.region);addSkyClouds(state.region);
+ const groundTexture=makeGroundTexture(state.region);const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,map:groundTexture,roughness:.94});const ground=addMesh(scene3d,makeTerrainGeometry(state.region),groundMat,0,-.08,0);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.userData.zoneObject=true;addSkyDome(state.region);addDistantRidges(state.region);addBiomeWater(state.region);addSkyClouds(state.region);
  const grid=new THREE.GridHelper(120,30,0x46574d,0x596b5c);grid.material.transparent=true;grid.material.opacity=.12;grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
  for(let i=0;i<48;i++){
   const x=(Math.random()-.5)*82,z=(Math.random()-.5)*82;
@@ -447,9 +497,9 @@ function init3DWorld(){
  if(!window.THREE){activate2DFallback('3D 引擎載入失敗，請確認網路後重新整理。');return}
  try{
  const canvas=$('world3d');scene3d=new THREE.Scene();camera3d=new THREE.PerspectiveCamera(55,1,.1,180);
- renderer3d=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'low-power'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));renderer3d.outputEncoding=THREE.sRGBEncoding;renderer3d.toneMapping=THREE.ACESFilmicToneMapping;renderer3d.toneMappingExposure=1.12;renderer3d.shadowMap.enabled=false;
- scene3d.add(new THREE.HemisphereLight(0xc8d4df,0x343b35,1.05));
- const sun=new THREE.DirectionalLight(0xd9d1bd,.82);sun.position.set(-12,25,10);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene3d.add(sun);
+ renderer3d=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.65));renderer3d.outputEncoding=THREE.sRGBEncoding;renderer3d.toneMapping=THREE.ACESFilmicToneMapping;renderer3d.toneMappingExposure=1.18;renderer3d.shadowMap.enabled=true;renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
+ scene3d.add(new THREE.HemisphereLight(0xc8dff5,0x514638,1.35));scene3d.add(new THREE.AmbientLight(0xffffff,.24));
+ const sun=new THREE.DirectionalLight(0xffe5bd,2.0);sun.position.set(-24,38,22);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-42;sun.shadow.camera.right=42;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;sun.shadow.camera.near=.5;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene3d.add(sun);
  player3d=makeCat();player3d.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene3d.add(player3d);
  buildZone();update3DPlayer();resize3D();threeReady=true;animate3D();
  let dragging=false,lastX=0,lastY=0;
