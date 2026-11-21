@@ -72,7 +72,13 @@ button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:re
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-let state=JSON.parse(localStorage.getItem('starTraveler')||'null')||{gems:1600,coins:300,primogems:0,owned:['風行者・菲亞'],pity:0,x:50,y:55,chest:false,quest:false};
+let state;
+try{state=JSON.parse(localStorage.getItem('starTraveler')||'null')}catch(err){console.warn('舊存檔讀取失敗，已建立新存檔',err);state=null}
+if(!state||typeof state!=='object'||Array.isArray(state))state={gems:1600,coins:300,primogems:0,owned:['咪露'],pity:0,x:50,y:55,chest:false,quest:false};
+state.owned=Array.isArray(state.owned)?state.owned:['咪露'];
+state.pity=Number(state.pity)||0;
+state.x=Number.isFinite(Number(state.x))?Number(state.x):50;
+state.y=Number.isFinite(Number(state.y))?Number(state.y):55;
 // 舊版存檔相容：確保頂部鑽石（星石）永遠是數字
 state.gems=Number.isFinite(Number(state.gems))?Number(state.gems):1600;
 state.coins=Number.isFinite(Number(state.coins))?Number(state.coins):300;
@@ -281,11 +287,15 @@ function update3DInteraction(){
 }
 function updateNearbyInteraction(){if(threeReady)update3DInteraction();else{$('worldHint').textContent='3D 世界載入中……'}}
 function animate3D(t=0){
- if(!renderer3d)return;requestAnimationFrame(animate3D);const dt=Math.min(.05,(t-lastFrame)/1000||.016);lastFrame=t;
- if(player3d){const x=player3d.position.x,z=player3d.position.z;const target=new THREE.Vector3(x+Math.sin(cameraYaw)*cameraDistance,2.6+cameraDistance*Math.sin(cameraPitch),z+Math.cos(cameraYaw)*cameraDistance);camera3d.position.lerp(target,.12);camera3d.lookAt(x,1,z);player3d.rotation.y=Math.atan2(camera3d.position.x-x,camera3d.position.z-z)+Math.PI}
- if(player3d){player3d.position.y=.035+Math.sin(t*.004)*.035;player3d.rotation.z=Math.sin(t*.002)*.025}
- worldObjects.forEach(o=>{if(o.userData.kind==='quest')o.children[1].rotation.y+=dt*.9});
- renderer3d.render(scene3d,camera3d);
+ if(!renderer3d)return;
+ requestAnimationFrame(animate3D);
+ try{
+  const dt=Math.min(.05,(t-lastFrame)/1000||.016);lastFrame=t;
+  if(player3d){const x=player3d.position.x,z=player3d.position.z;const target=new THREE.Vector3(x+Math.sin(cameraYaw)*cameraDistance,2.6+cameraDistance*Math.sin(cameraPitch),z+Math.cos(cameraYaw)*cameraDistance);camera3d.position.lerp(target,.12);camera3d.lookAt(x,1,z);player3d.rotation.y=Math.atan2(camera3d.position.x-x,camera3d.position.z-z)+Math.PI}
+  if(player3d){player3d.position.y=.035+Math.sin(t*.004)*.035;player3d.rotation.z=Math.sin(t*.002)*.025}
+  worldObjects.forEach(o=>{if(o.userData.kind==='quest'&&o.children[1])o.children[1].rotation.y+=dt*.9});
+  renderer3d.render(scene3d,camera3d);
+ }catch(err){console.error('3D 畫面執行失敗，切換安全模式：',err);activate2DFallback('3D 顯示發生錯誤，已切換安全模式。')}
 }
 function updateWorldBackground(){if(threeReady){buildZone();update3DPlayer();update3DInteraction()}else{$('world').style.backgroundImage=regionBackgrounds[state.region]||regionBackgrounds['風語草原']} $('loc').textContent='📍 '+state.region}
 
@@ -296,5 +306,7 @@ document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
 document.querySelectorAll('[data-move]').forEach(b=>{let [x,y]=b.dataset.move.split(',').map(Number);b.addEventListener('pointerdown',e=>{e.preventDefault();move(x,y)})});
 document.addEventListener('keydown',e=>{if(['ArrowUp','w','W'].includes(e.key))move(0,-4);if(['ArrowDown','s','S'].includes(e.key))move(0,4);if(['ArrowLeft','a','A'].includes(e.key))move(-4,0);if(['ArrowRight','d','D'].includes(e.key))move(4,0);if(e.key==='e'||e.key==='E')interactCurrent()});
-$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';init3DWorld();updateWorldBackground();updateNearbyInteraction();save();openPanel('home');
+$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';
+try{init3DWorld()}catch(err){console.error('遊戲世界初始化失敗：',err);activate2DFallback('世界載入失敗，已啟用安全模式。')}
+try{updateWorldBackground();updateNearbyInteraction();save();openPanel('home')}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
 </script></body></html>
