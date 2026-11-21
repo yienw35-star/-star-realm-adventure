@@ -142,6 +142,8 @@ function claimChestQuest(){if(state.openedChests.length<5||state.claimedQuests.i
 function runAway(){$('battle').style.display='none'}
 function openChest(id){const ch=chestCatalog.find(x=>x.id===Number(id));if(!ch||state.openedChests.includes(ch.id))return;state.openedChests.push(ch.id);state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady)buildZone();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
 function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;update3DPlayer();updateNearbyInteraction()}
+const heldKeys=new Set(),heldButtons=new Map();
+let walkDirection=new THREE.Vector2(),walkBlend=0;
 const regionBackgrounds={
 '風語草原':"url('https://images.unsplash.com/photo-1757492914273-e496b4cc4551?auto=format&fit=crop&w=1800&q=85')",
 '蒼翠森林':"url('https://images.unsplash.com/photo-1765871319901-0aaafe3f1a2a?auto=format&fit=crop&w=1800&q=85')",
@@ -292,8 +294,26 @@ function animate3D(t=0){
  requestAnimationFrame(animate3D);
  try{
   const dt=Math.min(.05,(t-lastFrame)/1000||.016);lastFrame=t;
-  if(player3d){const x=player3d.position.x,z=player3d.position.z;const target=new THREE.Vector3(x+Math.sin(cameraYaw)*cameraDistance,2.6+cameraDistance*Math.sin(cameraPitch),z+Math.cos(cameraYaw)*cameraDistance);camera3d.position.lerp(target,.12);camera3d.lookAt(x,1,z);player3d.rotation.y=Math.atan2(camera3d.position.x-x,camera3d.position.z-z)+Math.PI}
-  if(player3d){player3d.position.y=.035+Math.sin(t*.004)*.035;player3d.rotation.z=Math.sin(t*.002)*.025}
+  const keys=heldKeys;
+  let ix=(keys.has('d')||keys.has('arrowright')?1:0)-(keys.has('a')||keys.has('arrowleft')?1:0);
+  let iz=(keys.has('s')||keys.has('arrowdown')?1:0)-(keys.has('w')||keys.has('arrowup')?1:0);
+  for(const [id,v] of heldButtons){ix+=v.x;iz+=v.z}
+  const inputLen=Math.hypot(ix,iz);if(inputLen>1){ix/=inputLen;iz/=inputLen}
+  const moving=inputLen>.01;
+  if(moving){
+   const speed=15*dt;state.x=Math.max(5,Math.min(95,state.x+ix*speed));state.y=Math.max(12,Math.min(88,state.y+iz*speed));
+   $('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;
+   update3DPlayer();update3DInteraction();
+   const dx=ix,dz=iz;const desired=Math.atan2(-dx,-dz);
+   let diff=((desired-player3d.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;
+   player3d.rotation.y+=diff*Math.min(1,dt*12);
+  }else{
+   const away=Math.atan2(Math.sin(cameraYaw),Math.cos(cameraYaw));
+   let diff=((away-player3d.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;
+   player3d.rotation.y+=diff*Math.min(1,dt*5);
+  }
+  walkBlend+=(moving?1:0-walkBlend)*Math.min(1,dt*8);
+  if(player3d){const step=moving?Math.sin(t*.014)*.045:0;player3d.position.y=.035+Math.abs(step)+Math.sin(t*.004)*.012;player3d.rotation.z=Math.sin(t*.014)*.025*(moving?1:0.15)}
   worldObjects.forEach(o=>{if(o.userData.kind==='quest'&&o.children[1])o.children[1].rotation.y+=dt*.9});
   renderer3d.render(scene3d,camera3d);
  }catch(err){console.error('3D 畫面執行失敗，切換安全模式：',err);activate2DFallback('3D 顯示發生錯誤，已切換安全模式。')}
@@ -305,8 +325,10 @@ function updateNearbyInteraction(){if(threeReady){update3DInteraction();return}c
 function interactCurrent(){if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}const type=nearbyPoi.dataset.interact;if(type==='quest')openPanel('quest');else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))}
 document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('click',()=>{if(btn.classList.contains('nearby')){nearbyPoi=btn;interactCurrent()}else{$('worldHint').textContent='還太遠了！請先走近這個標記。'}}));
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
-document.querySelectorAll('[data-move]').forEach(b=>{let [x,y]=b.dataset.move.split(',').map(Number);b.addEventListener('pointerdown',e=>{e.preventDefault();move(x,y)})});
-document.addEventListener('keydown',e=>{if(['ArrowUp','w','W'].includes(e.key))move(0,-4);if(['ArrowDown','s','S'].includes(e.key))move(0,4);if(['ArrowLeft','a','A'].includes(e.key))move(-4,0);if(['ArrowRight','d','D'].includes(e.key))move(4,0);if(e.key==='e'||e.key==='E')interactCurrent()});
+document.querySelectorAll('[data-move]').forEach(b=>{const [x,y]=b.dataset.move.split(',').map(Number);const id=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);heldButtons.set(id,{x:Math.sign(x),z:Math.sign(y)})});const stop=()=>heldButtons.delete(id);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)});
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();heldKeys.add(k)}if(k==='e')interactCurrent()});
+document.addEventListener('keyup',e=>heldKeys.delete(e.key.toLowerCase()));
+window.addEventListener('blur',()=>{heldKeys.clear();heldButtons.clear()});
 $('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';
 try{init3DWorld()}catch(err){console.error('遊戲世界初始化失敗：',err);activate2DFallback('世界載入失敗，已啟用安全模式。')}
 try{updateWorldBackground();updateNearbyInteraction();save();openPanel('home')}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
