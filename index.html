@@ -9,8 +9,8 @@ body{margin:0;background:#101d2b;color:#fff;font-family:system-ui,-apple-system,
 header{height:54px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;background:#0c1826eF;border-bottom:1px solid var(--line);position:relative;z-index:2}
 .brand{font-weight:900;letter-spacing:2px;color:var(--gold)}.stats{font-size:13px;display:flex;gap:12px}
 main{max-width:1000px;margin:auto;padding:12px;display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px}
-#world{height:min(66vh,570px);min-height:370px;position:relative;overflow:hidden;border:1px solid #ffffff45;border-radius:17px;background:linear-gradient(#7db3c2 0%,#b4d0bd 47%,#658b67 48%,#284b42 100%)}
-#world:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 20% 30%,#fff7 0 2%,transparent 25%),linear-gradient(130deg,transparent 35%,#ffffff12 36% 37%,transparent 38%);pointer-events:none}
+#world{height:min(66vh,570px);min-height:370px;position:relative;overflow:hidden;border:1px solid #ffffff45;border-radius:17px;background:#294a42 center/cover no-repeat;transition:background-image .35s ease}#world:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#07152222 20%,#07152266 100%);pointer-events:none}.mountain,.tree{display:none}
+#world:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#ffffff12,transparent 45%,#07152233);pointer-events:none;z-index:0}
 .mountain{position:absolute;bottom:40%;width:0;height:0;border-left:130px solid transparent;border-right:130px solid transparent;border-bottom:190px solid #627e86;filter:drop-shadow(0 7px 0 #506d67)}
 .m1{left:-35px}.m2{right:-55px;transform:scale(1.3);border-bottom-color:#718b91}
 .tree{position:absolute;font-size:42px;filter:drop-shadow(2px 4px 2px #183b2c99)}
@@ -18,7 +18,7 @@ main{max-width:1000px;margin:auto;padding:12px;display:grid;grid-template-column
 #hero:after{content:"";position:absolute;width:34px;height:8px;background:#10251c66;border-radius:50%;bottom:-1px;left:5px;z-index:-1}
 .location{position:absolute;top:12px;left:12px;background:#102238b9;padding:7px 11px;border-radius:9px;font-size:13px}
 .hint{position:absolute;bottom:10px;left:10px;right:10px;text-align:center;background:#102238a9;padding:7px;border-radius:9px;font-size:12px}
-.poi{position:absolute;border:0;background:#f5d78c;color:#263448;border-radius:20px;padding:6px 10px;font-weight:800;box-shadow:0 3px 10px #1425}
+.poi{position:absolute;z-index:2;border:0;background:#f5d78c;color:#263448;border-radius:20px;padding:7px 11px;font-weight:800;box-shadow:0 3px 10px #1425;opacity:.88}.poi.nearby{opacity:1;outline:3px solid #fff;box-shadow:0 0 0 6px #f5d78c66,0 3px 15px #1425;transform:scale(1.08)}#interactBtn{display:none;position:absolute;z-index:3;left:50%;bottom:48px;transform:translateX(-50%);border:1px solid #fff;background:#f5d78c;color:#263448;border-radius:24px;padding:9px 18px;font-weight:900;box-shadow:0 4px 18px #0008}#interactBtn.show{display:block}
 #panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:13px;min-height:370px}
 h2{font-size:17px;margin:0 0 10px;color:var(--gold)}.muted{color:#b9c8d4;font-size:12px}
 button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
@@ -61,10 +61,7 @@ button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:re
 <div class="mountain m1"></div><div class="mountain m2"></div>
 <div class="tree" style="left:12%;bottom:15%">🌲</div><div class="tree" style="left:29%;bottom:22%">🌳</div><div class="tree" style="right:15%;bottom:13%">🌲</div><div class="tree" style="right:34%;bottom:27%">🌳</div>
 <div class="location" id="loc">📍 貓咪風語草原</div><div id="hero" role="img" aria-label="玩家主角：驚嚇貓" title="驚嚇貓">🐈</div>
-<button class="poi" style="left:8%;top:24%" onclick="openPanel('quest')">📜 委託</button>
-<button class="poi" style="right:8%;top:36%" onclick="startBattle()">⚔️ 魔物</button>
-<button class="poi" style="right:12%;bottom:22%" onclick="openPanel('chest')">🎁 寶箱</button><button class="poi" style="left:24%;top:43%" onclick="openPanel('chest')">🧰 寶箱</button><button class="poi" style="left:55%;top:28%" onclick="openPanel('chest')">✨ 寶箱</button><button class="poi" style="left:72%;bottom:35%" onclick="openPanel('chest')">🎁 寶箱</button><button class="poi" style="left:42%;bottom:18%" onclick="openPanel('chest')">🧰 寶箱</button>
-<div class="hint">操控貓貓探索世界 · 靠近標記可進行互動</div></div>
+<button class="poi" data-interact="quest" style="left:8%;top:24%">📜 委託</button><button class="poi" data-interact="monster" style="right:8%;top:36%">⚔️ 魔物</button><button class="poi" data-interact="chest" data-chest-id="0" style="right:12%;bottom:22%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="1" style="left:24%;top:43%">🧰 寶箱</button><button class="poi" data-interact="chest" data-chest-id="2" style="left:55%;top:28%">✨ 寶箱</button><button class="poi" data-interact="chest" data-chest-id="3" style="left:72%;bottom:35%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="4" style="left:42%;bottom:18%">🧰 寶箱</button><button id="interactBtn" onclick="interactCurrent()">按 E 互動</button><div class="hint" id="worldHint">移動貓咪靠近委託、魔物或寶箱，再按 E 互動</div></div>
 <div id="controls"><button class="up" data-move="0,-5">↑</button><button class="left" data-move="-5,0">←</button><button class="down" data-move="0,5">↓</button><button class="right" data-move="5,0">→</button></div>
 </section>
 <aside id="panel"><div class="tabrow"><button class="tab active" data-tab="home">冒險</button><button class="tab" data-tab="gacha">祈願</button><button class="tab" data-tab="bag">角色</button><button class="tab" data-tab="party">隊伍</button><button class="tab" data-tab="quest">任務</button><button class="tab" data-tab="map">世界</button></div><div id="content" class="content"></div></aside></main>
@@ -129,14 +126,25 @@ function attack(){if(hp<=0||catHp<=0)return;let dmg=catAttack();hp-=dmg;afterHit
 function skill(){if(hp<=0||catHp<=0)return;if(!skillReady){$('battlemsg').textContent='星光衝擊還在蓄力，這回合先用貓掌攻擊吧！';return}let dmg=Math.round(catAttack()*1.8);hp-=dmg;skillReady=false;afterHit(`✨ 貓咪星光衝擊造成 ${dmg} 點傷害！`)}
 function afterHit(msg){if(hp<=0){hp=0;updateBattleBars();const rewardScale=currentEnemy.reward;state.coins+=Math.round(100*rewardScale);state.primogems+=Math.round(20*rewardScale);state.gems=(Number(state.gems)||0)+Math.round(40*rewardScale);state.catXp+=Math.round(35*rewardScale);state.dailyWins++;$('battlemsg').textContent='勝利！獲得 '+Math.round(100*rewardScale)+' 摩拉、'+Math.round(40*rewardScale)+' 鑽石、'+Math.round(20*rewardScale)+' 原石與 '+Math.round(35*rewardScale)+' 經驗值！';if(state.catXp>=state.catLevel*100){state.catXp-=state.catLevel*100;state.catLevel++;alert('驚嚇貓升級了！目前等級 Lv.'+state.catLevel+'！生命、攻擊與防禦都提升了！')}save();setTimeout(()=>{$('battle').style.display='none';if(!state.quest){state.quest=true;state.primogems+=40;save();alert('委託完成！額外獲得 40 原石！')}},1300)}else{let retaliation=Math.max(3,16-catDefense()*.35);catHp=Math.max(0,catHp-Math.round(retaliation));skillReady=true;updateBattleBars();if(catHp<=0){$('battlemsg').textContent='驚嚇貓累倒了！先撤退休息，再來挑戰吧。'}else{$('battlemsg').textContent=msg+` 史萊姆剩餘 ${hp} HP。史萊姆反擊，驚嚇貓受到 ${Math.round(retaliation)} 點傷害。`}}}
 function toggleParty(name){if(state.party.includes(name))state.party=state.party.filter(n=>n!==name);else if(state.party.length<4)state.party.push(name);else alert('隊伍最多只能有 4 位夥伴！');save();openPanel('party')}
-function selectRegion(name){state.region=name;save();openPanel('map');alert('已前往'+name+'！魔物強度與獎勵也會提高。')}
+function selectRegion(name){state.region=name;state.x=50;state.y=55;save();$('hero').style.left='50%';$('hero').style.top='55%';updateWorldBackground();updateNearbyInteraction();openPanel('map');alert('已前往'+name+'！新的地區景色與魔物已載入。')}
 function claimDaily(){if(state.dailyWins<3||state.claimedQuests.includes('daily'))return;state.claimedQuests.push('daily');state.primogems+=30;state.gems+=100;save();openPanel('quest');alert('每日委託完成！獲得 30 原石與 100 星石！')}
 function claimChestQuest(){if(state.openedChests.length<5||state.claimedQuests.includes('chest'))return;state.claimedQuests.push('chest');state.primogems+=25;save();openPanel('quest');alert('探索委託完成！獲得 25 原石！')}
 function runAway(){$('battle').style.display='none'}
 function openChest(id){const ch=chestCatalog.find(x=>x.id===Number(id));if(!ch||state.openedChests.includes(ch.id))return;state.openedChests.push(ch.id);state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
-function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';if(state.x>80&&state.y<35)$('loc').textContent='📍 風語村';else if(state.y<25)$('loc').textContent='📍 蒼翠山徑';else $('loc').textContent='📍 風語草原';}
+function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;updateNearbyInteraction()}
+const regionBackgrounds={
+'風語草原':"url('https://images.unsplash.com/photo-1757492914273-e496b4cc4551?auto=format&fit=crop&w=1800&q=85')",
+'蒼翠森林':"url('https://images.unsplash.com/photo-1765871319901-0aaafe3f1a2a?auto=format&fit=crop&w=1800&q=85')",
+'霜晶雪原':"url('https://images.unsplash.com/photo-1704236041747-615d800a8b0a?auto=format&fit=crop&w=1800&q=85')",
+'熾焰山脈':"linear-gradient(145deg,#f4a26133,#7c241b99),url('https://images.unsplash.com/photo-1757492914273-e496b4cc4551?auto=format&fit=crop&w=1800&q=85')"
+};
+function updateWorldBackground(){const world=$('world');world.style.backgroundImage=regionBackgrounds[state.region]||regionBackgrounds['風語草原'];world.style.backgroundSize='cover';world.style.backgroundPosition='center';$('loc').textContent='📍 '+state.region}
+let nearbyPoi=null;
+function updateNearbyInteraction(){const buttons=[...document.querySelectorAll('[data-interact]')];let closest=null,best=Infinity;buttons.forEach(btn=>{const x=parseFloat(btn.style.left||(btn.style.right?100-parseFloat(btn.style.right):50));const y=parseFloat(btn.style.top||(btn.style.bottom?100-parseFloat(btn.style.bottom):50));const d=Math.hypot(state.x-x,state.y-y);btn.classList.toggle('nearby',d<=13);if(d<best){best=d;closest=btn}});nearbyPoi=best<=13?closest:null;$('interactBtn').classList.toggle('show',!!nearbyPoi);$('worldHint').textContent=nearbyPoi?'已靠近：'+(nearbyPoi.dataset.interact==='quest'?'冒險委託':nearbyPoi.dataset.interact==='monster'?'魔物':'寶箱')+' · 按 E 或點擊互動':'移動貓咪靠近委託、魔物或寶箱，再按 E 互動'}
+function interactCurrent(){if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}const type=nearbyPoi.dataset.interact;if(type==='quest')openPanel('quest');else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))}
+document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('click',()=>{if(btn.classList.contains('nearby')){nearbyPoi=btn;interactCurrent()}else{$('worldHint').textContent='還太遠了！請先走近這個標記。'}}));
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
 document.querySelectorAll('[data-move]').forEach(b=>{let [x,y]=b.dataset.move.split(',').map(Number);b.addEventListener('pointerdown',e=>{e.preventDefault();move(x,y)})});
-document.addEventListener('keydown',e=>{if(['ArrowUp','w'].includes(e.key))move(0,-4);if(['ArrowDown','s'].includes(e.key))move(0,4);if(['ArrowLeft','a'].includes(e.key))move(-4,0);if(['ArrowRight','d'].includes(e.key))move(4,0)});
-$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';save();openPanel('home');
+document.addEventListener('keydown',e=>{if(['ArrowUp','w','W'].includes(e.key))move(0,-4);if(['ArrowDown','s','S'].includes(e.key))move(0,4);if(['ArrowLeft','a','A'].includes(e.key))move(-4,0);if(['ArrowRight','d','D'].includes(e.key))move(4,0);if(e.key==='e'||e.key==='E')interactCurrent()});
+$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';updateWorldBackground();updateNearbyInteraction();save();openPanel('home');
 </script></body></html>
