@@ -236,10 +236,41 @@ main>section{width:100%;min-width:0}
  #panel{bottom:calc(86px + env(safe-area-inset-bottom))!important;width:calc(100vw - 16px)!important;height:min(48dvh,390px)!important;max-height:calc(100dvh - 190px)!important}
  #featureDock{bottom:calc(9px + env(safe-area-inset-bottom))!important;width:calc(100vw - 16px)!important}
 }
-</style></head>
+/* Mobile HUD: assign every floating control its own lane; prevent label collisions */
+@media(max-width:720px){
+ #soundToggle{position:fixed!important;top:calc(8px + env(safe-area-inset-top))!important;right:8px!important;left:auto!important;max-width:145px!important;padding:7px 9px!important;font-size:10px!important;white-space:normal!important;line-height:1.25!important}
+ #cheatOpen{top:calc(50px + env(safe-area-inset-top))!important;right:8px!important;left:auto!important;max-width:145px!important;padding:7px 9px!important;font-size:10px!important;white-space:normal!important}
+ #world .world-help{top:calc(94px + env(safe-area-inset-top))!important;right:8px!important;left:auto!important;max-width:155px!important;font-size:9px!important;line-height:1.35!important;white-space:normal!important;text-align:right!important}
+ .compass{top:calc(8px + env(safe-area-inset-top))!important;left:8px!important;width:58px!important;height:58px!important;transform:scale(.88);transform-origin:top left}
+ .compass .north{left:24px!important}.compass .south{left:24px!important}.compass .east{top:23px!important}.compass .west{top:23px!important}.compass i{left:25px!important;top:15px!important;height:25px!important}
+ #guideBanner{top:calc(140px + env(safe-area-inset-top))!important;width:calc(100% - 20px)!important;max-width:350px!important;font-size:10px!important;line-height:1.45!important;padding:7px 9px!important;white-space:normal!important}
+ #storyHud{left:8px!important;right:auto!important;bottom:calc(112px + env(safe-area-inset-bottom))!important;width:min(190px,56vw)!important;max-width:190px!important;z-index:14!important;padding:7px 8px!important}
+ #storyHud b{font-size:11px!important;line-height:1.35!important;overflow-wrap:anywhere!important}
+ #storyHud p{font-size:10px!important;line-height:1.4!important;overflow-wrap:anywhere!important}
+ #storyHud .storyKicker{font-size:9px!important;letter-spacing:.2px!important}
+ #storyHud button{font-size:9px!important;white-space:normal!important}
+ #controls{position:fixed!important;left:auto!important;right:8px!important;top:auto!important;bottom:calc(100px + env(safe-area-inset-bottom))!important;transform:none!important;z-index:16!important}
+ #interactBtn{bottom:calc(84px + env(safe-area-inset-bottom))!important;left:50%!important;transform:translateX(-50%)!important;max-width:calc(100% - 24px)!important;white-space:normal!important}
+ #worldHint{left:50%!important;right:auto!important;bottom:calc(52px + env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:calc(100% - 22px)!important;max-width:360px!important;font-size:10px!important;line-height:1.35!important;text-align:center!important;white-space:normal!important;overflow-wrap:anywhere!important}
+ #featureDock{z-index:70!important}
+ #panel{bottom:calc(86px + env(safe-area-inset-bottom))!important;height:min(45dvh,360px)!important;max-height:calc(100dvh - 205px)!important;min-height:145px!important}
+ #panel h2,#panel h3,#content h2,#content h3{line-height:1.35!important;overflow-wrap:anywhere!important}
+ #panel #content,#content{word-break:normal!important;overflow-wrap:anywhere!important;line-height:1.55!important}
+ #panel .tabrow{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+ #panel .tab,#panel button,#content button{min-width:0!important;max-width:100%!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.35!important}
+ .stats{display:flex!important;flex-wrap:wrap!important;gap:5px!important}
+ .stats span{white-space:normal!important;overflow-wrap:anywhere!important}
+}
+@media(max-width:390px){
+ #storyHud{width:164px!important;bottom:calc(116px + env(safe-area-inset-bottom))!important}
+ #controls{right:6px!important;bottom:calc(100px + env(safe-area-inset-bottom))!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,34px)!important;gap:2px!important}
+ #controls button{width:38px!important;height:34px!important;font-size:16px!important}
+ #worldHint{font-size:9px!important;bottom:calc(52px + env(safe-area-inset-bottom))!important}
+ #soundToggle,#cheatOpen{max-width:132px!important;font-size:9px!important}
+}</style></head>
 <body>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
-<button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">🔊 音效與音樂開啟</button><main><section>
+<button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">🔊 點擊啟動音樂</button><main><section>
 <div id="world">
 <canvas id="world3d" aria-label="星境旅人 3D 冒險世界"></canvas>
 <div class="world-help">拖曳旋轉視角 · 點擊互動</div><button id="cheatOpen" class="cheat-open" onclick="openCheat()">🎟 兌換碼</button>
@@ -268,56 +299,60 @@ function ensureGameAudio(){
  if(audioMuted)return null;
  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
  if(!gameAudio){gameAudio=new AC();lastGameActivity=gameAudio.currentTime}
- if(gameAudio.state==='suspended')gameAudio.resume();
+ if(gameAudio.state==='suspended')gameAudio.resume().then(()=>{startIdleMusic();if(!audioMuted)setMusicLevel(.34)}).catch(()=>{});
  startIdleMusic();return gameAudio;
 }
 function markGameActivity(){
  if(!gameAudio||audioMuted)return;
- lastGameActivity=gameAudio.currentTime;setMusicLevel(.035);
+ lastGameActivity=gameAudio.currentTime;setMusicLevel(.075);
 }
 function setMusicLevel(level){
  if(!gameAudio||!bgmGain)return;
+ if(Math.abs(bgmTarget-level)<.025)return;
  bgmTarget=level;bgmGain.gain.cancelScheduledValues(gameAudio.currentTime);
- bgmGain.gain.setTargetAtTime(level,gameAudio.currentTime,.9);
+ bgmGain.gain.setTargetAtTime(level,gameAudio.currentTime,.55);
 }
 function startIdleMusic(){
  if(!gameAudio||audioMuted||bgmTimer)return;
- const ac=gameAudio,now=ac.currentTime;
- const master=ac.createGain();master.gain.value=.0001;master.connect(ac.destination);bgmGain=master;
- // 柔和的星空和弦墊底，避免刺耳高頻
- const pad=ac.createGain();pad.gain.value=.16;pad.connect(master);
- [196,246.94,293.66,392].forEach((hz,i)=>{
+ const ac=gameAudio,master=ac.createGain();master.gain.value=.0001;master.connect(ac.destination);bgmGain=master;
+ const chords=[[196,246.94,293.66,392],[174.61,220,261.63,349.23],[146.83,185,220,293.66],[164.81,207.65,246.94,329.63]];
+ const melody=[392,493.88,587.33,493.88,440,392,329.63,392,523.25,587.33,659.25,587.33,493.88,440,392,329.63];
+ const playNote=(freq,at,dur=.62,volume=.22,wave='sine')=>{
+  const o=ac.createOscillator(),g=ac.createGain(),filter=ac.createBiquadFilter();
+  o.type=wave;o.frequency.setValueAtTime(freq,at);filter.type='lowpass';filter.frequency.value=2400;
+  g.gain.setValueAtTime(.0001,at);g.gain.linearRampToValueAtTime(volume,at+.035);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
+  o.connect(filter);filter.connect(g);g.connect(master);o.start(at);o.stop(at+dur+.04);
+ };
+ // Warm, clearly audible sustained harmony beneath a gentle repeating melody.
+ const pad=ac.createGain();pad.gain.value=.13;pad.connect(master);
+ [196,246.94,293.66].forEach((hz,i)=>{
   const o=ac.createOscillator(),g=ac.createGain(),lfo=ac.createOscillator(),lg=ac.createGain();
-  o.type=i===3?'sine':'triangle';o.frequency.value=hz;g.gain.value=i===3?.12:.18;
-  lfo.frequency.value=.07+i*.025;lg.gain.value=hz*.0025;lfo.connect(lg);lg.connect(o.frequency);
+  o.type='triangle';o.frequency.value=hz;g.gain.value=.24;
+  lfo.frequency.value=.09+i*.035;lg.gain.value=hz*.003;lfo.connect(lg);lg.connect(o.frequency);
   o.connect(g);g.connect(pad);o.start();lfo.start();bgmNodes.push(o,lfo);
  });
- const chords=[[196,246.94,293.66,392],[174.61,220,261.63,349.23],[130.81,164.81,196,261.63],[146.83,185,220,293.66]];
- const melody=[392,493.88,587.33,493.88,440,392,329.63,392,523.25,587.33,659.25,587.33,493.88,440,392,329.63];
- const playNote=(freq,at,dur=.8)=>{
-  const o=ac.createOscillator(),g=ac.createGain(),filter=ac.createBiquadFilter();
-  o.type='sine';o.frequency.setValueAtTime(freq,at);filter.type='lowpass';filter.frequency.value=1800;
-  g.gain.setValueAtTime(.0001,at);g.gain.linearRampToValueAtTime(.105,at+.09);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
-  o.connect(filter);filter.connect(g);g.connect(master);o.start(at);o.stop(at+dur+.03);
- };
  bgmStep=0;
  bgmTimer=setInterval(()=>{
   if(!gameAudio||audioMuted)return;
   const t=ac.currentTime;
-  if(t-lastGameActivity>5){if(bgmTarget<.16)setMusicLevel(.16)}else if(bgmTarget>.001)setMusicLevel(.12);
+  if(t-lastGameActivity>3.2)setMusicLevel(.34);
+  else setMusicLevel(.075);
   const n=bgmStep%16;
-  if(n%4===0){const chord=chords[Math.floor(bgmStep/16)%chords.length];chord.forEach((hz,j)=>playNote(hz*(j===3?2:1),t+.02,.95))}
-  if(n%2===0)playNote(melody[n],t+.06,.72);
+  if(n%4===0){
+   const chord=chords[Math.floor(bgmStep/16)%chords.length];
+   chord.forEach((hz,j)=>playNote(hz*(j===3?2:1),t+.01,.95,j===0?.095:.065,'triangle'));
+  }
+  if(n%2===0)playNote(melody[n],t+.04,.72,.24,'sine');
+  if(n===6||n===14)playNote(melody[n]+12,t+.12,.38,.10,'triangle');
   bgmStep++;
- },720);
- setMusicLevel(.16);
+ },620);
+ setMusicLevel(.34);
 }
 function playGameSound(kind='tap'){
- const ac=ensureGameAudio();if(!ac)return;
- markGameActivity();
+ const ac=ensureGameAudio();if(!ac)return;markGameActivity();
  const now=ac.currentTime;
  const presets={
-  tap:[[620,.07,'sine',.025]], move:[[180,.07,'triangle',.012]],
+  tap:[[620,.07,'sine',.025]],move:[[180,.07,'triangle',.012]],
   hit:[[190,.11,'sawtooth',.055],[95,.16,'triangle',.035],[420,.055,'square',.012]],
   skill:[[392,.14,'sine',.045],[587,.17,'sine',.05],[784,.2,'triangle',.04],[1175,.28,'sine',.035]],
   win:[[523,.18,'sine',.05],[659,.18,'sine',.05],[784,.24,'sine',.055],[1046,.36,'sine',.045]],
@@ -332,12 +367,6 @@ function playGameSound(kind='tap'){
   g.gain.setValueAtTime(.0001,now+i*.065);g.gain.exponentialRampToValueAtTime(vol,now+i*.065+.018);g.gain.exponentialRampToValueAtTime(.0001,now+i*.065+dur);
   o.connect(filter);filter.connect(g);g.connect(ac.destination);o.start(now+i*.065);o.stop(now+i*.065+dur+.025);
  });
-}
-function toggleGameSound(){
- audioMuted=!audioMuted;const b=$('soundToggle');
- if(b){b.textContent=audioMuted?'🔇 音效關閉':'🔊 音效與音樂開啟';b.setAttribute('aria-pressed',String(!audioMuted))}
- if(audioMuted){if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}bgmNodes.forEach(n=>{try{n.stop()}catch(e){}});bgmNodes=[];bgmGain=null}
- else{ensureGameAudio();playGameSound('tap')}
 }
 
 const SAVE_SYSTEM_VERSION='3';
@@ -703,7 +732,7 @@ function addSignpost(x,z,rotation,labelColor){
  const g=new THREE.Group();addMesh(g,new THREE.CylinderGeometry(.09,.13,2.2,7),mat(0x65472f),0,1.1,0);
  const board=addMesh(g,new THREE.BoxGeometry(1.25,.42,.13),mat(0x8a633c),0,1.72,0);board.rotation.y=rotation;
  addMesh(g,new THREE.OctahedronGeometry(.14),mat(labelColor,.3,{emissive:labelColor}),0,2.05,0);
- g.position.set(x,0,z);scene3d.add(g);addObstacle(x,z,.45);
+ g.position.set(x,0,z);g.userData={kind:'signpost',id:'region-gate'};scene3d.add(g);worldObjects.push(g);addObstacle(x,z,.45);
 }
 function addBiomeLandmark(look){
  const g=new THREE.Group(),region=state.region;
@@ -852,7 +881,7 @@ let guidePathMesh=null,guidePathMaterial=null;
 function getStoryGuideTarget(){
  if(!threeReady||!worldObjects.length)return null;
  const kinds={0:'quest',1:'monster',2:'chest',3:'resource'},kind=kinds[state.storyStep];
- if(!kind)return {x:-2,z:1,label:'地圖路標'};
+ if(!kind)return worldObjects.find(o=>o.userData.kind==='signpost')||null;
  const candidates=worldObjects.filter(o=>o.userData.kind===kind);
  if(kind==='chest')return candidates.filter(o=>!state.openedChests.includes(o.userData.key)&&!state.openedChests.includes(o.userData.id)).sort((a,b)=>Math.hypot(a.position.x-player3d.position.x,a.position.z-player3d.position.z)-Math.hypot(b.position.x-player3d.position.x,b.position.z-player3d.position.z))[0]||null;
  if(kind==='resource')return candidates.filter(o=>!state.gatheredNodes.includes(o.userData.key)).sort((a,b)=>Math.hypot(a.position.x-player3d.position.x,a.position.z-player3d.position.z)-Math.hypot(b.position.x-player3d.position.x,b.position.z-player3d.position.z))[0]||null;
@@ -886,8 +915,8 @@ function update3DInteraction(){
  if(nearbyPoi&&nearbyPoi.classList)nearbyPoi.classList.add('nearby');
  $('interactBtn').classList.toggle('show',!!nearbyPoi);
  const kind=nearbyPoi?.userData?.kind||nearbyPoi?.dataset?.interact;
- const labels={quest:'冒險委託',monster:'地區魔物',chest:'寶箱',resource:'地區晶礦'};
- $('interactBtn').textContent=kind==='resource'?'點擊採集':'點擊互動';
+ const labels={quest:'冒險委託',monster:'地區魔物',chest:'寶箱',resource:'地區晶礦',signpost:'跨區傳送路標'};
+ $('interactBtn').textContent=kind==='resource'?'點擊採集':kind==='signpost'?'選擇目的地':'點擊互動';
  $('worldHint').textContent=nearbyPoi?'已靠近：'+(labels[kind]||'探索目標')+' · '+(kind==='resource'?'點擊採集':'點擊互動'):'沿著發光路線前進，尋找 '+(storySteps[state.storyStep]?.title||'探索目標');$('worldHint').classList.toggle('guide-hint',!nearbyPoi);updateGuidePath();
 }
 function updateNearbyInteraction(){if(threeReady)update3DInteraction();else{$('worldHint').textContent='3D 世界載入中……'}}
@@ -944,6 +973,7 @@ function updateNearbyInteraction(){if(threeReady){update3DInteraction();return}c
 function interactCurrent(){
  if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}
  if(nearbyPoi.userData?.kind==='resource'){gatherResource(nearbyPoi.userData.id);return}
+ if(nearbyPoi.userData?.kind==='signpost'){playGameSound('region');openPanel('map');$('worldHint').textContent='選擇目的地，即可前往其他星境！';return}
  if(nearbyPoi.userData?.kind==='chest'){openChest(nearbyPoi.userData.id,nearbyPoi.userData.key);return}
  const type=nearbyPoi.dataset.interact;if(type==='quest')interactStoryStone();else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))
 }
