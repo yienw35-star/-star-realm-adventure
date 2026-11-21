@@ -96,6 +96,7 @@ state.gatheredNodes=Array.isArray(state.gatheredNodes)?state.gatheredNodes:[];
 state.materials=state.materials&&typeof state.materials==='object'?state.materials:{};
 state.visitedRegions=Array.isArray(state.visitedRegions)?state.visitedRegions:['風語草原'];
 state.openedChests=Array.isArray(state.openedChests)?state.openedChests:[];
+state.openedChests=state.openedChests.map(id=>typeof id==='number'?'風語草原-'+id:id);
 state.storyStep=Math.max(0,Math.min(4,Number(state.storyStep)||0));
 const storySteps=[{title:'星境的呼喚',objective:'前往草原中央的星導石，按 E 與它互動。'},{title:'初次試煉',objective:'擊敗星導石附近的草原魔物，保護這片草原。'},{title:'遺失的補給',objective:'尋找地圖上的寶箱並打開一個，取得旅途補給。'},{title:'星光共鳴',objective:'找到發光晶礦並採集，完成第一次星光共鳴。'},{title:'新的旅程',objective:'主線第一章完成！你已經可以自由探索四大區域。'}];
 const chestCatalog=[{id:0,name:'草叢木箱',emoji:'🧰',gems:80,coins:60,primogems:2},{id:1,name:'星光寶箱',emoji:'✨',gems:140,coins:90,primogems:5},{id:2,name:'古老寶箱',emoji:'🎁',gems:180,coins:120,primogems:8},{id:3,name:'森林寶箱',emoji:'🌿',gems:100,coins:160,primogems:3},{id:4,name:'稀有寶箱',emoji:'💎',gems:260,coins:180,primogems:12}];
@@ -449,7 +450,7 @@ function animate3D(t=0){
   $('compassRose').style.transform='rotate('+(-cameraYaw*180/Math.PI)+'deg)';
   camera3d.position.set(player3d.position.x+Math.sin(cameraYaw)*cameraDistance,player3d.position.y+cameraDistance*Math.sin(cameraPitch)+1.2,player3d.position.z+Math.cos(cameraYaw)*cameraDistance);
   camera3d.lookAt(player3d.position.x,player3d.position.y+1.05,player3d.position.z);
-  worldObjects.forEach(o=>{if(o.userData.kind==='quest'&&o.children[1])o.children[1].rotation.y+=dt*.9;if(o.userData.kind==='chest'&&!o.userData.opened){const jewel=o.children[7];if(jewel)jewel.rotation.y+=dt*1.2}});
+  worldObjects.forEach(o=>{if(o.userData.kind==='quest'&&o.children[1])o.children[1].rotation.y+=dt*.9;if(o.userData.kind==='chest'&&!o.userData.opened){const jewel=o.children[6];if(jewel)jewel.rotation.y+=dt*1.2}});
   renderer3d.render(scene3d,camera3d);
  }catch(err){console.error('3D 畫面執行失敗，切換安全模式：',err);activate2DFallback('3D 顯示發生錯誤，已切換安全模式。')}
 }
