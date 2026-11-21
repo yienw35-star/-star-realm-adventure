@@ -133,7 +133,7 @@ function selectRegion(name){state.region=name;state.x=50;state.y=55;save();$('he
 function claimDaily(){if(state.dailyWins<3||state.claimedQuests.includes('daily'))return;state.claimedQuests.push('daily');state.primogems+=30;state.gems+=100;save();openPanel('quest');alert('每日委託完成！獲得 30 原石與 100 星石！')}
 function claimChestQuest(){if(state.openedChests.length<5||state.claimedQuests.includes('chest'))return;state.claimedQuests.push('chest');state.primogems+=25;save();openPanel('quest');alert('探索委託完成！獲得 25 原石！')}
 function runAway(){$('battle').style.display='none'}
-function openChest(id){const ch=chestCatalog.find(x=>x.id===Number(id));if(!ch||state.openedChests.includes(ch.id))return;state.openedChests.push(ch.id);state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
+function openChest(id){const ch=chestCatalog.find(x=>x.id===Number(id));if(!ch||state.openedChests.includes(ch.id))return;state.openedChests.push(ch.id);state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady)buildZone();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
 function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;update3DPlayer();updateNearbyInteraction()}
 const regionBackgrounds={
 '風語草原':"url('https://images.unsplash.com/photo-1757492914273-e496b4cc4551?auto=format&fit=crop&w=1800&q=85')",
@@ -152,7 +152,7 @@ const zoneLooks={
 function mat(color,roughness=.85,extra={}){return new THREE.MeshStandardMaterial({color,roughness,...extra})}
 function addMesh(parent,geometry,material,x,y,z){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);parent.add(m);return m}
 function makeCat(){
- const g=new THREE.Group(),cream=mat(0xf3e5ca),white=mat(0xffffff),pink=mat(0xe98d9b),dark=mat(0x303344),eye=mat(0x55b7a5,{roughness:.3,emissive:0x163c35});
+ const g=new THREE.Group(),cream=mat(0xf3e5ca),white=mat(0xffffff),pink=mat(0xe98d9b),dark=mat(0x303344),eye=mat(0x55b7a5,.3,{emissive:0x163c35});
  const body=addMesh(g,new THREE.SphereGeometry(.48,20,16),cream,0,.78,0);body.scale.set(.78,.92,1.15);
  const head=addMesh(g,new THREE.SphereGeometry(.43,24,18),cream,0,1.43,-.23);head.scale.set(1.05,.92,.9);
  for(const side of [-1,1]){
@@ -192,7 +192,7 @@ function addChest(x,z,id,look){
  const lid=addMesh(g,new THREE.BoxGeometry(.98,.22,.7),wood,0,.82,0);lid.rotation.x=-.12;
  addMesh(g,new THREE.BoxGeometry(.13,.28,.08),gold,0,.56,-.37);
  const ring=addMesh(g,new THREE.TorusGeometry(.62,.025,6,24),mat(look.accent,{roughness:.4,emissive:look.accent}),0,.08,0);ring.rotation.x=Math.PI/2;
- g.position.set(x,0,z);g.userData={kind:'chest',id};scene3d.add(g);worldObjects.push(g);
+ g.position.set(x,0,z);g.userData={kind:'chest',id,opened:state.openedChests.includes(id)};if(g.userData.opened)lid.rotation.x=-.85;scene3d.add(g);worldObjects.push(g);
 }
 function addMonster(x,z,look){
  const g=new THREE.Group(),bodyColor=state.region==='熾焰山脈'?0xb95738:state.region==='霜晶雪原'?0x8ed5ee:state.region==='蒼翠森林'?0x9bba5b:0x79c96a;
@@ -208,7 +208,7 @@ function addMonster(x,z,look){
 function buildZone(){
  const look=zoneLooks[state.region]||zoneLooks['風語草原'];
  scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,28,90);
- scene3d.children.filter(o=>o.userData.zoneObject).forEach(o=>scene3d.remove(o));worldObjects=[];
+ scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];
  const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,50,50),mat(look.ground),0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;
  const grid=new THREE.GridHelper(120,60,0xffffff22,0xffffff0c);grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
  for(let i=0;i<42;i++){
@@ -222,13 +222,13 @@ function buildZone(){
   const mountain=addMesh(scene3d,new THREE.ConeGeometry(5+Math.random()*4,12+Math.random()*10,6),mat(state.region==='霜晶雪原'?0xd9eff7:state.region==='熾焰山脈'?0x493b43:0x657f72),Math.cos(a)*r,5,Math.sin(a)*r);mountain.userData.zoneObject=true;
  }
  const spots=[
-  {x:-13,z:-10,kind:'quest'},
-  {x:13,z:-7,kind:'monster'},
-  {x:8,z:11,kind:'chest',id:0},
-  {x:-10,z:4,kind:'chest',id:1},
-  {x:2,z:-15,kind:'chest',id:2},
-  {x:16,z:8,kind:'chest',id:3},
-  {x:-3,z:15,kind:'chest',id:4}
+  {x:-23.1,z:-14.3,kind:'quest'},
+  {x:23.1,z:-7.7,kind:'monster'},
+  {x:20.9,z:15.4,kind:'chest',id:0},
+  {x:-14.3,z:-3.85,kind:'chest',id:1},
+  {x:2.75,z:-12.1,kind:'chest',id:2},
+  {x:12.1,z:8.25,kind:'chest',id:3},
+  {x:-4.4,z:17.6,kind:'chest',id:4}
  ];
  for(const p of spots){
   if(p.kind==='chest')addChest(p.x,p.z,p.id,look);
@@ -264,7 +264,7 @@ function update3DPlayer(){if(!player3d)return;player3d.position.set((state.x-50)
 function update3DInteraction(){
  if(!threeReady)return;
  const px=player3d.position.x,pz=player3d.position.z;let best=Infinity,nearest=null;
- for(const obj of worldObjects){const d=Math.hypot(obj.position.x-px,obj.position.z-pz);if(d<best){best=d;nearest=obj}}
+ for(const obj of worldObjects){if(obj.userData.kind==='chest'&&state.openedChests.includes(obj.userData.id))continue;const d=Math.hypot(obj.position.x-px,obj.position.z-pz);if(d<best){best=d;nearest=obj}}
  const close=best<3.3;
  const btns=[...document.querySelectorAll('[data-interact]')];
  btns.forEach(b=>b.classList.remove('nearby'));
