@@ -106,6 +106,7 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 <div id="battle"><div id="battlebox"><div class="muted">驚嚇貓出擊！</div><h2>史萊姆</h2><div class="enemy">🟢</div><div class="bar"><i id="enemyhp"></i></div><div class="muted" id="catBattleStats">🐈 驚嚇貓 HP：180 / 180</div><div class="catHp"><i id="catHpBar"></i></div><p id="battlemsg">一隻野生史萊姆擋住了去路！</p><button class="action primary" onclick="attack()">🐾 貓掌普通攻擊</button><button class="action" onclick="skill()">✨ 貓咪星光衝擊</button><button class="action" onclick="runAway()">撤退</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
 <script>if(!window.THREE){document.write('<scr'+'ipt src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></scr'+'ipt>')}</script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 let state;
@@ -212,6 +213,36 @@ const zoneLooks={
 '熾焰山脈':{ground:0x382c2d,sky:0x3c3039,fog:0x684b45,tree:0x56332e,accent:0xc66d3f}
 };
 function mat(color,roughness=.85,extra={}){return new THREE.MeshStandardMaterial({color,roughness,...extra})}
+
+const natureAssetModels={};
+let natureAssetsReady=false,natureAssetLoadStarted=false;
+function loadNatureAssets(){
+ if(natureAssetLoadStarted||!window.THREE||!THREE.GLTFLoader)return;
+ natureAssetLoadStarted=true;
+ const loader=new THREE.GLTFLoader();
+ const files={treeDetailed:'tree-detailed.glb',treeOak:'tree-oak.glb',treePine:'tree-pinedefaulta.glb',rock:'rock-largea.glb',bush:'plant-bushdetailed.glb',flower:'flower-purplea.glb'};
+ const jobs=Object.entries(files).map(([key,file])=>new Promise(resolve=>{
+  loader.load(new URL('assets/nature/'+file,document.baseURI).href,gltf=>{natureAssetModels[key]=gltf.scene;resolve(true)},undefined,err=>{console.warn('自然模型載入失敗：'+file,err);resolve(false)});
+ }));
+ Promise.all(jobs).then(results=>{
+  const loaded=results.filter(Boolean).length;
+  if(loaded>=4){natureAssetsReady=true;if(threeReady){buildZone();update3DPlayer()}}
+  console.info('星境自然模型載入：'+loaded+'/'+jobs.length);
+ });
+}
+function cloneNatureAsset(key,targetHeight){
+ const source=natureAssetModels[key];if(!source)return null;
+ const model=source.clone(true),box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
+ const factor=targetHeight/Math.max(size.y,.001);model.scale.setScalar(factor);model.updateMatrixWorld(true);
+ const scaledBox=new THREE.Box3().setFromObject(model);model.position.y-=scaledBox.min.y;
+ model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(Array.isArray(o.material))o.material.forEach(m=>{if(m.roughness!==undefined)m.roughness=Math.max(.62,m.roughness)});else if(o.material&&o.material.roughness!==undefined)o.material.roughness=Math.max(.62,o.material.roughness)}});
+ return model;
+}
+function addNatureDecoration(key,x,z,targetHeight,rotation=0){
+ const model=cloneNatureAsset(key,targetHeight);if(!model)return;
+ model.position.x=x;model.position.z=z;model.rotation.y=rotation;model.userData.zoneObject=true;scene3d.add(model);
+}
+
 
 
 
@@ -323,6 +354,7 @@ function makeCat(){
  return g;
 }
 function addTree(x,z,look,scale=1){
+ if(natureAssetsReady){const pick=state.region==='霜晶雪原'?'treePine':state.region==='蒼翠森林'?(Math.random()<.58?'treeDetailed':'treeOak'):(Math.random()<.55?'treeOak':'treeDetailed');const model=cloneNatureAsset(pick,(4.8+Math.random()*1.8)*scale);if(model){model.position.x=x;model.position.z=z;model.rotation.y=Math.random()*Math.PI*2;scene3d.add(model);addObstacle(x,z,.72*scale);return}}
  const g=new THREE.Group(),region=state.region;
  const trunk=mat(region==='蒼翠森林'?0x493b2c:region==='熾焰山脈'?0x51403a:0x72513a);
  const foliage=mat(look.tree,.92),lightFoliage=mat(look.accent,.95);
@@ -342,6 +374,7 @@ function addTree(x,z,look,scale=1){
  g.position.set(x,0,z);scene3d.add(g);addObstacle(x,z,.72*scale);
 }
 function addRock(x,z,look,scale=1){
+ if(natureAssetsReady){const model=cloneNatureAsset('rock',(1.35+Math.random()*.9)*scale);if(model){model.position.x=x;model.position.z=z;model.rotation.y=Math.random()*Math.PI*2;scene3d.add(model);addObstacle(x,z,scale*.78);return}}
  const colors=state.region==='霜晶雪原'?0x9fc9dd:state.region==='熾焰山脈'?0x533d3b:0x778c83;
  const rock=addMesh(scene3d,new THREE.DodecahedronGeometry(scale,0),mat(colors),x,scale*.55,z);rock.scale.y=.8;addObstacle(x,z,scale*.78);
 }
@@ -479,6 +512,10 @@ function buildZone(){
    if(Math.random()<.42){const tuft=addMesh(scene3d,new THREE.ConeGeometry(.18,.55,5),mat(0x9b9b62),x,.25,z);tuft.rotation.z=(Math.random()-.5)*.7}
   }
  }
+ if(natureAssetsReady&&(state.region==='風語草原'||state.region==='蒼翠森林')){
+  for(let i=0;i<24;i++){let x=(Math.random()-.5)*78,z=(Math.random()-.5)*78;if(Math.abs(x)<9&&Math.abs(z)<9){x+=x<0?-11:11;z+=z<0?-9:9}addNatureDecoration('bush',x,z,.85+Math.random()*.75,Math.random()*Math.PI*2)}
+  for(let i=0;i<30;i++){let x=(Math.random()-.5)*76,z=(Math.random()-.5)*76;if(Math.abs(x)<9&&Math.abs(z)<9){x+=x<0?-10:10;z+=z<0?-10:10}addNatureDecoration('flower',x,z,.45+Math.random()*.5,Math.random()*Math.PI*2)}
+ }
  for(let i=0;i<9;i++){
   const a=i*Math.PI*2/9,r=33+Math.random()*8;
   const mountain=addMesh(scene3d,new THREE.ConeGeometry(5+Math.random()*4,12+Math.random()*10,6),mat(state.region==='霜晶雪原'?0xd9eff7:state.region==='熾焰山脈'?0x493b43:0x657f72),Math.cos(a)*r,5,Math.sin(a)*r);mountain.userData.zoneObject=true;
@@ -516,7 +553,7 @@ function init3DWorld(){
  scene3d.add(new THREE.HemisphereLight(0xc8dff5,0x514638,1.35));scene3d.add(new THREE.AmbientLight(0xffffff,.24));
  const sun=new THREE.DirectionalLight(0xffe5bd,2.0);sun.position.set(-24,38,22);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-42;sun.shadow.camera.right=42;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;sun.shadow.camera.near=.5;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene3d.add(sun);
  player3d=makeCat();player3d.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene3d.add(player3d);
- buildZone();update3DPlayer();resize3D();threeReady=true;animate3D();
+ buildZone();update3DPlayer();resize3D();threeReady=true;animate3D();loadNatureAssets();
  let dragging=false,lastX=0,lastY=0;
  canvas.addEventListener('pointerdown',e=>{dragging=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
  canvas.addEventListener('pointermove',e=>{if(!dragging)return;cameraYaw-=(e.clientX-lastX)*.006;cameraPitch=Math.max(.18,Math.min(1.05,cameraPitch+(e.clientY-lastY)*.003));lastX=e.clientX;lastY=e.clientY});
