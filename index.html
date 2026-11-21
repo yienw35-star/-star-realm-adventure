@@ -64,7 +64,7 @@ button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:re
 <button class="poi" style="left:8%;top:24%" onclick="openPanel('quest')">📜 委託</button>
 <button class="poi" style="right:8%;top:36%" onclick="startBattle()">⚔️ 魔物</button>
 <button class="poi" style="right:12%;bottom:22%" onclick="openPanel('chest')">🎁 寶箱</button><button class="poi" style="left:24%;top:43%" onclick="openPanel('chest')">🧰 寶箱</button><button class="poi" style="left:55%;top:28%" onclick="openPanel('chest')">✨ 寶箱</button><button class="poi" style="left:72%;bottom:35%" onclick="openPanel('chest')">🎁 寶箱</button><button class="poi" style="left:42%;bottom:18%" onclick="openPanel('chest')">🧰 寶箱</button>
-<div class="hint">操控驚嚇貓探索世界 · 靠近標記可進行互動</div></div>
+<div class="hint">操控貓貓探索世界 · 靠近標記可進行互動</div></div>
 <div id="controls"><button class="up" data-move="0,-5">↑</button><button class="left" data-move="-5,0">←</button><button class="down" data-move="0,5">↓</button><button class="right" data-move="5,0">→</button></div>
 </section>
 <aside id="panel"><div class="tabrow"><button class="tab active" data-tab="home">冒險</button><button class="tab" data-tab="gacha">祈願</button><button class="tab" data-tab="bag">角色</button></div><div id="content" class="content"></div></aside></main>
@@ -83,15 +83,15 @@ if(!Array.isArray(state.openedChests)){state.openedChests=state.chest?[0]:[];}
 
 // 所有角色統一使用相同欄位：name、rarity、stars、element、emoji、role、desc、skill、baseHp、baseAtk、baseDef
 const characters=[
-{name:'星爪・咪露',rarity:'★★★★★',stars:5,element:'星',emoji:'🐱',role:'主攻手',desc:'把星光凝聚在貓掌上的勇敢小隊長。',skill:'星月爪擊',baseHp:180,baseAtk:32,baseDef:18},
-{name:'焰尾・燒燒',rarity:'★★★★★',stars:5,element:'火',emoji:'🐈',role:'爆發手',desc:'尾巴燃起火焰，擅長瞬間爆發。',skill:'喵焰流星',baseHp:165,baseAtk:36,baseDef:15},
-{name:'潮泡・沫沫',rarity:'★★★★',stars:4,element:'水',emoji:'😺',role:'治療手',desc:'用泡泡治癒夥伴的溫柔貓咪。',skill:'泡泡療癒',baseHp:175,baseAtk:23,baseDef:19},
-{name:'霜耳・雪糕',rarity:'★★★★',stars:4,element:'冰',emoji:'🐈‍⬛',role:'控場手',desc:'能讓敵人慢下來的冷靜貓咪。',skill:'冰晶喵環',baseHp:160,baseAtk:27,baseDef:17},
-{name:'雷鬚・電電',rarity:'★★★★',stars:4,element:'雷',emoji:'😼',role:'速度手',desc:'快如閃電，連鬍鬚都帶著電光。',skill:'雷光衝刺',baseHp:155,baseAtk:29,baseDef:15},
-{name:'草球・芽芽',rarity:'★★★',stars:3,element:'草',emoji:'😸',role:'輔助手',desc:'帶著小草球旅行的活潑貓咪。',skill:'嫩葉拍擊',baseHp:145,baseAtk:21,baseDef:14},
-{name:'風鈴・呼呼',rarity:'★★★',stars:3,element:'風',emoji:'🐾',role:'速度手',desc:'跑過時會帶起一陣微風。',skill:'旋風肉球',baseHp:135,baseAtk:23,baseDef:12},
-{name:'石掌・圓圓',rarity:'★★',stars:2,element:'岩',emoji:'🐱',role:'防守手',desc:'圓滾滾但很可靠的小守衛。',skill:'小石盾',baseHp:150,baseAtk:15,baseDef:18},
-{name:'水點・滴滴',rarity:'★★',stars:2,element:'水',emoji:'😺',role:'輔助手',desc:'喜歡玩水，能幫隊伍補充活力。',skill:'水滴彈',baseHp:130,baseAtk:16,baseDef:14},
+{name:'咪露',rarity:'★★★★★',stars:5,element:'星',emoji:'🐱',role:'主攻手',desc:'把星光凝聚在貓掌上的勇敢小隊長。',skill:'星月爪擊',baseHp:180,baseAtk:32,baseDef:18},
+{name:'燒燒',rarity:'★★★★★',stars:5,element:'火',emoji:'🐈',role:'爆發手',desc:'尾巴燃起火焰，擅長瞬間爆發。',skill:'喵焰流星',baseHp:165,baseAtk:36,baseDef:15},
+{name:'沫沫',rarity:'★★★★',stars:4,element:'水',emoji:'😺',role:'治療手',desc:'用泡泡治癒夥伴的溫柔貓咪。',skill:'泡泡療癒',baseHp:175,baseAtk:23,baseDef:19},
+{name:'雪糕',rarity:'★★★★',stars:4,element:'冰',emoji:'🐈‍⬛',role:'控場手',desc:'能讓敵人慢下來的冷靜貓咪。',skill:'冰晶喵環',baseHp:160,baseAtk:27,baseDef:17},
+{name:'電電',rarity:'★★★★',stars:4,element:'雷',emoji:'😼',role:'速度手',desc:'快如閃電，連鬍鬚都帶著電光。',skill:'雷光衝刺',baseHp:155,baseAtk:29,baseDef:15},
+{name:'芽芽',rarity:'★★★',stars:3,element:'草',emoji:'😸',role:'輔助手',desc:'帶著小草球旅行的活潑貓咪。',skill:'嫩葉拍擊',baseHp:145,baseAtk:21,baseDef:14},
+{name:'呼呼',rarity:'★★★',stars:3,element:'風',emoji:'🐾',role:'速度手',desc:'跑過時會帶起一陣微風。',skill:'旋風肉球',baseHp:135,baseAtk:23,baseDef:12},
+{name:'圓圓',rarity:'★★',stars:2,element:'岩',emoji:'🐱',role:'防守手',desc:'圓滾滾但很可靠的小守衛。',skill:'小石盾',baseHp:150,baseAtk:15,baseDef:18},
+{name:'滴滴',rarity:'★★',stars:2,element:'水',emoji:'😺',role:'輔助手',desc:'喜歡玩水，能幫隊伍補充活力。',skill:'水滴彈',baseHp:130,baseAtk:16,baseDef:14},
 {name:'豆豆',rarity:'★',stars:1,element:'無',emoji:'🐈',role:'新手',desc:'剛踏上旅程、努力學習的小貓。',skill:'努力喵拳',baseHp:110,baseAtk:12,baseDef:10},
 {name:'小灰',rarity:'★',stars:1,element:'無',emoji:'🐾',role:'新手',desc:'膽小但很努力，總是跟著大家。',skill:'勇氣拍擊',baseHp:115,baseAtk:11,baseDef:11}
 ];
