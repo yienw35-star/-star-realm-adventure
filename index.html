@@ -103,7 +103,7 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 </section>
 <aside id="panel"><div class="tabrow" aria-label="遊戲功能"><button class="tab active" data-tab="home">🏠 冒險</button><button class="tab" data-tab="quest">📜 任務</button><button class="tab" data-tab="map">🗺️ 地圖</button><button class="tab" data-tab="gacha">✦ 祈願</button><button class="tab" data-tab="bag">🐈 角色</button><button class="tab" data-tab="party">⚔️ 隊伍</button></div><div id="content" class="content"></div></aside></main>
 <div id="wishReveal"><div id="wishBox"><div id="wishTitle">✦ 星願降臨 ✦</div><div id="wishSubtitle">命運的星光正在揭曉……</div><div id="wishBeam"></div><div id="wishCards"></div><button id="wishClose" class="action primary" onclick="closeWishReveal()" style="display:none">收下祈願結果</button><button id="wishSkip" class="action" onclick="revealWishCards()">跳過動畫</button></div></div>
-<div id="battle"><div id="battlebox"><div class="muted">驚嚇貓出擊！</div><h2>史萊姆</h2><div class="enemy">🟢</div><div class="bar"><i id="enemyhp"></i></div><div class="muted" id="catBattleStats">🐈 驚嚇貓 HP：180 / 180</div><div class="catHp"><i id="catHpBar"></i></div><p id="battlemsg">一隻野生史萊姆擋住了去路！</p><button class="action primary" onclick="attack()">🐾 貓掌普通攻擊</button><button class="action" onclick="skill()">✨ 貓咪星光衝擊</button><button class="action" onclick="runAway()">撤退</button></div></div>
+<div id="battle"><div id="battlebox"><div class="muted">星芽出擊！</div><h2>史萊姆</h2><div class="enemy">🟢</div><div class="bar"><i id="enemyhp"></i></div><div class="muted" id="catBattleStats">🌟 星芽 HP：180 / 180</div><div class="catHp"><i id="catHpBar"></i></div><p id="battlemsg">一隻野生史萊姆擋住了去路！</p><button class="action primary" onclick="attack()">🐾 貓掌普通攻擊</button><button class="action" onclick="skill()">✨ 貓咪星光衝擊</button><button class="action" onclick="runAway()">撤退</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
 <script>if(!window.THREE){document.write('<scr'+'ipt src="https://cdn.jsdelivr.net/npm/three@0.146.0/build/three.min.js"></scr'+'ipt>')}</script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -135,30 +135,33 @@ if(!Array.isArray(state.openedChests)){state.openedChests=state.chest?[0]:[];}
 
 // 所有角色統一使用相同欄位：name、rarity、stars、element、emoji、role、desc、skill、baseHp、baseAtk、baseDef
 const characters=[
-{name:'咪露',rarity:'★★★★★',stars:5,element:'星',emoji:'🐱',role:'主攻手',desc:'把星光凝聚在貓掌上的勇敢小隊長。',skill:'星月爪擊',baseHp:180,baseAtk:32,baseDef:18},
-{name:'燒燒',rarity:'★★★★★',stars:5,element:'火',emoji:'🐈',role:'爆發手',desc:'尾巴燃起火焰，擅長瞬間爆發。',skill:'喵焰流星',baseHp:165,baseAtk:36,baseDef:15},
-{name:'沫沫',rarity:'★★★★',stars:4,element:'水',emoji:'😺',role:'治療手',desc:'用泡泡治癒夥伴的溫柔貓咪。',skill:'泡泡療癒',baseHp:175,baseAtk:23,baseDef:19},
-{name:'雪糕',rarity:'★★★★',stars:4,element:'冰',emoji:'🐈‍⬛',role:'控場手',desc:'能讓敵人慢下來的冷靜貓咪。',skill:'冰晶喵環',baseHp:160,baseAtk:27,baseDef:17},
-{name:'電電',rarity:'★★★★',stars:4,element:'雷',emoji:'😼',role:'速度手',desc:'快如閃電，連鬍鬚都帶著電光。',skill:'雷光衝刺',baseHp:155,baseAtk:29,baseDef:15},
-{name:'芽芽',rarity:'★★★',stars:3,element:'草',emoji:'😸',role:'輔助手',desc:'帶著小草球旅行的活潑貓咪。',skill:'嫩葉拍擊',baseHp:145,baseAtk:21,baseDef:14},
-{name:'呼呼',rarity:'★★★',stars:3,element:'風',emoji:'🐾',role:'速度手',desc:'跑過時會帶起一陣微風。',skill:'旋風肉球',baseHp:135,baseAtk:23,baseDef:12},
-{name:'圓圓',rarity:'★★',stars:2,element:'岩',emoji:'🐱',role:'防守手',desc:'圓滾滾但很可靠的小守衛。',skill:'小石盾',baseHp:150,baseAtk:15,baseDef:18},
-{name:'滴滴',rarity:'★★',stars:2,element:'水',emoji:'😺',role:'輔助手',desc:'喜歡玩水，能幫隊伍補充活力。',skill:'水滴彈',baseHp:130,baseAtk:16,baseDef:14},
-{name:'豆豆',rarity:'★',stars:1,element:'無',emoji:'🐈',role:'新手',desc:'剛踏上旅程、努力學習的小貓。',skill:'努力喵拳',baseHp:110,baseAtk:12,baseDef:10},
-{name:'小灰',rarity:'★',stars:1,element:'無',emoji:'🐾',role:'新手',desc:'膽小但很努力，總是跟著大家。',skill:'勇氣拍擊',baseHp:115,baseAtk:11,baseDef:11},
-{name:'露卡',rarity:'★★★★★',stars:5,element:'火',emoji:'🦊',role:'爆發手',desc:'來自熾焰山脈的旅者，能引爆敵人的弱點。',skill:'熾焰星爆',baseHp:170,baseAtk:38,baseDef:14},
-{name:'霜鈴',rarity:'★★★★',stars:4,element:'冰',emoji:'🐈',role:'控場手',desc:'能以冰晶守護隊友的雪原貓咪。',skill:'霜華結界',baseHp:168,baseAtk:25,baseDef:20},
-{name:'雷豆',rarity:'★★★',stars:3,element:'雷',emoji:'😻',role:'速度手',desc:'總是第一個衝向冒險的雷電小貓。',skill:'電光連爪',baseHp:140,baseAtk:24,baseDef:13},
-{name:'石球',rarity:'★★',stars:2,element:'岩',emoji:'🐹',role:'防守手',desc:'背著小石盾的可靠夥伴。',skill:'岩壁防護',baseHp:155,baseAtk:14,baseDef:20},
-{name:'奶糖',rarity:'★',stars:1,element:'草',emoji:'🐇',role:'新手',desc:'喜歡花草，會努力幫忙的小夥伴。',skill:'嫩芽拍擊',baseHp:112,baseAtk:12,baseDef:10}
+{name:'星芽',rarity:'★★★★★',stars:5,element:'星',emoji:'🌟',role:'全能主角',desc:'戴著星晶額飾的旅團領航員，勇敢、好奇，能喚醒古老星境之力。',skill:'星穹共鳴',baseHp:180,baseAtk:32,baseDef:18},
+{name:'焰尾',rarity:'★★★★★',stars:5,element:'火',emoji:'🔥',role:'爆發輸出',desc:'赤金火紋沿著尾巴燃燒，衝鋒時留下流星般的火花。',skill:'赤焰流星斬',baseHp:166,baseAtk:39,baseDef:14},
+{name:'月霜',rarity:'★★★★★',stars:5,element:'冰',emoji:'🌙',role:'控場法師',desc:'披著月白斗篷的雪原術士，能把寒霜凝成守護星環。',skill:'月華冰牢',baseHp:172,baseAtk:35,baseDef:17},
+{name:'森露',rarity:'★★★★',stars:4,element:'草',emoji:'🍃',role:'治療輔助',desc:'森林精靈貓，背著種子包，讓枯萎的土地重新發芽。',skill:'露光回春',baseHp:178,baseAtk:22,baseDef:20},
+{name:'潮汐',rarity:'★★★★',stars:4,element:'水',emoji:'💧',role:'治療支援',desc:'藍色水紋耳飾會召來環繞身邊的小水靈。',skill:'潮音祝福',baseHp:182,baseAtk:24,baseDef:19},
+{name:'雷弦',rarity:'★★★★',stars:4,element:'雷',emoji:'⚡',role:'連擊刺客',desc:'紫電短披風與雙刃爪套，出手迅捷得只看見電光。',skill:'紫電七連爪',baseHp:150,baseAtk:31,baseDef:14},
+{name:'岩團',rarity:'★★★★',stars:4,element:'岩',emoji:'🪨',role:'前排守護',desc:'背著星岩盾牌的可靠守衛，總是站在夥伴最前方。',skill:'大地壁壘',baseHp:205,baseAtk:21,baseDef:25},
+{name:'風鈴',rarity:'★★★',stars:3,element:'風',emoji:'🪽',role:'速度支援',desc:'耳尖綁著風鈴結，跳躍時能帶起輕柔旋風。',skill:'乘風躍擊',baseHp:138,baseAtk:23,baseDef:13},
+{name:'莓果',rarity:'★★★',stars:3,element:'草',emoji:'🍓',role:'持續治療',desc:'圓圓的莓紅圍巾藏著草藥香，擅長照顧整支隊伍。',skill:'莓香療癒',baseHp:155,baseAtk:19,baseDef:17},
+{name:'星砂',rarity:'★★★',stars:3,element:'星',emoji:'✨',role:'遠程法師',desc:'額前星砂晶片閃爍，能投射追蹤星彈。',skill:'星砂彈幕',baseHp:142,baseAtk:25,baseDef:14},
+{name:'石榴',rarity:'★★',stars:2,element:'岩',emoji:'🔸',role:'防禦支援',desc:'小小岩甲貓，雖然身材嬌小卻很有責任感。',skill:'碎岩護盾',baseHp:145,baseAtk:16,baseDef:19},
+{name:'泡芙',rarity:'★',stars:1,element:'水',emoji:'🫧',role:'新手夥伴',desc:'愛玩泡泡的奶油色小貓，總能帶來好心情。',skill:'泡泡拍擊',baseHp:118,baseAtk:13,baseDef:12}
 ];
-state.party=Array.isArray(state.party)?state.party:['咪露','沫沫','雪糕'];
-state.party=state.party.filter(n=>characters.some(ch=>ch.name===n)&&state.owned.includes(n)).slice(0,4);
+// 角色重製遷移：舊角色不再進入新圖鑑與祈願池，保留玩家資源、探索進度與保底。
+const newCharacterNames=new Set(characters.map(ch=>ch.name));
+const previousOwned=Array.isArray(state.owned)?state.owned:[];
+const hadLegacyRoster=previousOwned.some(n=>!newCharacterNames.has(n));
+state.owned=previousOwned.filter(n=>newCharacterNames.has(n));
+if(!state.owned.includes('星芽'))state.owned.unshift('星芽');
+if(hadLegacyRoster)state.characterReworkVersion=2;
+state.party=Array.isArray(state.party)?state.party.filter(n=>newCharacterNames.has(n)&&state.owned.includes(n)).slice(0,4):[];
+if(!state.party.length)state.party=['星芽'];
 function characterStats(ch,level=1){const growth=Math.max(0,level-1);return {hp:ch.baseHp+growth*Math.round(ch.baseHp*.08),atk:ch.baseAtk+growth*Math.max(1,Math.round(ch.baseAtk*.09)),def:ch.baseDef+growth*Math.max(1,Math.round(ch.baseDef*.07))};}
 function save(){state.gems=Number(state.gems)||0;state.coins=Number(state.coins)||0;state.primogems=Number(state.primogems)||0;localStorage.setItem('starTraveler',JSON.stringify(state));$('gems').textContent=state.gems;$('coins').textContent=state.coins;$('primogems').textContent=state.primogems}
 function openPanel(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));let c=$('content');
-if(tab==='gacha')c.innerHTML=`<h2>✦ 星願祈願</h2><div class="card" style="background:linear-gradient(130deg,#514276,#1e4260)"><div style="font-size:12px;color:#f6d58b">期間限定角色祈願</div><div style="font-size:23px;font-weight:900">焰心・露卡</div><div style="font-size:48px">🔥 ⚔️</div><div class="muted">五星火元素角色 · 限定機率提升</div></div><div class="muted">所有祈願結果都是貓咪角色 · 五星 0.6% · 四星 5.1% · 三星 24.3% · 二星 30% · 一星 40% · 十連至少一隻三星以上 · 90 抽五星保底</div><button class="action primary" onclick="wish(1)">祈願一次 · 160 星石</button><button class="action" onclick="wish(10)">祈願十次 · 1600 星石</button><p class="muted">目前距離保底：${state.pity}/90</p>`;
-else if(tab==='bag')c.innerHTML=`<h2>♡ 貓咪角色圖鑑</h2><div class="card" style="border-color:#f4d58a;background:linear-gradient(135deg,#66533b,#263a55)"><div style="font-size:34px">🐈</div><b>驚嚇貓・星境守護者</b><div class="muted">★★★★★ · 主角</div><div class="catStats"><div class="catStat">❤️ 生命值<br><b>${catMaxHp()}</b></div><div class="catStat">🐾 攻擊力<br><b>${catAttack()}</b></div><div class="catStat">🛡️ 防禦力<br><b>${catDefense()}</b></div><div class="catStat">⬆️ 等級<br><b>Lv. ${state.catLevel}</b></div></div><div class="muted">經驗值：${state.catXp} / ${state.catLevel*100}</div></div>${state.owned.map(n=>{let ch=characters.find(x=>x.name===n);if(!ch)return '';let st=characterStats(ch);return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:18px">${ch.emoji} ${ch.name}</b><b style="color:${ch.stars===5?'#f4d58a':ch.stars===4?'#c7a6ed':'#9bc9e8'}">${ch.rarity}</b></div><div class="muted">${ch.element}元素 · ${ch.role}</div><p>${ch.desc}</p><div class="catStats"><div class="catStat">❤️ HP<br><b>${st.hp}</b></div><div class="catStat">🐾 攻擊<br><b>${st.atk}</b></div><div class="catStat">🛡️ 防禦<br><b>${st.def}</b></div><div class="catStat">✨ 技能<br><b>${ch.skill}</b></div></div></div>`}).join('')}` 
+if(tab==='gacha')c.innerHTML=`<h2>✦ 星願祈願</h2><div class="card" style="background:linear-gradient(130deg,#514276,#1e4260)"><div style="font-size:12px;color:#f6d58b">期間限定角色祈願</div><div style="font-size:23px;font-weight:900">焰尾・赤焰旅者</div><div style="font-size:48px">🔥 🐾</div><div class="muted">五星火元素貓咪 · 限定機率提升</div></div><div class="muted">所有祈願結果都是貓咪角色 · 五星 0.6% · 四星 5.1% · 三星 24.3% · 二星 30% · 一星 40% · 十連至少一隻三星以上 · 90 抽五星保底</div><button class="action primary" onclick="wish(1)">祈願一次 · 160 星石</button><button class="action" onclick="wish(10)">祈願十次 · 1600 星石</button><p class="muted">目前距離保底：${state.pity}/90</p>`;
+else if(tab==='bag')c.innerHTML=`<h2>♡ 貓咪角色圖鑑</h2><div class="card" style="border-color:#f4d58a;background:linear-gradient(135deg,#66533b,#263a55)"><div style="font-size:34px">🐈</div><b>星芽・星境領航員</b><div class="muted">★★★★★ · 主角</div><div class="catStats"><div class="catStat">❤️ 生命值<br><b>${catMaxHp()}</b></div><div class="catStat">🐾 攻擊力<br><b>${catAttack()}</b></div><div class="catStat">🛡️ 防禦力<br><b>${catDefense()}</b></div><div class="catStat">⬆️ 等級<br><b>Lv. ${state.catLevel}</b></div></div><div class="muted">經驗值：${state.catXp} / ${state.catLevel*100}</div></div>${state.owned.map(n=>{let ch=characters.find(x=>x.name===n);if(!ch)return '';let st=characterStats(ch);return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:18px">${ch.emoji} ${ch.name}</b><b style="color:${ch.stars===5?'#f4d58a':ch.stars===4?'#c7a6ed':'#9bc9e8'}">${ch.rarity}</b></div><div class="muted">${ch.element}元素 · ${ch.role}</div><p>${ch.desc}</p><div class="catStats"><div class="catStat">❤️ HP<br><b>${st.hp}</b></div><div class="catStat">🐾 攻擊<br><b>${st.atk}</b></div><div class="catStat">🛡️ 防禦<br><b>${st.def}</b></div><div class="catStat">✨ 技能<br><b>${ch.skill}</b></div></div></div>`}).join('')}` 
 else if(tab==='party')c.innerHTML=`<h2>⚔️ 冒險隊伍</h2><p class="muted">選擇最多 4 位已獲得的夥伴同行。</p><div class="card"><b>目前出戰：${state.party.length}/4</b><p class="muted">${state.party.join(' · ')||'尚未編隊'}</p></div>${characters.filter(ch=>state.owned.includes(ch.name)).map(ch=>`<div class="card" style="display:flex;align-items:center;gap:9px"><span style="font-size:27px">${ch.emoji}</span><div style="flex:1"><b>${ch.name}</b><div class="muted">${ch.rarity} · ${ch.element} · ${ch.role}</div></div><button class="action ${state.party.includes(ch.name)?'':'primary'}" style="width:auto;margin:0" onclick="toggleParty('${ch.name}')">${state.party.includes(ch.name)?'退出隊伍':'加入隊伍'}</button></div>`).join('')}`;
 else if(tab==='map')c.innerHTML=`<h2>🗺️ 星境大陸</h2><p class="muted">選擇地區即可傳送。每張地圖都有專屬景觀、氣候、資源與魔物。已探索：${state.visitedRegions.length}/4</p>
 <div class="card" style="background:linear-gradient(120deg,#243a42,#17232d)"><b>📍 目前所在：${state.region}</b><p class="muted">本區域採集：${state.gatheredNodes.filter(k=>k.startsWith(state.region+'-')).length}/3 · 地區素材：${state.materials[state.region]||0}</p></div>
@@ -235,7 +238,7 @@ function cloneNatureAsset(key,targetHeight){
  const model=source.clone(true),box=new THREE.Box3().setFromObject(model),size=box.getSize(new THREE.Vector3());
  const factor=targetHeight/Math.max(size.y,.001);model.scale.setScalar(factor);model.updateMatrixWorld(true);
  const scaledBox=new THREE.Box3().setFromObject(model);model.position.y-=scaledBox.min.y;
- model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(Array.isArray(o.material))o.material.forEach(m=>{if(m.roughness!==undefined)m.roughness=Math.max(.62,m.roughness)});else if(o.material&&o.material.roughness!==undefined)o.material.roughness=Math.max(.62,o.material.roughness)}});
+ model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;if(Array.isArray(o.material))o.material.forEach(m=>{if(m.roughness!==undefined)m.roughness=Math.max(.78,m.roughness)});else if(o.material&&o.material.roughness!==undefined)o.material.roughness=Math.max(.78,o.material.roughness)}});
  return model;
 }
 function addNatureDecoration(key,x,z,targetHeight,rotation=0){
@@ -254,9 +257,9 @@ function buildEnvironmentLighting(region){
  const palettes={'風語草原':['#6e9db5','#d5c59b'],'蒼翠森林':['#315b58','#a6b99a'],'霜晶雪原':['#6c98b4','#e3f0f4'],'熾焰山脈':['#493b55','#df9567']};
  const p=palettes[region]||palettes['風語草原'];
  const grad=ctx.createLinearGradient(0,0,0,512);grad.addColorStop(0,p[0]);grad.addColorStop(.52,p[1]);grad.addColorStop(1,'#59615a');ctx.fillStyle=grad;ctx.fillRect(0,0,1024,512);
- const sun=ctx.createRadialGradient(720,150,8,720,150,170);sun.addColorStop(0,'rgba(255,239,197,.95)');sun.addColorStop(.15,'rgba(255,226,177,.38)');sun.addColorStop(1,'rgba(255,226,177,0)');ctx.fillStyle=sun;ctx.fillRect(500,0,450,350);
+ const sun=ctx.createRadialGradient(720,150,8,720,150,170);sun.addColorStop(0,'rgba(255,239,197,.62)');sun.addColorStop(.15,'rgba(255,226,177,.22)');sun.addColorStop(1,'rgba(255,226,177,0)');ctx.fillStyle=sun;ctx.fillRect(500,0,450,350);
  for(let i=0;i<180;i++){const x=Math.random()*1024,y=70+Math.random()*280,r=12+Math.random()*40;ctx.fillStyle='rgba(255,255,255,'+(Math.random()*.045)+')';ctx.beginPath();ctx.ellipse(x,y,r,r*.22,0,0,Math.PI*2);ctx.fill()}
- environmentTexture3d=new THREE.CanvasTexture(canvas);environmentTexture3d.mapping=THREE.EquirectangularReflectionMapping;environmentTexture3d.encoding=THREE.sRGBEncoding;environmentTexture3d.needsUpdate=true;scene3d.environment=environmentTexture3d;scene3d.environmentIntensity=.72;
+ environmentTexture3d=new THREE.CanvasTexture(canvas);environmentTexture3d.mapping=THREE.EquirectangularReflectionMapping;environmentTexture3d.encoding=THREE.sRGBEncoding;environmentTexture3d.needsUpdate=true;scene3d.environment=environmentTexture3d;scene3d.environmentIntensity=.42;
 }
 
 function makeTerrainGeometry(region){
@@ -328,30 +331,46 @@ function addGrassField(region){
 
 function addMesh(parent,geometry,material,x,y,z){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);parent.add(m);return m}
 function makeCat(){
- const g=new THREE.Group(),cream=mat(0xf3e5ca),white=mat(0xffffff),pink=mat(0xe98d9b),dark=mat(0x303344),eye=mat(0x55b7a5,.3,{emissive:0x163c35});
- const body=addMesh(g,new THREE.SphereGeometry(.48,20,16),cream,0,.78,0);body.scale.set(.78,.92,1.15);
- const head=addMesh(g,new THREE.SphereGeometry(.43,24,18),cream,0,1.43,-.23);head.scale.set(1.05,.92,.9);
- const ears=[],eyes=[];
+ const g=new THREE.Group();
+ const fur=mat(0xf1e7d5,.78),cream=mat(0xfff6e8,.72),pink=mat(0xe9a0a8,.62),ink=mat(0x263347,.42),eye=mat(0x5ad5b2,.22,{emissive:0x16483c,emissiveIntensity:.12}),gold=mat(0xd8ad62,.42,{metalness:.22}),mint=mat(0x6bbba5,.5),capeMat=mat(0x315b69,.82);
+ const bodyPivot=new THREE.Group();bodyPivot.position.set(0,.92,0);g.add(bodyPivot);
+ const body=addMesh(bodyPivot,new THREE.SphereGeometry(.49,32,24),fur,0,0,0);body.scale.set(.82,1.12,.78);
+ const chest=addMesh(bodyPivot,new THREE.SphereGeometry(.31,24,18),cream,0,.02,-.34);chest.scale.set(.9,1.05,.35);
+ const headPivot=new THREE.Group();headPivot.position.set(0,1.62,-.12);g.add(headPivot);
+ const head=addMesh(headPivot,new THREE.SphereGeometry(.53,32,24),fur,0,0,0);head.scale.set(1.06,.94,.92);
+ const ears=[];
  for(const side of [-1,1]){
-  const ear=addMesh(g,new THREE.ConeGeometry(.16,.42,4),cream,side*.27,1.83,-.2);ear.rotation.z=side*-.22;ears.push(ear);
-  const inner=addMesh(g,new THREE.ConeGeometry(.075,.24,4),pink,side*.27,1.84,-.095);inner.rotation.z=side*-.22;
-  addMesh(g,new THREE.SphereGeometry(.055,12,10),dark,side*.17,1.48,-.61);
-  eyes.push(addMesh(g,new THREE.SphereGeometry(.027,10,8),eye,side*.17,1.49,-.658));
+  const ear=addMesh(headPivot,new THREE.ConeGeometry(.19,.48,5),fur,side*.36,.42,-.015);ear.rotation.z=side*-.24;ears.push(ear);
+  const inner=addMesh(headPivot,new THREE.ConeGeometry(.105,.29,5),pink,side*.36,.43,.075);inner.rotation.z=side*-.24;
+  addMesh(headPivot,new THREE.SphereGeometry(.082,16,12),ink,side*.205,.045,-.466);
+  addMesh(headPivot,new THREE.SphereGeometry(.052,16,12),eye,side*.205,.055,-.525);
+  addMesh(headPivot,new THREE.SphereGeometry(.018,10,8),cream,side*.185,.08,-.568);
+  const whisker=addMesh(headPivot,new THREE.CylinderGeometry(.008,.008,.25,6),ink,side*.37,-.08,-.45);whisker.rotation.z=side*.42;
  }
- const muzzle=addMesh(g,new THREE.SphereGeometry(.12,14,10),white,0,1.31,-.57);muzzle.scale.set(1.35,.7,.6);
- addMesh(g,new THREE.SphereGeometry(.045,12,8),pink,0,1.35,-.66);
- const legs=[];
- for(const side of [-1,1])for(const z of [-.34,.34]){
-  const pivot=new THREE.Group();pivot.position.set(side*.23,.43,z);g.add(pivot);
-  addMesh(pivot,new THREE.CylinderGeometry(.095,.11,.34,10),cream,0,-.15,0);
-  addMesh(pivot,new THREE.SphereGeometry(.105,10,8),cream,0,-.31,-.025);
-  legs.push(pivot);
+ const muzzle=addMesh(headPivot,new THREE.SphereGeometry(.16,20,14),cream,0,-.16,-.43);muzzle.scale.set(1.25,.72,.72);
+ addMesh(headPivot,new THREE.SphereGeometry(.042,14,10),pink,0,-.095,-.55);
+ const mouth=addMesh(headPivot,new THREE.TorusGeometry(.055,.009,6,16,Math.PI),ink,0,-.205,-.54);mouth.rotation.z=Math.PI;
+ const starGem=addMesh(headPivot,new THREE.OctahedronGeometry(.105,1),gold,0,.43,-.48);starGem.rotation.z=Math.PI/4;
+ const legs=[],arms=[];
+ for(const side of [-1,1]){
+  const leg=new THREE.Group();leg.position.set(side*.22,.43,.02);g.add(leg);
+  addMesh(leg,new THREE.CapsuleGeometry(.105,.29,4,10),fur,0,-.14,0);
+  const paw=addMesh(leg,new THREE.SphereGeometry(.13,16,12),cream,0,-.34,-.055);paw.scale.set(1,.68,1.12);legs.push(leg);
+  const arm=new THREE.Group();arm.position.set(side*.39,1.18,-.04);bodyPivot.add(arm);
+  const upper=addMesh(arm,new THREE.CapsuleGeometry(.095,.25,4,10),fur,0,-.15,0);upper.rotation.z=side*.12;
+  addMesh(arm,new THREE.SphereGeometry(.125,16,12),cream,0,-.31,-.04);
+  const cuff=addMesh(arm,new THREE.TorusGeometry(.105,.026,8,16),gold,0,-.24,-.005);cuff.rotation.x=Math.PI/2;
+  arms.push(arm);
  }
- const tailCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.82,.45),new THREE.Vector3(.38,1,.72),new THREE.Vector3(.5,1.35,.62),new THREE.Vector3(.34,1.48,.4)]);
- const tail=addMesh(g,new THREE.TubeGeometry(tailCurve,20,.075,8,false),cream,0,0,0);
- const scarf=addMesh(g,new THREE.TorusGeometry(.28,.07,8,24),mat(0xe9a94f),0,1.12,-.05);scarf.rotation.x=Math.PI/2;
- g.userData={legs,body,head,tail,ears,walkPhase:0};
- return g;
+ arms[0].rotation.z=-.82;arms[0].rotation.x=-.18;
+ arms[1].rotation.z=.24;
+ const tailCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.72,.26),new THREE.Vector3(.38,.83,.5),new THREE.Vector3(.62,1.18,.44),new THREE.Vector3(.55,1.42,.18),new THREE.Vector3(.34,1.38,-.02)]);
+ const tail=addMesh(g,new THREE.TubeGeometry(tailCurve,32,.09,12,false),fur,0,0,0);
+ const cape=addMesh(g,new THREE.ConeGeometry(.48,.88,5,1,true),capeMat,0,1.03,.38);cape.rotation.x=-.22;cape.rotation.z=Math.PI;
+ const collar=addMesh(g,new THREE.TorusGeometry(.36,.065,10,28),gold,0,1.32,-.02);collar.rotation.x=Math.PI/2;
+ const emblem=addMesh(bodyPivot,new THREE.OctahedronGeometry(.12,1),gold,0,.02,-.49);emblem.rotation.z=Math.PI/4;
+ g.userData={legs,arms,body:bodyPivot,head:headPivot,tail,ears,walkPhase:0};
+ g.rotation.z=-.045;return g;
 }
 function addTree(x,z,look,scale=1){
  if(natureAssetsReady){const pick=state.region==='霜晶雪原'?'treePine':state.region==='蒼翠森林'?(Math.random()<.58?'treeDetailed':'treeOak'):(Math.random()<.55?'treeOak':'treeDetailed');const model=cloneNatureAsset(pick,(4.8+Math.random()*1.8)*scale);if(model){model.position.x=x;model.position.z=z;model.rotation.y=Math.random()*Math.PI*2;scene3d.add(model);addObstacle(x,z,.72*scale);return}}
@@ -549,9 +568,9 @@ function init3DWorld(){
  if(!window.THREE){activate2DFallback('3D 引擎載入失敗，請確認網路後重新整理。');return}
  try{
  const canvas=$('world3d');scene3d=new THREE.Scene();camera3d=new THREE.PerspectiveCamera(55,1,.1,180);
- renderer3d=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.65));renderer3d.outputEncoding=THREE.sRGBEncoding;renderer3d.toneMapping=THREE.ACESFilmicToneMapping;renderer3d.toneMappingExposure=1.18;renderer3d.shadowMap.enabled=true;renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
- scene3d.add(new THREE.HemisphereLight(0xc8dff5,0x514638,1.35));scene3d.add(new THREE.AmbientLight(0xffffff,.24));
- const sun=new THREE.DirectionalLight(0xffe5bd,2.0);sun.position.set(-24,38,22);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-42;sun.shadow.camera.right=42;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;sun.shadow.camera.near=.5;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene3d.add(sun);
+ renderer3d=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.65));renderer3d.outputEncoding=THREE.sRGBEncoding;renderer3d.toneMapping=THREE.ACESFilmicToneMapping;renderer3d.toneMappingExposure=.84;renderer3d.shadowMap.enabled=true;renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
+ scene3d.add(new THREE.HemisphereLight(0xb9cbd9,0x37352f,.82));scene3d.add(new THREE.AmbientLight(0xe2e5e8,.12));
+ const sun=new THREE.DirectionalLight(0xffe8c9,1.12);sun.position.set(-24,38,22);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-42;sun.shadow.camera.right=42;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;sun.shadow.camera.near=.5;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene3d.add(sun);
  player3d=makeCat();player3d.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene3d.add(player3d);
  buildZone();update3DPlayer();resize3D();threeReady=true;animate3D();loadNatureAssets();
  let dragging=false,lastX=0,lastY=0;
@@ -620,9 +639,9 @@ function animate3D(t=0){
    const phase=t*.013,blend=walkBlend,legs=player3d.userData.legs;
    player3d.userData.walkPhase=phase;
    legs.forEach((leg,i)=>{const offset=(i===0||i===3)?0:Math.PI;leg.rotation.x=Math.sin(phase+offset)*.62*blend});
-   player3d.userData.body.position.y=.78+Math.abs(Math.sin(phase*2))*.055*blend+Math.sin(t*.003)*.012;
-   player3d.userData.head.rotation.x=Math.sin(phase*2)*.035*blend;
-   player3d.userData.tail.rotation.x=Math.sin(phase*.75)*.16;
+   player3d.userData.body.position.y=.92+Math.abs(Math.sin(phase*2))*.045*blend+Math.sin(t*.003)*.009;
+   player3d.userData.head.rotation.x=Math.sin(phase*2)*.025*blend;player3d.userData.arms[0].rotation.z=-.82+Math.sin(t*.002)*.035;player3d.userData.arms[1].rotation.z=.24+Math.sin(t*.0025+1)*.045;
+   player3d.userData.tail.rotation.x=Math.sin(phase*.75)*.12;player3d.userData.tail.rotation.z=Math.sin(t*.0018)*.08;
    player3d.userData.tail.rotation.z=Math.cos(phase*.75)*.09;
    player3d.userData.ears.forEach((ear,i)=>ear.rotation.z=(i===0?-.22:.22)+Math.sin(t*.004+i)*.025);
    player3d.position.y=.015+Math.abs(Math.sin(phase*2))*.025*blend;
