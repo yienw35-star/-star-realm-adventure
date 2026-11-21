@@ -183,6 +183,29 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 /* 功能面板關閉鍵 */
 #panel{position:relative} .panel-close{flex:0 0 34px;width:34px;height:34px;align-self:center;border-radius:10px;border:1px solid #f1d59a88;background:#513e42;color:#ffe7c0;font-size:16px;font-weight:900;display:grid;place-items:center;z-index:4}.tabrow{align-items:center}#panel.is-closed #content{display:none}#panel.is-closed{max-height:62px;height:62px;min-height:0}#panel.is-closed .tabrow{margin-bottom:0}
 @media(max-width:720px){.panel-close{width:30px;height:34px;flex-basis:30px;font-size:14px;padding:0}.tabrow{grid-template-columns:repeat(6,minmax(0,1fr)) 30px!important;padding-right:1px!important}.tab{min-width:0!important}.tab span{font-size:18px!important}.tab small{font-size:8px!important}}
+
+/* Separate bottom navigation from centered feature pop-up */
+main{display:block!important;max-width:1240px!important}
+main>section{width:100%;min-width:0}
+#panel{position:fixed!important;z-index:45!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(620px,calc(100vw - 28px))!important;height:min(72dvh,680px)!important;max-height:calc(100dvh - 130px)!important;min-height:0!important;padding:52px 16px 16px!important;border:1px solid #d9bd7b66!important;border-radius:20px!important;background:linear-gradient(155deg,#172e46f7,#101e31fa)!important;box-shadow:0 0 0 100vmax #030914a8,0 22px 70px #000b!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#panel.panel-hidden{display:none!important}
+#panel .panel-close{position:absolute!important;right:12px!important;top:10px!important;width:34px!important;height:34px!important;flex:none!important;border-radius:11px!important;border:1px solid #f1d59a88!important;background:#513e42!important;color:#ffe7c0!important;font-size:19px!important;z-index:5!important}
+#panel #content{display:block!important;flex:1!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;padding:0 4px 18px 0!important}
+#featureDock{position:fixed!important;z-index:40!important;left:50%!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:min(620px,calc(100vw - 20px))!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:5px!important;padding:7px!important;margin:0!important;border:1px solid #ffffff30!important;border-radius:17px!important;background:#102238ed!important;box-shadow:0 8px 28px #0008!important;overflow:visible!important;backdrop-filter:blur(14px)}
+#featureDock .tab{min-width:0!important;width:100%!important;height:52px!important;padding:4px 1px!important;border-radius:11px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;white-space:nowrap!important}
+#featureDock .tab span{display:block!important;margin:0!important;font-size:20px!important;line-height:23px!important}
+#featureDock .tab small{font-size:10px!important;line-height:13px!important}
+#featureDock .tab.active{background:linear-gradient(180deg,#b98b4d55,#e4c47e18)!important}
+@media(max-width:720px){
+ body{padding-bottom:90px!important}
+ #world{height:calc(100dvh - 116px)!important;min-height:400px!important}
+ #panel{width:calc(100vw - 20px)!important;height:min(70dvh,620px)!important;max-height:calc(100dvh - 112px)!important;padding:49px 12px 12px!important;border-radius:18px!important}
+ #featureDock{bottom:calc(8px + env(safe-area-inset-bottom))!important;width:calc(100vw - 16px)!important;gap:2px!important;padding:5px!important}
+ #featureDock .tab{height:50px!important}
+ #featureDock .tab span{font-size:19px!important}
+ #featureDock .tab small{font-size:9px!important}
+}
+@media(max-width:390px){#featureDock .tab small{font-size:8px!important}#featureDock .tab span{font-size:18px!important}}
 </style></head>
 <body>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
@@ -198,7 +221,7 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 <button class="poi" data-interact="quest" style="left:8%;top:24%">📜 委託</button><button class="poi" data-interact="monster" style="right:8%;top:36%">⚔️ 魔物</button><button class="poi" data-interact="chest" data-chest-id="0" style="right:12%;bottom:22%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="1" style="left:24%;top:43%">🧰 寶箱</button><button class="poi" data-interact="chest" data-chest-id="2" style="left:55%;top:28%">✨ 寶箱</button><button class="poi" data-interact="chest" data-chest-id="3" style="left:72%;bottom:35%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="4" style="left:42%;bottom:18%">🧰 寶箱</button><button id="interactBtn" onclick="interactCurrent()">按 E 互動</button><div class="hint" id="worldHint">移動貓咪靠近委託、魔物或寶箱，再按 E 互動</div></div>
 <div id="controls"><button class="up" data-move="0,-5">↑</button><button class="left" data-move="-5,0">←</button><button class="down" data-move="0,5">↓</button><button class="right" data-move="5,0">→</button></div>
 </section>
-<aside id="panel"><div class="tabrow" aria-label="貓咪世界功能"><button class="tab active" data-tab="home"><span>🐾</span><small>基地</small></button><button class="tab" data-tab="quest"><span>📜</span><small>任務</small></button><button class="tab" data-tab="map"><span>🌏</span><small>地圖</small></button><button class="tab" data-tab="gacha"><span>✨</span><small>祈願</small></button><button class="tab" data-tab="bag"><span>🐈</span><small>圖鑑</small></button><button class="tab" data-tab="party"><span>🐱</span><small>小隊</small></button><button class="panel-close" type="button" onclick="closePanel()" aria-label="關閉功能面板" title="關閉">✕</button></div><div id="content" class="content"></div></aside></main>
+<nav id="featureDock" class="tabrow" aria-label="貓咪世界功能"><button class="tab active" data-tab="home"><span>🐾</span><small>基地</small></button><button class="tab" data-tab="quest"><span>📜</span><small>任務</small></button><button class="tab" data-tab="map"><span>🌏</span><small>地圖</small></button><button class="tab" data-tab="gacha"><span>✨</span><small>祈願</small></button><button class="tab" data-tab="bag"><span>🐈</span><small>圖鑑</small></button><button class="tab" data-tab="party"><span>🐱</span><small>小隊</small></button></nav><aside id="panel" class="panel-hidden" role="dialog" aria-modal="true" aria-label="遊戲功能面板"><button class="panel-close" type="button" onclick="closePanel()" aria-label="關閉功能面板" title="關閉">✕</button><div id="content" class="content"></div></aside></main>
 <div id="cheatModal" class="cheat-modal" onclick="if(event.target===this)closeCheat()"><div class="cheat-box"><button class="cheat-x" onclick="closeCheat()">✕</button><div class="cheat-cat">🐱 ✦ 🐾</div><div class="cheat-title">貓咪秘密補給</div><p>輸入星境啟動碼，領取一次限定補給。</p><input id="cheatInput" maxlength="32" autocomplete="off" placeholder="輸入啟動碼"><div id="cheatMessage" class="cheat-message">每個帳號限領一次</div><button class="action primary" onclick="redeemCheat()">啟動補給</button></div></div>
 <div id="wishReveal"><div id="wishBox"><div id="wishTitle">✦ 星願降臨 ✦</div><div id="wishSubtitle">命運的星光正在揭曉……</div><div id="wishBeam"></div><div id="wishCards"></div><button id="wishClose" class="action primary" onclick="closeWishReveal()" style="display:none">收下祈願結果</button><button id="wishSkip" class="action" onclick="revealWishCards()">跳過動畫</button></div></div>
 <div id="battle"><div id="battlebox"><div class="muted">星芽出擊！</div><h2>史萊姆</h2><div class="enemy">🟢</div><div class="bar"><i id="enemyhp"></i></div><div class="muted" id="catBattleStats">🌟 星芽 HP：180 / 180</div><div class="catHp"><i id="catHpBar"></i></div><p id="battlemsg">一隻野生史萊姆擋住了去路！</p><button class="action primary" onclick="attack()">🐾 貓掌普通攻擊</button><button class="action" onclick="skill()">✨ 貓咪星光衝擊</button><button class="action" onclick="runAway()">撤退</button></div></div>
@@ -266,9 +289,9 @@ state.party=Array.isArray(state.party)?state.party.filter(n=>newCharacterNames.h
 if(!state.party.length)state.party=['星芽'];
 function characterStats(ch,level=1){const growth=Math.max(0,level-1);return {hp:ch.baseHp+growth*Math.round(ch.baseHp*.08),atk:ch.baseAtk+growth*Math.max(1,Math.round(ch.baseAtk*.09)),def:ch.baseDef+growth*Math.max(1,Math.round(ch.baseDef*.07))};}
 function save(){state.gems=Number(state.gems)||0;state.coins=Number(state.coins)||0;state.primogems=Number(state.primogems)||0;localStorage.setItem('starTraveler',JSON.stringify(state));$('gems').textContent=state.gems;$('coins').textContent=state.coins;$('primogems').textContent=state.primogems}
-function closePanel(){const p=$('panel');if(!p)return;if(window.matchMedia('(max-width:720px)').matches)p.classList.remove('expanded');else p.classList.add('is-closed')}
+function closePanel(){const p=$('panel');if(p)p.classList.add('panel-hidden')}
 function openPanel(tab){
- const panel=$('panel');if(panel)panel.classList.remove('is-closed');
+ const panel=$('panel');if(panel)panel.classList.remove('panel-hidden');
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  const c=$('content'),owned=characters.filter(ch=>state.owned.includes(ch.name));
  const regionList=[{name:'風語草原',emoji:'🌾',desc:'柔軟草浪與星導石，是小貓冒險的起點。',weather:'微風黃昏'},{name:'蒼翠森林',emoji:'🌲',desc:'巨木、蘑菇與藏在樹影裡的寶物。',weather:'森林薄霧'},{name:'霜晶雪原',emoji:'❄️',desc:'雪花飄落，冰晶深處有稀有素材。',weather:'寒雪冰霧'},{name:'熾焰山脈',emoji:'🌋',desc:'火山岩與熔光交織的高難度區域。',weather:'火山熱浪'}];
@@ -784,12 +807,8 @@ function gatherResource(id){
 }
 function claimGatherQuest(){if(state.gatheredNodes.length<12||state.claimedQuests.includes('gather'))return;state.claimedQuests.push('gather');state.gems+=80;state.primogems+=20;save();openPanel('quest');alert('世界探索完成！獲得 80 星石與 20 原石！')}
 document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('click',()=>{nearbyPoi=btn;interactCurrent()}));
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
- const panel=$('panel'),isMobile=window.matchMedia('(max-width:720px)').matches,wasActive=b.classList.contains('active')&&panel.classList.contains('expanded');
- openPanel(b.dataset.tab);
- if(isMobile){panel.classList.toggle('expanded',!wasActive);if(!wasActive)panel.scrollIntoView({behavior:'smooth',block:'end'});}
-});
-document.querySelectorAll('[data-move]').forEach(b=>{const [x,y]=b.dataset.move.split(',').map(Number);const id=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);heldButtons.set(id,{x:Math.sign(x),z:Math.sign(y)})});const stop=()=>heldButtons.delete(id);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)});
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
+ document.querySelectorAll('[data-move]').forEach(b=>{const [x,y]=b.dataset.move.split(',').map(Number);const id=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);heldButtons.set(id,{x:Math.sign(x),z:Math.sign(y)})});const stop=()=>heldButtons.delete(id);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)});
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();heldKeys.add(k)}});
 document.addEventListener('keyup',e=>heldKeys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{heldKeys.clear();heldButtons.clear()});
