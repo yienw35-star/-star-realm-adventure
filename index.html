@@ -909,7 +909,7 @@ function update3DInteraction(){
  }
  const close=best<3.3,btns=[...document.querySelectorAll('[data-interact]')];btns.forEach(b=>b.classList.remove('nearby'));
  if(close&&nearest){
-  if(['resource','chest'].includes(nearest.userData.kind))nearbyPoi=nearest;
+  if(['resource','chest','signpost'].includes(nearest.userData.kind))nearbyPoi=nearest;
   else{const type=nearest.userData.kind;nearbyPoi=btns.find(b=>b.dataset.interact===type)||null}
  }else nearbyPoi=null;
  if(nearbyPoi&&nearbyPoi.classList)nearbyPoi.classList.add('nearby');
