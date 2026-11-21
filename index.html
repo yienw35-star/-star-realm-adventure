@@ -259,13 +259,21 @@ function makeCat(){
  return g;
 }
 function addTree(x,z,look,scale=1){
- const g=new THREE.Group(),trunk=mat(0x73513a),leaf=mat(look.tree);
- addMesh(g,new THREE.CylinderGeometry(.13*scale,.2*scale,1.25*scale,7),trunk,0,.62*scale,0);
- if(state.region==='霜晶雪原'){
-  for(let i=0;i<3;i++)addMesh(g,new THREE.ConeGeometry((.8-i*.16)*scale,1.25*scale,7),leaf,0,(1.25+i*.52)*scale,0);
+ const g=new THREE.Group(),region=state.region;
+ const trunk=mat(region==='蒼翠森林'?0x493b2c:region==='熾焰山脈'?0x51403a:0x72513a);
+ const foliage=mat(look.tree,.92),lightFoliage=mat(look.accent,.95);
+ addMesh(g,new THREE.CylinderGeometry(.13*scale,.24*scale,1.65*scale,8),trunk,0,.82*scale,0);
+ if(region==='霜晶雪原'){
+  for(let i=0;i<4;i++){const h=(1.05+i*.48)*scale;const ice=addMesh(g,new THREE.ConeGeometry((.78-i*.13)*scale,1.35*scale,6),mat(i%2?0x9bc4d3:0xd2e5e8,.32,{metalness:.12}),0,h,0);ice.rotation.z=(i%2?-.035:.035)}
+ }else if(region==='蒼翠森林'){
+  for(let i=0;i<3;i++){const h=(1.75+i*.62)*scale;const crown=addMesh(g,new THREE.SphereGeometry((.92-i*.1)*scale,10,8),mat(i%2?0x28543b:0x376a49),0,h,0);crown.scale.set(1.05,.9,1.05)}
+  for(let side=-1;side<=1;side+=2){const branch=addMesh(g,new THREE.CylinderGeometry(.055*scale,.09*scale,1.15*scale,6),trunk,side*.46*scale,1.55*scale,0);branch.rotation.z=side*-.72;addMesh(g,new THREE.SphereGeometry(.58*scale,9,7),foliage,side*.82*scale,2.05*scale,0)}
+ }else if(region==='熾焰山脈'){
+  for(let i=0;i<3;i++){const crown=addMesh(g,new THREE.ConeGeometry((.82-i*.15)*scale,(1.65-i*.12)*scale,6),mat(i%2?0x654139:0x49383a),0,(1.65+i*.63)*scale,0);crown.rotation.z=(i-1)*.06}
+  addMesh(g,new THREE.SphereGeometry(.24*scale,8,7),mat(0xb45b3d,.5,{emissive:0x4a160d,emissiveIntensity:.16}),.28*scale,2.45*scale,0);
  }else{
-  addMesh(g,new THREE.ConeGeometry(.9*scale,2*scale,7),leaf,0,1.65*scale,0);
-  addMesh(g,new THREE.SphereGeometry(.5*scale,8,7),mat(look.accent),.3*scale,2.1*scale,0);
+  for(let i=0;i<3;i++){const h=(1.55+i*.57)*scale;const crown=addMesh(g,new THREE.ConeGeometry((.98-i*.16)*scale,(1.85-i*.12)*scale,7),foliage,0,h,0);crown.rotation.y=i*.25}
+  addMesh(g,new THREE.SphereGeometry(.22*scale,8,7),lightFoliage,.32*scale,2.35*scale,0);
  }
  g.position.set(x,0,z);scene3d.add(g);addObstacle(x,z,.72*scale);
 }
@@ -358,11 +366,33 @@ function addBiomeDetails(look){
   for(const p of [[-13,9],[14,-16],[27,12]])addLantern(p[0],p[1],0xff8042);
  }
 }
+
+function addBiomeWater(region){
+ const palettes={'風語草原':0x63b9c1,'蒼翠森林':0x477f70,'霜晶雪原':0x9bd9ed,'熾焰山脈':0xd65a32};
+ const color=palettes[region]||0x63b9c1;
+ const pts=region==='熾焰山脈'?[[-35,-22],[-31,-12],[-34,-1],[-30,10],[-33,22]]:[[-35,-22],[-31,-13],[-34,-4],[-30,7],[-33,19],[-28,28]];
+ const curve=new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(p[0],.045,p[1])));
+ const segments=100,vertices=[],uv=[],indices=[];
+ for(let i=0;i<=segments;i++){const t=i/segments,p=curve.getPoint(t),tan=curve.getTangent(t),nx=-tan.z,nz=tan.x;const width=region==='熾焰山脈'?1.5:1.9;vertices.push(p.x+nx*width,.035,p.z+nz*width,p.x-nx*width,.035,p.z-nz*width);uv.push(0,t*8,1,t*8);if(i<segments){const n=i*2;indices.push(n,n+1,n+2,n+1,n+3,n+2)}}
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(indices);geo.computeVertexNormals();
+ const waterMat=new THREE.MeshStandardMaterial({color,roughness:.2,metalness:.18,transparent:true,opacity:.86,side:THREE.DoubleSide,emissive:color,emissiveIntensity:region==='熾焰山脈'?.22:.035});
+ const water=new THREE.Mesh(geo,waterMat);scene3d.add(water);
+ const bankColor=region==='熾焰山脈'?0x302b2d:region==='霜晶雪原'?0xb5d1d6:0x857b5d;
+ for(const side of [-1,1]){const edgePts=pts.map((p,i)=>{const tangent=curve.getTangent(i/(pts.length-1));return new THREE.Vector3(p[0]-tangent.z*1.95*side,.045,p[1]+tangent.x*1.95*side)});const edgeCurve=new THREE.CatmullRomCurve3(edgePts);addMesh(scene3d,new THREE.TubeGeometry(edgeCurve,70,.19,6,false),mat(bankColor),0,0,0)}
+}
+function addSkyClouds(region){
+ const cloudMat=mat(region==='熾焰山脈'?0x79635f:region==='霜晶雪原'?0xd8e7eb:0xe5e2d1,1);
+ for(let i=0;i<8;i++){
+  const cloud=new THREE.Group(),x=Math.cos(i*Math.PI/4)*34,z=Math.sin(i*Math.PI/4)*34;
+  for(let j=0;j<4;j++){const puff=addMesh(cloud,new THREE.SphereGeometry(1.35+(j%2)*.45,8,6),cloudMat,(j-1.5)*1.25,.15+(j%2)*.25,0);puff.scale.y=.48}
+  cloud.position.set(x,15+(i%3)*2,z);scene3d.add(cloud);
+ }
+}
 function buildZone(){
  const look=zoneLooks[state.region]||zoneLooks['風語草原'];
  scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,18,66);
  scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];worldObstacles.length=0;
- const groundTexture=makeGroundTexture(state.region);const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,map:groundTexture,roughness:1});const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,1,1),groundMat,0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;
+ const groundTexture=makeGroundTexture(state.region);const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,map:groundTexture,roughness:1});const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,1,1),groundMat,0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;addBiomeWater(state.region);addSkyClouds(state.region);
  const grid=new THREE.GridHelper(120,30,0x46574d,0x596b5c);grid.material.transparent=true;grid.material.opacity=.12;grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
  for(let i=0;i<48;i++){
   const x=(Math.random()-.5)*82,z=(Math.random()-.5)*82;
