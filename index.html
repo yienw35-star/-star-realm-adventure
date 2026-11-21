@@ -267,10 +267,12 @@ main>section{width:100%;min-width:0}
  #controls button{width:38px!important;height:34px!important;font-size:16px!important}
  #worldHint{font-size:9px!important;bottom:calc(52px + env(safe-area-inset-bottom))!important}
  #soundToggle,#cheatOpen{max-width:132px!important;font-size:9px!important}
-}</style></head>
+}#travelSignpostBtn{position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:68;border:1px solid #f6dc9a;background:linear-gradient(135deg,#735338,#d7ae68);color:#fff8e7;border-radius:22px;padding:10px 17px;font-weight:900;font-size:13px;box-shadow:0 5px 20px #0008;white-space:nowrap}
+@media(max-width:720px){#travelSignpostBtn{bottom:calc(91px + env(safe-area-inset-bottom));font-size:12px;padding:9px 13px;z-index:68}}
+</style></head>
 <body>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
-<button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">🔊 點擊啟動音樂</button><main><section>
+<button id="travelSignpostBtn" type="button" onclick="playGameSound('region');openPanel('map')">🪧 前往其他地圖</button><button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">♫ 點擊播放背景音樂</button><main><section>
 <div id="world">
 <canvas id="world3d" aria-label="星境旅人 3D 冒險世界"></canvas>
 <div class="world-help">拖曳旋轉視角 · 點擊互動</div><button id="cheatOpen" class="cheat-open" onclick="openCheat()">🎟 兌換碼</button>
@@ -304,7 +306,7 @@ function ensureGameAudio(){
 }
 function markGameActivity(){
  if(!gameAudio||audioMuted)return;
- lastGameActivity=gameAudio.currentTime;setMusicLevel(.075);
+ lastGameActivity=gameAudio.currentTime;setMusicLevel(.42);
 }
 function setMusicLevel(level){
  if(!gameAudio||!bgmGain)return;
@@ -317,7 +319,7 @@ function startIdleMusic(){
  const ac=gameAudio,master=ac.createGain();master.gain.value=.0001;master.connect(ac.destination);bgmGain=master;
  const chords=[[196,246.94,293.66,392],[174.61,220,261.63,349.23],[146.83,185,220,293.66],[164.81,207.65,246.94,329.63]];
  const melody=[392,493.88,587.33,493.88,440,392,329.63,392,523.25,587.33,659.25,587.33,493.88,440,392,329.63];
- const playNote=(freq,at,dur=.62,volume=.22,wave='sine')=>{
+ const playNote=(freq,at,dur=.62,volume=.32,wave='sine')=>{
   const o=ac.createOscillator(),g=ac.createGain(),filter=ac.createBiquadFilter();
   o.type=wave;o.frequency.setValueAtTime(freq,at);filter.type='lowpass';filter.frequency.value=2400;
   g.gain.setValueAtTime(.0001,at);g.gain.linearRampToValueAtTime(volume,at+.035);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
@@ -335,18 +337,38 @@ function startIdleMusic(){
  bgmTimer=setInterval(()=>{
   if(!gameAudio||audioMuted)return;
   const t=ac.currentTime;
-  if(t-lastGameActivity>3.2)setMusicLevel(.34);
-  else setMusicLevel(.075);
+  if(t-lastGameActivity>3.2)setMusicLevel(.82);
+  else setMusicLevel(.42);
   const n=bgmStep%16;
   if(n%4===0){
    const chord=chords[Math.floor(bgmStep/16)%chords.length];
-   chord.forEach((hz,j)=>playNote(hz*(j===3?2:1),t+.01,.95,j===0?.095:.065,'triangle'));
+   chord.forEach((hz,j)=>playNote(hz*(j===3?2:1),t+.01,.95,j===0?.18:.12,'triangle'));
   }
-  if(n%2===0)playNote(melody[n],t+.04,.72,.24,'sine');
+  if(n%2===0)playNote(melody[n],t+.04,.72,.42,'sine');
   if(n===6||n===14)playNote(melody[n]+12,t+.12,.38,.10,'triangle');
   bgmStep++;
  },620);
  setMusicLevel(.34);
+}
+function toggleGameSound(){
+ const b=$('soundToggle');
+ if(audioMuted){
+  audioMuted=false;
+  if(b){b.textContent='♫ 背景音樂播放中';b.setAttribute('aria-pressed','true')}
+  const ac=ensureGameAudio();
+  if(ac&&ac.state==='suspended')ac.resume().then(()=>{startIdleMusic();setMusicLevel(.82)});
+  else if(ac){startIdleMusic();setMusicLevel(.82)}
+  return;
+ }
+ if(!gameAudio||gameAudio.state==='suspended'){
+  audioMuted=false;const ac=ensureGameAudio();
+  if(ac&&ac.state==='suspended')ac.resume().then(()=>{startIdleMusic();setMusicLevel(.82)});
+  else if(ac){startIdleMusic();setMusicLevel(.82)}
+  if(b){b.textContent='♫ 背景音樂播放中';b.setAttribute('aria-pressed','true')}
+  return;
+ }
+ audioMuted=true;if(b){b.textContent='🔇 開啟背景音樂';b.setAttribute('aria-pressed','false')}
+ if(bgmGain)setMusicLevel(0);
 }
 function playGameSound(kind='tap'){
  const ac=ensureGameAudio();if(!ac)return;markGameActivity();
@@ -369,7 +391,7 @@ function playGameSound(kind='tap'){
  });
 }
 
-const SAVE_SYSTEM_VERSION='3';
+const SAVE_SYSTEM_VERSION='4';
 let state;
 if(localStorage.getItem('starTravelerSystemVersion')!==SAVE_SYSTEM_VERSION){
  // 本次是全新系統：只清除本遊戲舊存檔，不碰瀏覽器其他網站資料
@@ -733,6 +755,8 @@ function addSignpost(x,z,rotation,labelColor){
  const board=addMesh(g,new THREE.BoxGeometry(1.25,.42,.13),mat(0x8a633c),0,1.72,0);board.rotation.y=rotation;
  addMesh(g,new THREE.OctahedronGeometry(.14),mat(labelColor,.3,{emissive:labelColor}),0,2.05,0);
  g.position.set(x,0,z);g.userData={kind:'signpost',id:'region-gate'};scene3d.add(g);worldObjects.push(g);addObstacle(x,z,.45);
+ const signCanvas=document.createElement('canvas');signCanvas.width=512;signCanvas.height=128;const ctx=signCanvas.getContext('2d');ctx.fillStyle='rgba(20,35,54,.88)';ctx.beginPath();ctx.roundRect(8,8,496,112,24);ctx.fill();ctx.strokeStyle='#f5d98e';ctx.lineWidth=5;ctx.stroke();ctx.fillStyle='#fff0c2';ctx.font='bold 38px sans-serif';ctx.textAlign='center';ctx.fillText('前往其他星境',256,78);
+ const tex=new THREE.CanvasTexture(signCanvas),sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));sprite.scale.set(4.3,1.08,1);sprite.position.set(0,2.8,0);g.add(sprite);
 }
 function addBiomeLandmark(look){
  const g=new THREE.Group(),region=state.region;
@@ -846,7 +870,7 @@ function buildZone(){
   }
  }
  addTrail([[0,0,4],[-5,-3],[-10,-7],[-15,-10],[-19,-13],[-23,-14]],look.accent);
- addSignpost(-2,1,.15,look.accent);addBiomeLandmark(look);addBiomeDetails(look);addGrassField(state.region);
+ addSignpost(-1.2,1.8,.15,look.accent);addBiomeLandmark(look);addBiomeDetails(look);addGrassField(state.region);
  // 小型發光水晶與道路石塊
  for(let i=0;i<16;i++){const x=(Math.random()-.5)*48,z=(Math.random()-.5)*48;const crystal=addMesh(scene3d,new THREE.OctahedronGeometry(.25+Math.random()*.25),mat(look.accent,.3,{emissive:look.accent}),x,.35,z);crystal.userData.zoneObject=true}
  const resourceSpots=[[-18,18],[18,-22],[-28,-5]];
