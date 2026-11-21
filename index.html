@@ -225,10 +225,21 @@ main>section{width:100%;min-width:0}
 #regionTransition{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(circle at center,#476b80f5,#101a30 68%,#070d18);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .55s ease,visibility .55s}
 #regionTransition.show{opacity:1;visibility:visible}#regionTransition .transition-mark{font-size:54px;filter:drop-shadow(0 0 20px #ffe6a0);animation:portalPulse 1s ease-in-out infinite alternate}#regionTransition b{font-size:22px;color:#ffe4a0;letter-spacing:2px;text-shadow:0 0 18px #f4d58a}#regionTransition small{font-size:12px;color:#d8e6ee}@keyframes portalPulse{from{transform:scale(.92);filter:drop-shadow(0 0 8px #ffe6a0)}to{transform:scale(1.08);filter:drop-shadow(0 0 28px #fff2b0)}}#worldHint.guide-hint{border:1px solid #ffe58b99;color:#fff1b9;box-shadow:0 0 18px #ffd66b55}#guideBanner{position:absolute;left:50%;top:52px;transform:translateX(-50%);z-index:11;width:min(360px,calc(100% - 24px));padding:9px 12px;border:1px solid #8eeeffaa;border-radius:13px;background:linear-gradient(100deg,#102b43ef,#173b54ef);color:#baf4ff;font-size:11px;font-weight:900;text-align:center;box-shadow:0 0 20px #51dfff55;pointer-events:none;animation:guideGlow 1.8s ease-in-out infinite alternate}#guideBanner span{color:#fff1b9;font-weight:700}@keyframes guideGlow{to{box-shadow:0 0 26px #65eaff99;border-color:#fff2a0}}
 #soundToggle{position:fixed;right:14px;top:66px;z-index:80;border:1px solid #8edcf2aa;border-radius:22px;background:#10243bdc;color:#eafaff;padding:8px 12px;font-weight:700;font-size:12px;box-shadow:0 4px 18px #0005;backdrop-filter:blur(8px)}#soundToggle:active{transform:scale(.96)}
+/* Exclusive feature panel layout: one panel above a separate bottom dock */
+#panel{position:fixed!important;z-index:72!important;left:50%!important;right:auto!important;top:auto!important;bottom:calc(86px + env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:min(620px,calc(100vw - 24px))!important;height:min(46dvh,420px)!important;max-height:calc(100dvh - 190px)!important;min-height:150px!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-radius:18px!important;padding:48px 14px 12px!important;box-shadow:0 12px 42px #000b,0 0 0 1px #e8cb8655!important}
+#panel.panel-hidden{display:none!important}
+#panel .panel-close{position:absolute!important;right:12px!important;top:10px!important;z-index:5!important;width:36px!important;height:36px!important}
+#panel #content{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+#featureDock{position:fixed!important;z-index:70!important;left:50%!important;right:auto!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:min(620px,calc(100vw - 24px))!important;margin:0!important}
+#soundToggle{z-index:90!important;top:calc(58px + env(safe-area-inset-top))!important}
+@media(max-width:720px){
+ #panel{bottom:calc(86px + env(safe-area-inset-bottom))!important;width:calc(100vw - 16px)!important;height:min(48dvh,390px)!important;max-height:calc(100dvh - 190px)!important}
+ #featureDock{bottom:calc(9px + env(safe-area-inset-bottom))!important;width:calc(100vw - 16px)!important}
+}
 </style></head>
 <body>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
-<button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">🔊 音效開啟</button><main><section>
+<button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">🔊 音效與音樂開啟</button><main><section>
 <div id="world">
 <canvas id="world3d" aria-label="星境旅人 3D 冒險世界"></canvas>
 <div class="world-help">拖曳旋轉視角 · 點擊互動</div><button id="cheatOpen" class="cheat-open" onclick="openCheat()">🎟 兌換碼</button>
@@ -252,37 +263,81 @@ main>section{width:100%;min-width:0}
 
 const $=id=>document.getElementById(id);
 // 程序合成音效：首次點擊後啟動，無需外部音檔
-let gameAudio=null,audioMuted=false,stepSoundClock=0;
+let gameAudio=null,audioMuted=false,stepSoundClock=0,bgmNodes=[],bgmTimer=null,bgmStep=0,bgmGain=null,bgmTarget=0,lastGameActivity=0;
 function ensureGameAudio(){
  if(audioMuted)return null;
  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
- if(!gameAudio)gameAudio=new AC();
+ if(!gameAudio){gameAudio=new AC();lastGameActivity=gameAudio.currentTime}
  if(gameAudio.state==='suspended')gameAudio.resume();
- return gameAudio;
+ startIdleMusic();return gameAudio;
+}
+function markGameActivity(){
+ if(!gameAudio||audioMuted)return;
+ lastGameActivity=gameAudio.currentTime;setMusicLevel(.12);
+}
+function setMusicLevel(level){
+ if(!gameAudio||!bgmGain)return;
+ bgmTarget=level;bgmGain.gain.cancelScheduledValues(gameAudio.currentTime);
+ bgmGain.gain.setTargetAtTime(level,gameAudio.currentTime,.9);
+}
+function startIdleMusic(){
+ if(!gameAudio||audioMuted||bgmTimer)return;
+ const ac=gameAudio,now=ac.currentTime;
+ const master=ac.createGain();master.gain.value=.0001;master.connect(ac.destination);bgmGain=master;
+ // 柔和的星空和弦墊底，避免刺耳高頻
+ const pad=ac.createGain();pad.gain.value=.16;pad.connect(master);
+ [196,246.94,293.66,392].forEach((hz,i)=>{
+  const o=ac.createOscillator(),g=ac.createGain(),lfo=ac.createOscillator(),lg=ac.createGain();
+  o.type=i===3?'sine':'triangle';o.frequency.value=hz;g.gain.value=i===3?.12:.18;
+  lfo.frequency.value=.07+i*.025;lg.gain.value=hz*.0025;lfo.connect(lg);lg.connect(o.frequency);
+  o.connect(g);g.connect(pad);o.start();lfo.start();bgmNodes.push(o,lfo);
+ });
+ const chords=[[196,246.94,293.66,392],[174.61,220,261.63,349.23],[130.81,164.81,196,261.63],[146.83,185,220,293.66]];
+ const melody=[392,493.88,587.33,493.88,440,392,329.63,392,523.25,587.33,659.25,587.33,493.88,440,392,329.63];
+ const playNote=(freq,at,dur=.8)=>{
+  const o=ac.createOscillator(),g=ac.createGain(),filter=ac.createBiquadFilter();
+  o.type='sine';o.frequency.setValueAtTime(freq,at);filter.type='lowpass';filter.frequency.value=1800;
+  g.gain.setValueAtTime(.0001,at);g.gain.linearRampToValueAtTime(.105,at+.09);g.gain.exponentialRampToValueAtTime(.0001,at+dur);
+  o.connect(filter);filter.connect(g);g.connect(master);o.start(at);o.stop(at+dur+.03);
+ };
+ bgmStep=0;
+ bgmTimer=setInterval(()=>{
+  if(!gameAudio||audioMuted)return;
+  const t=ac.currentTime;
+  if(t-lastGameActivity>5){if(bgmTarget<.16)setMusicLevel(.16)}else if(bgmTarget>.001)setMusicLevel(.12);
+  const n=bgmStep%16;
+  if(n%4===0){const chord=chords[Math.floor(bgmStep/16)%chords.length];chord.forEach((hz,j)=>playNote(hz*(j===3?2:1),t+.02,.95))}
+  if(n%2===0)playNote(melody[n],t+.06,.72);
+  bgmStep++;
+ },720);
+ setMusicLevel(.16);
 }
 function playGameSound(kind='tap'){
  const ac=ensureGameAudio();if(!ac)return;
+ markGameActivity();
  const now=ac.currentTime;
  const presets={
-  tap:[[620,.045,'sine',.035]], move:[[180,.055,'triangle',.018]],
-  hit:[[150,.09,'sawtooth',.075],[90,.12,'triangle',.045]],
-  skill:[[440,.12,'sine',.055],[660,.16,'sine',.05],[990,.22,'triangle',.04]],
-  win:[[523,.13,'sine',.055],[659,.13,'sine',.055],[784,.22,'sine',.06]],
-  chest:[[660,.1,'sine',.05],[880,.13,'sine',.055],[1320,.24,'sine',.045]],
-  gather:[[740,.09,'sine',.04],[1100,.16,'sine',.045]],
-  gacha:[[392,.1,'sine',.04],[587,.12,'sine',.05],[784,.18,'sine',.055],[1175,.32,'sine',.05]],
-  region:[[330,.18,'sine',.04],[494,.2,'sine',.045],[659,.3,'sine',.05]]
+  tap:[[620,.07,'sine',.025]], move:[[180,.07,'triangle',.012]],
+  hit:[[190,.11,'sawtooth',.055],[95,.16,'triangle',.035],[420,.055,'square',.012]],
+  skill:[[392,.14,'sine',.045],[587,.17,'sine',.05],[784,.2,'triangle',.04],[1175,.28,'sine',.035]],
+  win:[[523,.18,'sine',.05],[659,.18,'sine',.05],[784,.24,'sine',.055],[1046,.36,'sine',.045]],
+  chest:[[587,.12,'sine',.04],[784,.16,'sine',.045],[988,.18,'sine',.05],[1568,.3,'sine',.035]],
+  gather:[[659,.12,'sine',.035],[880,.13,'sine',.04],[1318,.22,'sine',.035]],
+  gacha:[[392,.12,'sine',.035],[523,.14,'sine',.04],[659,.16,'sine',.045],[880,.2,'sine',.045],[1175,.34,'sine',.04]],
+  region:[[293.66,.22,'sine',.035],[392,.24,'sine',.04],[493.88,.26,'sine',.04],[587.33,.38,'sine',.04]]
  };
  (presets[kind]||presets.tap).forEach(([freq,dur,wave,vol],i)=>{
-  const o=ac.createOscillator(),g=ac.createGain();o.type=wave;o.frequency.setValueAtTime(freq,now+i*.075);
-  g.gain.setValueAtTime(.0001,now+i*.075);g.gain.exponentialRampToValueAtTime(vol,now+i*.075+.012);g.gain.exponentialRampToValueAtTime(.0001,now+i*.075+dur);
-  o.connect(g);g.connect(ac.destination);o.start(now+i*.075);o.stop(now+i*.075+dur+.02);
+  const o=ac.createOscillator(),g=ac.createGain(),filter=ac.createBiquadFilter();o.type=wave;o.frequency.setValueAtTime(freq,now+i*.065);
+  filter.type='lowpass';filter.frequency.value=kind==='hit'?2200:3200;
+  g.gain.setValueAtTime(.0001,now+i*.065);g.gain.exponentialRampToValueAtTime(vol,now+i*.065+.018);g.gain.exponentialRampToValueAtTime(.0001,now+i*.065+dur);
+  o.connect(filter);filter.connect(g);g.connect(ac.destination);o.start(now+i*.065);o.stop(now+i*.065+dur+.025);
  });
 }
 function toggleGameSound(){
  audioMuted=!audioMuted;const b=$('soundToggle');
- if(b){b.textContent=audioMuted?'🔇 音效關閉':'🔊 音效開啟';b.setAttribute('aria-pressed',String(!audioMuted))}
- if(!audioMuted){playGameSound('tap')}
+ if(b){b.textContent=audioMuted?'🔇 音效關閉':'🔊 音效與音樂開啟';b.setAttribute('aria-pressed',String(!audioMuted))}
+ if(audioMuted){if(bgmTimer){clearInterval(bgmTimer);bgmTimer=null}bgmNodes.forEach(n=>{try{n.stop()}catch(e){}});bgmNodes=[];bgmGain=null}
+ else{ensureGameAudio();playGameSound('tap')}
 }
 
 const SAVE_SYSTEM_VERSION='3';
@@ -344,9 +399,16 @@ state.party=Array.isArray(state.party)?state.party.filter(n=>newCharacterNames.h
 if(!state.party.length)state.party=['星芽'];
 function characterStats(ch,level=1){const growth=Math.max(0,level-1);return {hp:ch.baseHp+growth*Math.round(ch.baseHp*.08),atk:ch.baseAtk+growth*Math.max(1,Math.round(ch.baseAtk*.09)),def:ch.baseDef+growth*Math.max(1,Math.round(ch.baseDef*.07))};}
 function save(){state.gems=Number(state.gems)||0;state.coins=Number(state.coins)||0;state.primogems=Number(state.primogems)||0;localStorage.setItem('starTraveler',JSON.stringify(state));$('gems').textContent=state.gems;$('coins').textContent=state.coins;$('primogems').textContent=state.primogems}
-function closePanel(){const p=$('panel');if(p)p.classList.add('panel-hidden')}
+
+// Keep the single feature panel and dock in the top-level page layer, away from world stacking contexts.
+(()=>{const p=$('panel'),d=$('featureDock');if(p&&p.parentElement!==document.body)document.body.appendChild(p);if(d&&d.parentElement!==document.body)document.body.appendChild(d)})();
+let activeFeaturePanel=null;
+function closePanel(){const p=$('panel');if(p)p.classList.add('panel-hidden');activeFeaturePanel=null;document.querySelectorAll('#featureDock .tab').forEach(b=>b.classList.remove('active'))}
 function openPanel(tab){
- const panel=$('panel');if(panel)panel.classList.remove('panel-hidden');
+ const panel=$('panel');if(!panel)return;
+ if(activeFeaturePanel===tab&&!panel.classList.contains('panel-hidden')){closePanel();return}
+ activeFeaturePanel=tab;panel.classList.remove('panel-hidden');panel.style.display='flex';
+ document.querySelectorAll('#featureDock .tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  const c=$('content'),owned=characters.filter(ch=>state.owned.includes(ch.name));
  const regionList=[{name:'風語草原',emoji:'🌾',desc:'柔軟草浪與星導石，是小貓冒險的起點。',weather:'微風黃昏'},{name:'蒼翠森林',emoji:'🌲',desc:'巨木、蘑菇與藏在樹影裡的寶物。',weather:'森林薄霧'},{name:'霜晶雪原',emoji:'❄️',desc:'雪花飄落，冰晶深處有稀有素材。',weather:'寒雪冰霧'},{name:'熾焰山脈',emoji:'🌋',desc:'火山岩與熔光交織的高難度區域。',weather:'火山熱浪'}];
@@ -896,11 +958,13 @@ function gatherResource(id){
 }
 function claimGatherQuest(){if(state.gatheredNodes.length<12||state.claimedQuests.includes('gather'))return;state.claimedQuests.push('gather');state.gems+=80;state.primogems+=20;save();openPanel('quest');alert('世界探索完成！獲得 80 星石與 20 原石！')}
 document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('click',()=>{nearbyPoi=btn;interactCurrent()}));
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{playGameSound('tap');openPanel(b.dataset.tab)});
+document.querySelectorAll('#featureDock [data-tab]').forEach(b=>b.onclick=()=>{playGameSound('tap');openPanel(b.dataset.tab)});
  document.querySelectorAll('[data-move]').forEach(b=>{const [x,y]=b.dataset.move.split(',').map(Number);const id=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);heldButtons.set(id,{x:Math.sign(x),z:Math.sign(y)})});const stop=()=>heldButtons.delete(id);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)});
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();heldKeys.add(k)}});
 document.addEventListener('keyup',e=>heldKeys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{heldKeys.clear();heldButtons.clear()});
+document.addEventListener('pointerdown',()=>{if(!audioMuted){ensureGameAudio();markGameActivity()}},{passive:true});
+document.addEventListener('keydown',()=>{if(!audioMuted){ensureGameAudio();markGameActivity()}},{passive:true});
 $('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';
 try{init3DWorld()}catch(err){console.error('遊戲世界初始化失敗：',err);activate2DFallback('世界載入失敗，已啟用安全模式。')}
 try{updateWorldBackground();updateNearbyInteraction();save();refreshStoryHud();closePanel()}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
