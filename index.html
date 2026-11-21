@@ -9,7 +9,9 @@ body{margin:0;background:#101d2b;color:#fff;font-family:system-ui,-apple-system,
 header{height:54px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;background:#0c1826eF;border-bottom:1px solid var(--line);position:relative;z-index:2}
 .brand{font-weight:900;letter-spacing:2px;color:var(--gold)}.stats{font-size:13px;display:flex;gap:12px}
 main{max-width:1000px;margin:auto;padding:12px;display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px}
-#world{height:min(70vh,650px);min-height:410px;position:relative;overflow:hidden;border:1px solid #ffffff45;border-radius:17px;background:linear-gradient(#91c8e7,#d7e5d7);isolation:isolate}#world:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#07152208 45%,#07152266 100%);pointer-events:none;z-index:1}.mountain,.tree{display:none}#world3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:none}#hero{display:none}.poi{display:none!important}.fallback2d .poi{display:block!important}.fallback2d #hero{display:block!important}.fallback2d #world3d{display:none!important}.fallback2d .mountain,.fallback2d .tree{display:block!important}.location{z-index:4;pointer-events:none}.hint{z-index:4;pointer-events:none}#interactBtn{z-index:5}#worldHint{z-index:4}.world-help{position:absolute;right:10px;top:10px;z-index:4;background:#102238b9;padding:7px 10px;border-radius:9px;font-size:11px;color:#fff;pointer-events:none}
+#world{height:min(70vh,650px);min-height:410px;position:relative;overflow:hidden;border:1px solid #ffffff45;border-radius:17px;background:linear-gradient(#91c8e7,#d7e5d7);isolation:isolate}#world:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#07152208 45%,#07152266 100%);pointer-events:none;z-index:1}.mountain,.tree{display:none}#world3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:none}#hero{display:none}.poi{display:none!important}.fallback2d .poi{display:block!important}.fallback2d #hero{display:block!important}.fallback2d #world3d{display:none!important}.fallback2d .mountain,.fallback2d .tree{display:block!important}.location{z-index:4;pointer-events:none}.hint{z-index:4;pointer-events:none}#interactBtn{z-index:5}#worldHint{z-index:4} .world-help{position:absolute;right:10px;top:10px;z-index:4;background:#102238b9;padding:7px 10px;border-radius:9px;font-size:11px;color:#fff;pointer-events:none}
+#storyHud{position:absolute;left:12px;bottom:12px;z-index:5;width:min(270px,66%);padding:11px 13px;border:1px solid #d7c18b66;border-radius:13px;background:linear-gradient(135deg,#172b2beF,#18212beF);color:#f5ecd8;box-shadow:0 5px 18px #0006;pointer-events:auto}#storyHud .storyKicker{font-size:10px;letter-spacing:1px;color:#e4c77d}#storyHud b{display:block;font-size:14px;margin-top:3px}#storyHud p{font-size:11px;line-height:1.5;color:#d5d5cc;margin:5px 0 8px}#storyHud button{border:1px solid #c9ae72;background:#66583d;color:#fff;border-radius:7px;padding:5px 9px;font-size:10px}
+.obstacle-note{color:#c9d3d1;font-size:12px}
 .compass{position:absolute;left:12px;top:12px;width:76px;height:76px;border:1px solid #ffffff99;border-radius:50%;background:#102238b9;z-index:4;color:#fff;pointer-events:none;box-shadow:0 3px 12px #0005}.compass #compassRose{position:absolute;inset:0;transition:transform .08s linear}.compass span{position:absolute;font-size:11px;font-weight:900;text-shadow:0 1px 3px #000}.compass .north{top:5px;left:33px;color:#ff7777}.compass .south{bottom:5px;left:33px}.compass .east{right:7px;top:31px}.compass .west{left:7px;top:31px}.compass i{position:absolute;left:34px;top:19px;width:7px;height:29px;background:linear-gradient(#ff6464 0 50%,#fff 50%);clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%)}
 #world:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#ffffff12,transparent 45%,#07152233);pointer-events:none;z-index:0}
 .mountain{position:absolute;bottom:40%;width:0;height:0;border-left:130px solid transparent;border-right:130px solid transparent;border-bottom:190px solid #627e86;filter:drop-shadow(0 7px 0 #506d67)}
@@ -61,6 +63,7 @@ button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:re
 <div id="world">
 <canvas id="world3d" aria-label="星境旅人 3D 冒險世界"></canvas>
 <div class="world-help">WASD 移動 · 拖曳旋轉視角 · 滾輪縮放 · E 互動</div>
+<div id="storyHud"><div class="storyKicker">✦ 主線任務</div><b id="storyTitle">星境的呼喚</b><p id="storyObjective">前往草原中央的星導石，按 E 與它互動。</p><button onclick="openPanel(&quot;quest&quot;)">查看任務</button></div>
 <div class="compass" aria-label="方向羅盤"><div id="compassRose"><span class="north">N</span><span class="east">E</span><span class="south">S</span><span class="west">W</span><i></i></div></div>
 <div class="mountain m1"></div><div class="mountain m2"></div>
 <div class="tree" style="left:12%;bottom:15%">🌲</div><div class="tree" style="left:29%;bottom:22%">🌳</div><div class="tree" style="right:15%;bottom:13%">🌲</div><div class="tree" style="right:34%;bottom:27%">🌳</div>
@@ -92,6 +95,8 @@ state.claimedQuests=Array.isArray(state.claimedQuests)?state.claimedQuests:[];
 state.gatheredNodes=Array.isArray(state.gatheredNodes)?state.gatheredNodes:[];
 state.materials=state.materials&&typeof state.materials==='object'?state.materials:{};
 state.visitedRegions=Array.isArray(state.visitedRegions)?state.visitedRegions:['風語草原'];
+state.storyStep=Math.max(0,Math.min(4,Number(state.storyStep)||0));
+const storySteps=[{title:'星境的呼喚',objective:'前往草原中央的星導石，按 E 與它互動。'},{title:'初次試煉',objective:'擊敗星導石附近的草原魔物，保護這片草原。'},{title:'遺失的補給',objective:'尋找地圖上的寶箱並打開一個，取得旅途補給。'},{title:'星光共鳴',objective:'找到發光晶礦並採集，完成第一次星光共鳴。'},{title:'新的旅程',objective:'主線第一章完成！你已經可以自由探索四大區域。'}];
 const chestCatalog=[{id:0,name:'草叢木箱',emoji:'🧰',gems:80,coins:60,primogems:2},{id:1,name:'星光寶箱',emoji:'✨',gems:140,coins:90,primogems:5},{id:2,name:'古老寶箱',emoji:'🎁',gems:180,coins:120,primogems:8},{id:3,name:'森林寶箱',emoji:'🌿',gems:100,coins:160,primogems:3},{id:4,name:'稀有寶箱',emoji:'💎',gems:260,coins:180,primogems:12}];
 if(!Array.isArray(state.openedChests)){state.openedChests=state.chest?[0]:[];}
 
@@ -125,7 +130,7 @@ else if(tab==='party')c.innerHTML=`<h2>⚔️ 冒險隊伍</h2><p class="muted">
 else if(tab==='map')c.innerHTML=`<h2>🗺️ 星境大陸</h2><p class="muted">選擇地區即可傳送。每張地圖都有專屬景觀、氣候、資源與魔物。已探索：${state.visitedRegions.length}/4</p>
 <div class="card" style="background:linear-gradient(120deg,#243a42,#17232d)"><b>📍 目前所在：${state.region}</b><p class="muted">本區域採集：${state.gatheredNodes.filter(k=>k.startsWith(state.region+'-')).length}/3 · 地區素材：${state.materials[state.region]||0}</p></div>
 ${[{name:'風語草原',emoji:'🌾',desc:'黃昏草浪、古老石柱與微風水晶。推薦新手探索。',look:'linear-gradient(135deg,#68734b,#263a35)',weather:'微風・黃昏'},{name:'蒼翠森林',emoji:'🌲',desc:'幽暗林冠、巨木、蘑菇與被遺忘的遺跡。',look:'linear-gradient(135deg,#315b45,#142b28)',weather:'濃霧・林蔭'},{name:'霜晶雪原',emoji:'❄️',desc:'冷藍冰原、冰柱群與沉睡在雪中的水晶。',look:'linear-gradient(135deg,#637e8d,#273c4b)',weather:'寒雪・冰霧'},{name:'熾焰山脈',emoji:'🌋',desc:'暗紅火山岩、熔岩裂縫與焦黑山脊。',look:'linear-gradient(135deg,#75473b,#241e27)',weather:'火山灰・熱浪'}].map(r=>`<div class="card regionCard" style="background:${r.look};border-color:#ffffff24"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">${r.emoji} ${r.name}</b><span class="muted">${state.region===r.name?'探索中':state.visitedRegions.includes(r.name)?'已到訪':'未到訪'}</span></div><p class="muted">${r.desc}</p><small style="color:#e5d7b8">${r.weather} · 採集 ${state.gatheredNodes.filter(k=>k.startsWith(r.name+'-')).length}/3</small><button class="action ${state.region===r.name?'':'primary'}" onclick="selectRegion('${r.name}')">${state.region===r.name?'目前區域':'傳送至此地'}</button></div>`).join('')}`;
-else if(tab==='quest')c.innerHTML=`<h2>📜 冒險委託</h2><div class="card"><b>主線・初次相遇</b><p>擊敗魔物，了解星境大陸的危機。</p><span class="muted">獎勵：原石 × 40、摩拉 × 100（首次）</span><button class="action primary" onclick="startBattle()">前往討伐</button></div><div class="card"><b>每日委託・清理魔物</b><p>目前進度：${Math.min(state.dailyWins,3)} / 3</p><div class="catHp"><i style="width:${Math.min(state.dailyWins/3*100,100)}%"></i></div><span class="muted">獎勵：原石 × 30、星石 × 100</span><button class="action ${state.claimedQuests.includes('daily')?'':'primary'}" onclick="claimDaily()" ${state.dailyWins<3||state.claimedQuests.includes('daily')?'disabled':''}>${state.claimedQuests.includes('daily')?'已領取':'完成後領取'}</button></div><div class="card"><b>世界探索・晶礦採集</b><p>在四張地圖尋找發光的地區晶礦：${state.gatheredNodes.length} / 12</p><span class="muted">獎勵：星石 × 80、原石 × 20</span><button class="action ${state.claimedQuests.includes('gather')?'':'primary'}" onclick="claimGatherQuest()" ${state.gatheredNodes.length<12||state.claimedQuests.includes('gather')?'disabled':''}>${state.claimedQuests.includes('gather')?'已領取':'完成後領取'}</button></div><div class="card"><b>探索委託・寶箱獵人</b><p>開啟全部 5 個草原寶箱：${state.openedChests.length}/5</p><span class="muted">獎勵：原石 × 25</span><button class="action ${state.claimedQuests.includes('chest')?'':'primary'}" onclick="claimChestQuest()" ${state.openedChests.length<5||state.claimedQuests.includes('chest')?'disabled':''}>${state.claimedQuests.includes('chest')?'已領取':'完成後領取'}</button></div>`;
+else if(tab==='quest')c.innerHTML=`<h2>📜 冒險委託</h2><div class="card" style="border-color:#d7bd78;background:linear-gradient(135deg,#34443e,#202b36)"><div style="color:#e6c87e;font-size:11px">✦ 主線劇情 · 第一章</div><b style="font-size:17px">${storySteps[state.storyStep].title}</b><p>${storySteps[state.storyStep].objective}</p><div class="catHp"><i style="width:${state.storyStep/4*100}%"></i></div><small class="muted">劇情進度 ${state.storyStep}/4</small></div><div class="card"><b>主線・初次相遇</b><p>擊敗魔物，了解星境大陸的危機。</p><span class="muted">獎勵：原石 × 40、摩拉 × 100（首次）</span><button class="action primary" onclick="startBattle()">前往討伐</button></div><div class="card"><b>每日委託・清理魔物</b><p>目前進度：${Math.min(state.dailyWins,3)} / 3</p><div class="catHp"><i style="width:${Math.min(state.dailyWins/3*100,100)}%"></i></div><span class="muted">獎勵：原石 × 30、星石 × 100</span><button class="action ${state.claimedQuests.includes('daily')?'':'primary'}" onclick="claimDaily()" ${state.dailyWins<3||state.claimedQuests.includes('daily')?'disabled':''}>${state.claimedQuests.includes('daily')?'已領取':'完成後領取'}</button></div><div class="card"><b>世界探索・晶礦採集</b><p>在四張地圖尋找發光的地區晶礦：${state.gatheredNodes.length} / 12</p><span class="muted">獎勵：星石 × 80、原石 × 20</span><button class="action ${state.claimedQuests.includes('gather')?'':'primary'}" onclick="claimGatherQuest()" ${state.gatheredNodes.length<12||state.claimedQuests.includes('gather')?'disabled':''}>${state.claimedQuests.includes('gather')?'已領取':'完成後領取'}</button></div><div class="card"><b>探索委託・寶箱獵人</b><p>開啟全部 5 個草原寶箱：${state.openedChests.length}/5</p><span class="muted">獎勵：原石 × 25</span><button class="action ${state.claimedQuests.includes('chest')?'':'primary'}" onclick="claimChestQuest()" ${state.openedChests.length<5||state.claimedQuests.includes('chest')?'disabled':''}>${state.claimedQuests.includes('chest')?'已領取':'完成後領取'}</button></div>`;
 else if(tab==='chest')c.innerHTML=`<h2>🎁 草原寶箱探索</h2><p class="muted">地圖上藏著 5 個寶箱，找到並開啟它們，收集星石、摩拉與原石！</p><div class="card"><b>已開啟 ${state.openedChests.length} / ${chestCatalog.length}</b><div class="catHp"><i style="width:${state.openedChests.length/chestCatalog.length*100}%"></i></div></div>${chestCatalog.map(ch=>{let opened=state.openedChests.includes(ch.id);return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${ch.emoji} ${ch.name}</b><span class="muted">${opened?'已開啟':'尚未開啟'}</span></div><p class="muted">💎 ${ch.gems} 星石 · 🪙 ${ch.coins} 摩拉 · ⭐ ${ch.primogems} 原石</p><button class="action ${opened?'':'primary'}" onclick="openChest(${ch.id})" ${opened?'disabled':''}>${opened?'已領取獎勵':'開啟寶箱'}</button></div>`}).join('')}` ;
 else c.innerHTML=`<h2>🌿 風語草原</h2><p>歡迎來到星境大陸！在這片遼闊的草原上，傳說七種元素守護著世界的平衡。</p><div class="card"><b>目前目標</b><br>探索草原、打倒史萊姆，並尋找古老寶箱。</div><button class="action primary" onclick="openPanel('quest')">查看冒險委託</button><button class="action" onclick="openPanel('gacha')">前往角色祈願</button>`;
 }
@@ -137,11 +142,14 @@ const catMaxHp=()=>180+(state.catLevel-1)*22;const catAttack=()=>32+(state.catLe
 const regionEnemies={'風語草原':{name:'草原史萊姆',emoji:'🟢',hp:150,reward:1},'蒼翠森林':{name:'森林菇獸',emoji:'🍄',hp:230,reward:1.5},'霜晶雪原':{name:'霜晶獸',emoji:'🐺',hp:300,reward:2},'熾焰山脈':{name:'熔岩魔像',emoji:'🗿',hp:420,reward:2.5}};
 let currentEnemy=regionEnemies[state.region]||regionEnemies['風語草原'];
 let hp=currentEnemy.hp,catHp=catMaxHp(),enemyMaxHp=currentEnemy.hp,skillReady=true;
+function refreshStoryHud(){const s=storySteps[state.storyStep]||storySteps[4];const title=$('storyTitle'),objective=$('storyObjective');if(title)title.textContent=s.title;if(objective)objective.textContent=s.objective;}
+function advanceStory(expected,next,message){if(state.storyStep!==expected)return;state.storyStep=next;save();refreshStoryHud();if(message)$('worldHint').textContent=message;}
+function interactStoryStone(){if(state.storyStep===0){advanceStory(0,1,'星導石亮起了！前往附近的魔物，擊敗它。');openPanel('quest')}else{openPanel('quest')}}
 function updateBattleBars(){$('enemyhp').style.width=Math.max(0,hp/enemyMaxHp*100)+'%';$('catHpBar').style.width=Math.max(0,catHp/catMaxHp()*100)+'%';$('catBattleStats').textContent=`🐈 驚嚇貓 HP：${Math.max(0,catHp)} / ${catMaxHp()}`}
 function startBattle(){currentEnemy=regionEnemies[state.region]||regionEnemies['風語草原'];enemyMaxHp=currentEnemy.hp;hp=enemyMaxHp;catHp=catMaxHp();skillReady=true;$('battlebox').querySelector('h2').textContent=currentEnemy.name;$('battlebox').querySelector('.enemy').textContent=currentEnemy.emoji;updateBattleBars();$('battlemsg').textContent=currentEnemy.name+' 出現了！驚嚇貓，準備戰鬥！';$('battle').style.display='flex'}
 function attack(){if(hp<=0||catHp<=0)return;let dmg=catAttack();hp-=dmg;afterHit(`貓掌攻擊造成 ${dmg} 點傷害！`)}
 function skill(){if(hp<=0||catHp<=0)return;if(!skillReady){$('battlemsg').textContent='星光衝擊還在蓄力，這回合先用貓掌攻擊吧！';return}let dmg=Math.round(catAttack()*1.8);hp-=dmg;skillReady=false;afterHit(`✨ 貓咪星光衝擊造成 ${dmg} 點傷害！`)}
-function afterHit(msg){if(hp<=0){hp=0;updateBattleBars();const rewardScale=currentEnemy.reward;state.coins+=Math.round(100*rewardScale);state.primogems+=Math.round(20*rewardScale);state.gems=(Number(state.gems)||0)+Math.round(40*rewardScale);state.catXp+=Math.round(35*rewardScale);state.dailyWins++;$('battlemsg').textContent='勝利！獲得 '+Math.round(100*rewardScale)+' 摩拉、'+Math.round(40*rewardScale)+' 鑽石、'+Math.round(20*rewardScale)+' 原石與 '+Math.round(35*rewardScale)+' 經驗值！';if(state.catXp>=state.catLevel*100){state.catXp-=state.catLevel*100;state.catLevel++;alert('驚嚇貓升級了！目前等級 Lv.'+state.catLevel+'！生命、攻擊與防禦都提升了！')}save();setTimeout(()=>{$('battle').style.display='none';if(!state.quest){state.quest=true;state.primogems+=40;save();alert('委託完成！額外獲得 40 原石！')}},1300)}else{let retaliation=Math.max(3,16-catDefense()*.35);catHp=Math.max(0,catHp-Math.round(retaliation));skillReady=true;updateBattleBars();if(catHp<=0){$('battlemsg').textContent='驚嚇貓累倒了！先撤退休息，再來挑戰吧。'}else{$('battlemsg').textContent=msg+` 史萊姆剩餘 ${hp} HP。史萊姆反擊，驚嚇貓受到 ${Math.round(retaliation)} 點傷害。`}}}
+function afterHit(msg){if(hp<=0){hp=0;updateBattleBars();const rewardScale=currentEnemy.reward;state.coins+=Math.round(100*rewardScale);state.primogems+=Math.round(20*rewardScale);state.gems=(Number(state.gems)||0)+Math.round(40*rewardScale);state.catXp+=Math.round(35*rewardScale);state.dailyWins++;if(state.storyStep===1)advanceStory(1,2,'魔物已被擊敗！接著尋找一個寶箱取得補給。');$('battlemsg').textContent='勝利！獲得 '+Math.round(100*rewardScale)+' 摩拉、'+Math.round(40*rewardScale)+' 鑽石、'+Math.round(20*rewardScale)+' 原石與 '+Math.round(35*rewardScale)+' 經驗值！';if(state.catXp>=state.catLevel*100){state.catXp-=state.catLevel*100;state.catLevel++;alert('驚嚇貓升級了！目前等級 Lv.'+state.catLevel+'！生命、攻擊與防禦都提升了！')}save();setTimeout(()=>{$('battle').style.display='none';if(!state.quest){state.quest=true;state.primogems+=40;save();alert('委託完成！額外獲得 40 原石！')}},1300)}else{let retaliation=Math.max(3,16-catDefense()*.35);catHp=Math.max(0,catHp-Math.round(retaliation));skillReady=true;updateBattleBars();if(catHp<=0){$('battlemsg').textContent='驚嚇貓累倒了！先撤退休息，再來挑戰吧。'}else{$('battlemsg').textContent=msg+` 史萊姆剩餘 ${hp} HP。史萊姆反擊，驚嚇貓受到 ${Math.round(retaliation)} 點傷害。`}}}
 function toggleParty(name){if(state.party.includes(name))state.party=state.party.filter(n=>n!==name);else if(state.party.length<4)state.party.push(name);else alert('隊伍最多只能有 4 位夥伴！');save();openPanel('party')}
 function selectRegion(name){
  if(!zoneLooks[name])return;
@@ -153,7 +161,7 @@ function selectRegion(name){
 function claimDaily(){if(state.dailyWins<3||state.claimedQuests.includes('daily'))return;state.claimedQuests.push('daily');state.primogems+=30;state.gems+=100;save();openPanel('quest');alert('每日委託完成！獲得 30 原石與 100 星石！')}
 function claimChestQuest(){if(state.openedChests.length<5||state.claimedQuests.includes('chest'))return;state.claimedQuests.push('chest');state.primogems+=25;save();openPanel('quest');alert('探索委託完成！獲得 25 原石！')}
 function runAway(){$('battle').style.display='none'}
-function openChest(id){const ch=chestCatalog.find(x=>x.id===Number(id));if(!ch||state.openedChests.includes(ch.id))return;state.openedChests.push(ch.id);state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady)buildZone();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
+function openChest(id){const ch=chestCatalog.find(x=>x.id===Number(id));if(!ch||state.openedChests.includes(ch.id))return;state.openedChests.push(ch.id);if(state.storyStep===2)advanceStory(2,3,'補給已取得！接著尋找發光晶礦並按 E 採集。');state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady)buildZone();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
 function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;update3DPlayer();updateNearbyInteraction()}
 const heldKeys=new Set(),heldButtons=new Map();
 let walkDirection=new THREE.Vector2(),walkBlend=0;
@@ -208,11 +216,11 @@ function addTree(x,z,look,scale=1){
   addMesh(g,new THREE.ConeGeometry(.9*scale,2*scale,7),leaf,0,1.65*scale,0);
   addMesh(g,new THREE.SphereGeometry(.5*scale,8,7),mat(look.accent),.3*scale,2.1*scale,0);
  }
- g.position.set(x,0,z);scene3d.add(g);
+ g.position.set(x,0,z);scene3d.add(g);addObstacle(x,z,.72*scale);
 }
 function addRock(x,z,look,scale=1){
  const colors=state.region==='霜晶雪原'?0x9fc9dd:state.region==='熾焰山脈'?0x533d3b:0x778c83;
- const rock=addMesh(scene3d,new THREE.DodecahedronGeometry(scale,0),mat(colors),x,scale*.55,z);rock.scale.y=.8;
+ const rock=addMesh(scene3d,new THREE.DodecahedronGeometry(scale,0),mat(colors),x,scale*.55,z);rock.scale.y=.8;addObstacle(x,z,scale*.78);
 }
 function addChest(x,z,id,look){
  const g=new THREE.Group(),wood=mat(0x80502e),gold=mat(look.accent,.4,{metalness:.55}),dark=mat(0x382d2a);
@@ -221,7 +229,7 @@ function addChest(x,z,id,look){
  const lid=addMesh(g,new THREE.BoxGeometry(.98,.22,.7),wood,0,.82,0);lid.rotation.x=-.12;
  addMesh(g,new THREE.BoxGeometry(.13,.28,.08),gold,0,.56,-.37);
  const ring=addMesh(g,new THREE.TorusGeometry(.62,.025,6,24),mat(look.accent,.4,{emissive:look.accent}),0,.08,0);ring.rotation.x=Math.PI/2;
- g.position.set(x,0,z);g.userData={kind:'chest',id,opened:state.openedChests.includes(id)};if(g.userData.opened)lid.rotation.x=-.85;scene3d.add(g);worldObjects.push(g);
+ g.position.set(x,0,z);addObstacle(x,z,.95);g.userData={kind:'chest',id,opened:state.openedChests.includes(id)};if(g.userData.opened)lid.rotation.x=-.85;scene3d.add(g);worldObjects.push(g);
 }
 function addMonster(x,z,look){
  const g=new THREE.Group(),bodyColor=state.region==='熾焰山脈'?0xb95738:state.region==='霜晶雪原'?0x8ed5ee:state.region==='蒼翠森林'?0x9bba5b:0x79c96a;
@@ -232,7 +240,7 @@ function addMonster(x,z,look){
   addMesh(g,new THREE.SphereGeometry(.07,10,8),mat(0x382b36),side*.17,1.18,-.45);
  }
  const aura=addMesh(g,new THREE.TorusGeometry(.85,.035,6,32),mat(look.accent,.4,{emissive:look.accent}),0,.08,0);aura.rotation.x=Math.PI/2;
- g.position.set(x,0,z);g.userData={kind:'monster'};scene3d.add(g);worldObjects.push(g);
+ g.position.set(x,0,z);addObstacle(x,z,1.05);g.userData={kind:'monster'};scene3d.add(g);worldObjects.push(g);
 }
 function addResourceNode(x,z,id,look){
  const key=state.region+'-'+id;if(state.gatheredNodes.includes(key))return;
@@ -240,12 +248,12 @@ function addResourceNode(x,z,id,look){
  const crystal=addMesh(g,new THREE.OctahedronGeometry(.48,1),mat(crystalColor,.3,{emissive:crystalColor,emissiveIntensity:.16}),0,.72,0);crystal.scale.set(.8,1.5,.8);
  const shard=addMesh(g,new THREE.OctahedronGeometry(.25,0),mat(look.accent,.25,{emissive:look.accent}),.42,.4,.08);shard.rotation.z=.5;
  const ring=addMesh(g,new THREE.TorusGeometry(.72,.025,6,24),mat(look.accent,.4,{emissive:look.accent}),0,.08,0);ring.rotation.x=Math.PI/2;
- g.position.set(x,0,z);g.userData={kind:'resource',id,key};scene3d.add(g);worldObjects.push(g);
+ g.position.set(x,0,z);addObstacle(x,z,.78);g.userData={kind:'resource',id,key};scene3d.add(g);worldObjects.push(g);
 }
 function buildZone(){
  const look=zoneLooks[state.region]||zoneLooks['風語草原'];
  scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,18,66);
- scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];
+ scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];worldObstacles.length=0;
  const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,50,50),mat(look.ground,1),0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;
  const grid=new THREE.GridHelper(120,30,0x46574d,0x596b5c);grid.material.transparent=true;grid.material.opacity=.12;grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
  for(let i=0;i<48;i++){
@@ -257,10 +265,10 @@ function buildZone(){
    }
   }else if(state.region==='霜晶雪原'){
    if(Math.random()<.62)addRock(x,z,look,.5+Math.random()*1.5);
-   const ice=addMesh(scene3d,new THREE.ConeGeometry(.35+Math.random()*.5,1.2+Math.random()*2.5,5),mat(0x9bbbc6,.35,{metalness:.12}),x,.55,z);ice.rotation.z=(Math.random()-.5)*.18;
+   const ice=addMesh(scene3d,new THREE.ConeGeometry(.35+Math.random()*.5,1.2+Math.random()*2.5,5),mat(0x9bbbc6,.35,{metalness:.12}),x,.55,z);ice.rotation.z=(Math.random()-.5)*.18;addObstacle(x,z,.85);
   }else if(state.region==='蒼翠森林'){
    if(Math.random()<.72)addTree(x,z,look,.75+Math.random()*.95);else{
-    const stem=addMesh(scene3d,new THREE.CylinderGeometry(.09,.12,.38,7),mat(0xc3a47b),x,.19,z);
+    const stem=addMesh(scene3d,new THREE.CylinderGeometry(.09,.12,.38,7),mat(0xc3a47b),x,.19,z);addObstacle(x,z,.48);
     addMesh(scene3d,new THREE.SphereGeometry(.3,10,8),mat(0x9d655d),x,.42,z);
    }
   }else{
@@ -289,7 +297,7 @@ function buildZone(){
    addMesh(q,new THREE.CylinderGeometry(.08,.16,1.4,8),mat(look.accent),0,.7,0);
    addMesh(q,new THREE.OctahedronGeometry(.42),mat(0xffe7a3,.25,{emissive:0xd89b38}),0,1.65,0);
    const ring=addMesh(q,new THREE.TorusGeometry(.8,.04,8,32),mat(look.accent),0,.12,0);ring.rotation.x=Math.PI/2;
-   q.position.set(p.x,0,p.z);q.userData={kind:'quest'};scene3d.add(q);worldObjects.push(q);
+   q.position.set(p.x,0,p.z);addObstacle(p.x,p.z,.82);q.userData={kind:'quest'};scene3d.add(q);worldObjects.push(q);
   }
  }
  // 小型發光水晶與道路石塊
@@ -317,6 +325,10 @@ function init3DWorld(){
 function activate2DFallback(message){threeReady=false;renderer3d=null;$('world').classList.add('fallback2d');$('worldHint').textContent=message;$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('world').style.backgroundImage=regionBackgrounds[state.region]||regionBackgrounds['風語草原'];document.querySelectorAll('[data-interact]').forEach(b=>b.style.display='block');}
 function resize3D(){if(!renderer3d)return;const w=$('world').clientWidth,h=$('world').clientHeight;renderer3d.setSize(w,h,false);camera3d.aspect=w/h;camera3d.updateProjectionMatrix()}
 function update3DPlayer(){if(!player3d)return;player3d.position.set((state.x-50)*.55,0,(state.y-50)*.55)}
+const worldObstacles=[];
+function addObstacle(x,z,radius){worldObstacles.push({x,z,r:radius})}
+function blockedAt(x,z){return worldObstacles.some(o=>Math.hypot(x-o.x,z-o.z)<o.r+.48)}
+function resolveWorldMove(dx,dz){const p=player3d.position;let nx=p.x+dx,nz=p.z+dz;if(!blockedAt(nx,nz))return [nx,nz];let sx=p.x+dx,sz=p.z;if(!blockedAt(sx,sz))return [sx,p.z];sx=p.x;sz=p.z+dz;if(!blockedAt(sx,sz))return [p.x,sz];return [p.x,p.z]}
 function update3DInteraction(){
  if(!threeReady)return;
  const px=player3d.position.x,pz=player3d.position.z;let best=Infinity,nearest=null;
@@ -352,7 +364,7 @@ function animate3D(t=0){
   const worldX=ix*Math.cos(cameraYaw)+iz*Math.sin(cameraYaw);
   const worldZ=-ix*Math.sin(cameraYaw)+iz*Math.cos(cameraYaw);
   if(moving){
-   const speed=15*dt;state.x=Math.max(5,Math.min(95,state.x+worldX*speed));state.y=Math.max(12,Math.min(88,state.y+worldZ*speed));
+   const speed=15*dt,stepX=worldX*speed*.55,stepZ=worldZ*speed*.55;const resolved=resolveWorldMove(stepX,stepZ);state.x=Math.max(5,Math.min(95,50+resolved[0]/.55));state.y=Math.max(12,Math.min(88,50+resolved[1]/.55));
    $('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;
    update3DPlayer();update3DInteraction();
    const desired=Math.atan2(-worldX,-worldZ);
@@ -390,11 +402,12 @@ function updateNearbyInteraction(){if(threeReady){update3DInteraction();return}c
 function interactCurrent(){
  if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}
  if(nearbyPoi.userData?.kind==='resource'){gatherResource(nearbyPoi.userData.id);return}
- const type=nearbyPoi.dataset.interact;if(type==='quest')openPanel('quest');else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))
+ const type=nearbyPoi.dataset.interact;if(type==='quest')interactStoryStone();else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))
 }
 function gatherResource(id){
  const key=state.region+'-'+id;if(state.gatheredNodes.includes(key))return;
  state.gatheredNodes.push(key);state.materials[state.region]=(Number(state.materials[state.region])||0)+1;
+ if(state.storyStep===3){state.storyStep=4;state.gems+=120;state.primogems+=30;alert('主線第一章完成！額外獲得 120 星石與 30 原石！');}
  const gems=35,coins=25,primogems=2;state.gems+=gems;state.coins+=coins;state.primogems+=primogems;
  save();if(threeReady)buildZone();update3DInteraction();
  $('worldHint').textContent='採集成功！獲得地區晶礦、'+gems+' 星石、'+coins+' 摩拉與 '+primogems+' 原石。';
@@ -408,5 +421,5 @@ document.addEventListener('keyup',e=>heldKeys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{heldKeys.clear();heldButtons.clear()});
 $('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';
 try{init3DWorld()}catch(err){console.error('遊戲世界初始化失敗：',err);activate2DFallback('世界載入失敗，已啟用安全模式。')}
-try{updateWorldBackground();updateNearbyInteraction();save();openPanel('home')}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
+try{updateWorldBackground();updateNearbyInteraction();save();refreshStoryHud();openPanel('home')}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
 </script></body></html>
