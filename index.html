@@ -273,7 +273,7 @@ function ensureGameAudio(){
 }
 function markGameActivity(){
  if(!gameAudio||audioMuted)return;
- lastGameActivity=gameAudio.currentTime;setMusicLevel(.12);
+ lastGameActivity=gameAudio.currentTime;setMusicLevel(.035);
 }
 function setMusicLevel(level){
  if(!gameAudio||!bgmGain)return;
@@ -406,7 +406,6 @@ let activeFeaturePanel=null;
 function closePanel(){const p=$('panel');if(p)p.classList.add('panel-hidden');activeFeaturePanel=null;document.querySelectorAll('#featureDock .tab').forEach(b=>b.classList.remove('active'))}
 function openPanel(tab){
  const panel=$('panel');if(!panel)return;
- if(activeFeaturePanel===tab&&!panel.classList.contains('panel-hidden')){closePanel();return}
  activeFeaturePanel=tab;panel.classList.remove('panel-hidden');panel.style.display='flex';
  document.querySelectorAll('#featureDock .tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
@@ -438,7 +437,7 @@ function updateBattleBars(){$('enemyhp').style.width=Math.max(0,hp/enemyMaxHp*10
 function startBattle(){playGameSound('tap');currentEnemy=regionEnemies[state.region]||regionEnemies['風語草原'];enemyMaxHp=currentEnemy.hp;hp=enemyMaxHp;catHp=catMaxHp();skillReady=true;$('battlebox').querySelector('h2').textContent=currentEnemy.name;$('battlebox').querySelector('.enemy').textContent=currentEnemy.emoji;updateBattleBars();$('battlemsg').textContent=currentEnemy.name+' 出現了！驚嚇貓，準備戰鬥！';$('battle').style.display='flex'}
 function attack(){if(hp<=0||catHp<=0)return;playGameSound('hit');let dmg=catAttack();hp-=dmg;afterHit(`貓掌攻擊造成 ${dmg} 點傷害！`)}
 function skill(){if(hp<=0||catHp<=0)return;playGameSound('skill');if(!skillReady){$('battlemsg').textContent='星光衝擊還在蓄力，這回合先用貓掌攻擊吧！';return}let dmg=Math.round(catAttack()*1.8);hp-=dmg;skillReady=false;afterHit(`✨ 貓咪星光衝擊造成 ${dmg} 點傷害！`)}
-function afterHit(msg){if(hp<=0){hp=0;updateBattleBars();const rewardScale=currentEnemy.reward;state.coins+=Math.round(100*rewardScale);state.primogems+=Math.round(20*rewardScale);state.gems=(Number(state.gems)||0)+Math.round(40*rewardScale);state.catXp+=Math.round(35*rewardScale);state.dailyWins++;if(state.storyStep===1)advanceStory(1,2,'魔物已被擊敗！接著點擊一個寶箱取得補給。');$('battlemsg').textContent='勝利！獲得 '+Math.round(100*rewardScale)+' 摩拉、'+Math.round(40*rewardScale)+' 鑽石、'+Math.round(20*rewardScale)+' 原石與 '+Math.round(35*rewardScale)+' 經驗值！';if(state.catXp>=state.catLevel*100){state.catXp-=state.catLevel*100;state.catLevel++;alert('驚嚇貓升級了！目前等級 Lv.'+state.catLevel+'！生命、攻擊與防禦都提升了！')}save();setTimeout(()=>{$('battle').style.display='none';if(!state.quest){state.quest=true;state.primogems+=40;save();alert('委託完成！額外獲得 40 原石！')}},1300)}else{let retaliation=Math.max(3,16-catDefense()*.35);catHp=Math.max(0,catHp-Math.round(retaliation));skillReady=true;updateBattleBars();if(catHp<=0){$('battlemsg').textContent='驚嚇貓累倒了！先撤退休息，再來挑戰吧。'}else{$('battlemsg').textContent=msg+` 史萊姆剩餘 ${hp} HP。史萊姆反擊，驚嚇貓受到 ${Math.round(retaliation)} 點傷害。`}}}
+function afterHit(msg){if(hp<=0){playGameSound('win');hp=0;updateBattleBars();const rewardScale=currentEnemy.reward;state.coins+=Math.round(100*rewardScale);state.primogems+=Math.round(20*rewardScale);state.gems=(Number(state.gems)||0)+Math.round(40*rewardScale);state.catXp+=Math.round(35*rewardScale);state.dailyWins++;if(state.storyStep===1)advanceStory(1,2,'魔物已被擊敗！接著點擊一個寶箱取得補給。');$('battlemsg').textContent='勝利！獲得 '+Math.round(100*rewardScale)+' 摩拉、'+Math.round(40*rewardScale)+' 鑽石、'+Math.round(20*rewardScale)+' 原石與 '+Math.round(35*rewardScale)+' 經驗值！';if(state.catXp>=state.catLevel*100){state.catXp-=state.catLevel*100;state.catLevel++;alert('驚嚇貓升級了！目前等級 Lv.'+state.catLevel+'！生命、攻擊與防禦都提升了！')}save();setTimeout(()=>{$('battle').style.display='none';if(!state.quest){state.quest=true;state.primogems+=40;save();alert('委託完成！額外獲得 40 原石！')}},1300)}else{let retaliation=Math.max(3,16-catDefense()*.35);catHp=Math.max(0,catHp-Math.round(retaliation));skillReady=true;updateBattleBars();if(catHp<=0){$('battlemsg').textContent='驚嚇貓累倒了！先撤退休息，再來挑戰吧。'}else{$('battlemsg').textContent=msg+` 史萊姆剩餘 ${hp} HP。史萊姆反擊，驚嚇貓受到 ${Math.round(retaliation)} 點傷害。`}}}
 function toggleParty(name){if(state.party.includes(name))state.party=state.party.filter(n=>n!==name);else if(state.party.length<4)state.party.push(name);else alert('隊伍最多只能有 4 位夥伴！');save();openPanel('party')}
 function selectRegion(name){
  if(!zoneLooks[name]||name===state.region)return;
