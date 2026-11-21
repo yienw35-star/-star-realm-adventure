@@ -9,7 +9,7 @@ body{margin:0;background:#101d2b;color:#fff;font-family:system-ui,-apple-system,
 header{height:54px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;background:#0c1826eF;border-bottom:1px solid var(--line);position:relative;z-index:2}
 .brand{font-weight:900;letter-spacing:2px;color:var(--gold)}.stats{font-size:13px;display:flex;gap:12px}
 main{max-width:1000px;margin:auto;padding:12px;display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px}
-#world{height:min(70vh,650px);min-height:410px;position:relative;overflow:hidden;border:1px solid #ffffff45;border-radius:17px;background:linear-gradient(#91c8e7,#d7e5d7);isolation:isolate}#world:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#07152208 45%,#07152266 100%);pointer-events:none;z-index:1}.mountain,.tree{display:none}#world3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:none}#hero{display:none}.poi{display:none!important}.location{z-index:4;pointer-events:none}.hint{z-index:4;pointer-events:none}#interactBtn{z-index:5}#worldHint{z-index:4}.world-help{position:absolute;right:10px;top:10px;z-index:4;background:#102238b9;padding:7px 10px;border-radius:9px;font-size:11px;color:#fff;pointer-events:none}
+#world{height:min(70vh,650px);min-height:410px;position:relative;overflow:hidden;border:1px solid #ffffff45;border-radius:17px;background:linear-gradient(#91c8e7,#d7e5d7);isolation:isolate}#world:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#07152208 45%,#07152266 100%);pointer-events:none;z-index:1}.mountain,.tree{display:none}#world3d{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0;touch-action:none}#hero{display:none}.poi{display:none!important}.fallback2d .poi{display:block!important}.fallback2d #hero{display:block!important}.fallback2d #world3d{display:none!important}.fallback2d .mountain,.fallback2d .tree{display:block!important}.location{z-index:4;pointer-events:none}.hint{z-index:4;pointer-events:none}#interactBtn{z-index:5}#worldHint{z-index:4}.world-help{position:absolute;right:10px;top:10px;z-index:4;background:#102238b9;padding:7px 10px;border-radius:9px;font-size:11px;color:#fff;pointer-events:none}
 #world:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#ffffff12,transparent 45%,#07152233);pointer-events:none;z-index:0}
 .mountain{position:absolute;bottom:40%;width:0;height:0;border-left:130px solid transparent;border-right:130px solid transparent;border-bottom:190px solid #627e86;filter:drop-shadow(0 7px 0 #506d67)}
 .m1{left:-35px}.m2{right:-55px;transform:scale(1.3);border-bottom-color:#718b91}
@@ -160,14 +160,14 @@ function makeCat(){
   const inner=addMesh(g,new THREE.ConeGeometry(.075,.24,4),pink,side*.27,1.84,-.095);inner.rotation.z=side*-.22;
   addMesh(g,new THREE.SphereGeometry(.055,12,10),dark,side*.17,1.48,-.61);
   addMesh(g,new THREE.SphereGeometry(.027,10,8),eye,side*.17,1.49,-.658);
-  const leg=addMesh(g,new THREE.CapsuleGeometry(.105,.35,4,8),cream,side*.24,.36,-.12);leg.rotation.x=.08;
+  const leg=addMesh(g,new THREE.CylinderGeometry(.105,.12,.34,10),cream,side*.24,.36,-.12);addMesh(g,new THREE.SphereGeometry(.11,10,8),cream,side*.24,.19,-.12);leg.rotation.x=.08;
  }
  const muzzle=addMesh(g,new THREE.SphereGeometry(.12,14,10),white,0,1.31,-.57);muzzle.scale.set(1.35,.7,.6);
  addMesh(g,new THREE.SphereGeometry(.045,12,8),pink,0,1.35,-.66);
  const tailCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.82,.45),new THREE.Vector3(.38,1,.72),new THREE.Vector3(.5,1.35,.62),new THREE.Vector3(.34,1.48,.4)]);
  addMesh(g,new THREE.TubeGeometry(tailCurve,20,.075,8,false),cream,0,0,0);
  const scarf=addMesh(g,new THREE.TorusGeometry(.28,.07,8,24),mat(0xe9a94f),0,1.12,-.05);scarf.rotation.x=Math.PI/2;
- g.userData.legs=[];g.traverse(o=>{if(o.geometry&&o.geometry.type==='CapsuleGeometry')g.userData.legs.push(o)});
+ g.userData.legs=[];
  return g;
 }
 function addTree(x,z,look,scale=1){
@@ -245,9 +245,10 @@ function buildZone(){
  for(let i=0;i<16;i++){const x=(Math.random()-.5)*48,z=(Math.random()-.5)*48;const crystal=addMesh(scene3d,new THREE.OctahedronGeometry(.25+Math.random()*.25),mat(look.accent,.3,{emissive:look.accent}),x,.35,z);crystal.userData.zoneObject=true}
 }
 function init3DWorld(){
- if(!window.THREE){$('worldHint').textContent='3D 引擎載入失敗，請確認網路連線後重新整理。';return}
+ if(!window.THREE){activate2DFallback('3D 引擎載入失敗，請確認網路後重新整理。');return}
+ try{
  const canvas=$('world3d');scene3d=new THREE.Scene();camera3d=new THREE.PerspectiveCamera(55,1,.1,180);
- renderer3d=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer3d.shadowMap.enabled=true;renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
+ renderer3d=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'low-power'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.35));renderer3d.shadowMap.enabled=false;
  scene3d.add(new THREE.HemisphereLight(0xffffff,0x65745b,2));
  const sun=new THREE.DirectionalLight(0xfff0d5,2.1);sun.position.set(-12,25,10);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene3d.add(sun);
  player3d=makeCat();player3d.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene3d.add(player3d);
@@ -258,7 +259,9 @@ function init3DWorld(){
  canvas.addEventListener('pointerup',()=>dragging=false);canvas.addEventListener('pointercancel',()=>dragging=false);
  canvas.addEventListener('wheel',e=>{cameraDistance=Math.max(5,Math.min(18,cameraDistance+e.deltaY*.01));e.preventDefault()},{passive:false});
  window.addEventListener('resize',resize3D);
+ }catch(err){console.error('3D 初始化失敗：',err);if(renderer3d){renderer3d.dispose();renderer3d=null}activate2DFallback('3D 顯示裝置不支援或載入失敗，已切換安全模式。')}
 }
+function activate2DFallback(message){threeReady=false;renderer3d=null;$('world').classList.add('fallback2d');$('worldHint').textContent=message;$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('world').style.backgroundImage=regionBackgrounds[state.region]||regionBackgrounds['風語草原'];document.querySelectorAll('[data-interact]').forEach(b=>b.style.display='block');}
 function resize3D(){if(!renderer3d)return;const w=$('world').clientWidth,h=$('world').clientHeight;renderer3d.setSize(w,h,false);camera3d.aspect=w/h;camera3d.updateProjectionMatrix()}
 function update3DPlayer(){if(!player3d)return;player3d.position.set((state.x-50)*.55,0,(state.y-50)*.55)}
 function update3DInteraction(){
@@ -284,10 +287,10 @@ function animate3D(t=0){
  worldObjects.forEach(o=>{if(o.userData.kind==='quest')o.children[1].rotation.y+=dt*.9});
  renderer3d.render(scene3d,camera3d);
 }
-function updateWorldBackground(){if(threeReady){buildZone();update3DPlayer();update3DInteraction()}$('loc').textContent='📍 '+state.region}
+function updateWorldBackground(){if(threeReady){buildZone();update3DPlayer();update3DInteraction()}else{$('world').style.backgroundImage=regionBackgrounds[state.region]||regionBackgrounds['風語草原']} $('loc').textContent='📍 '+state.region}
 
 let nearbyPoi=null;
-function updateNearbyInteraction(){const buttons=[...document.querySelectorAll('[data-interact]')];let closest=null,best=Infinity;buttons.forEach(btn=>{const x=parseFloat(btn.style.left||(btn.style.right?100-parseFloat(btn.style.right):50));const y=parseFloat(btn.style.top||(btn.style.bottom?100-parseFloat(btn.style.bottom):50));const d=Math.hypot(state.x-x,state.y-y);btn.classList.toggle('nearby',d<=13);if(d<best){best=d;closest=btn}});nearbyPoi=best<=13?closest:null;$('interactBtn').classList.toggle('show',!!nearbyPoi);$('worldHint').textContent=nearbyPoi?'已靠近：'+(nearbyPoi.dataset.interact==='quest'?'冒險委託':nearbyPoi.dataset.interact==='monster'?'魔物':'寶箱')+' · 按 E 或點擊互動':'移動貓咪靠近委託、魔物或寶箱，再按 E 互動'}
+function updateNearbyInteraction(){if(threeReady){update3DInteraction();return}const buttons=[...document.querySelectorAll('[data-interact]')];let closest=null,best=Infinity;buttons.forEach(btn=>{const x=parseFloat(btn.style.left||(btn.style.right?100-parseFloat(btn.style.right):50));const y=parseFloat(btn.style.top||(btn.style.bottom?100-parseFloat(btn.style.bottom):50));const d=Math.hypot(state.x-x,state.y-y);btn.classList.toggle('nearby',d<=13);if(d<best){best=d;closest=btn}});nearbyPoi=best<=13?closest:null;$('interactBtn').classList.toggle('show',!!nearbyPoi);$('worldHint').textContent=nearbyPoi?'已靠近：'+(nearbyPoi.dataset.interact==='quest'?'冒險委託':nearbyPoi.dataset.interact==='monster'?'魔物':'寶箱')+' · 按 E 或點擊互動':'移動貓咪靠近委託、魔物或寶箱，再按 E 互動'}
 function interactCurrent(){if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}const type=nearbyPoi.dataset.interact;if(type==='quest')openPanel('quest');else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))}
 document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('click',()=>{if(btn.classList.contains('nearby')){nearbyPoi=btn;interactCurrent()}else{$('worldHint').textContent='還太遠了！請先走近這個標記。'}}));
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
