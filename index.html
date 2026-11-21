@@ -187,7 +187,7 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 /* Separate bottom navigation from centered feature pop-up */
 main{display:block!important;max-width:1240px!important}
 main>section{width:100%;min-width:0}
-#panel{position:fixed!important;z-index:45!important;left:50%!important;top:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;width:min(620px,calc(100vw - 28px))!important;height:min(72dvh,680px)!important;max-height:calc(100dvh - 130px)!important;min-height:0!important;padding:52px 16px 16px!important;border:1px solid #d9bd7b66!important;border-radius:20px!important;background:linear-gradient(155deg,#172e46f7,#101e31fa)!important;box-shadow:0 0 0 100vmax #030914a8,0 22px 70px #000b!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+#panel{position:fixed!important;z-index:38!important;left:50%!important;top:auto!important;right:auto!important;bottom:calc(72px + env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;width:min(620px,calc(100vw - 20px))!important;height:min(42dvh,390px)!important;max-height:calc(100dvh - 190px)!important;min-height:130px!important;padding:48px 13px 12px!important;border:1px solid #d9bd7b66!important;border-radius:18px 18px 0 0!important;background:linear-gradient(155deg,#172e46f7,#101e31fa)!important;box-shadow:0 -8px 28px #0008!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
 #panel.panel-hidden{display:none!important}
 #panel .panel-close{position:absolute!important;right:12px!important;top:10px!important;width:34px!important;height:34px!important;flex:none!important;border-radius:11px!important;border:1px solid #f1d59a88!important;background:#513e42!important;color:#ffe7c0!important;font-size:19px!important;z-index:5!important}
 #panel #content{display:block!important;flex:1!important;min-height:0!important;max-height:none!important;overflow-y:auto!important;padding:0 4px 18px 0!important}
@@ -199,7 +199,7 @@ main>section{width:100%;min-width:0}
 @media(max-width:720px){
  body{padding-bottom:90px!important}
  #world{height:calc(100dvh - 116px)!important;min-height:400px!important}
- #panel{width:calc(100vw - 20px)!important;height:min(70dvh,620px)!important;max-height:calc(100dvh - 112px)!important;padding:49px 12px 12px!important;border-radius:18px!important}
+ #panel{width:calc(100vw - 16px)!important;height:min(42dvh,360px)!important;max-height:calc(100dvh - 180px)!important;bottom:calc(66px + env(safe-area-inset-bottom))!important;padding:45px 10px 9px!important;border-radius:16px 16px 0 0!important}
  #featureDock{bottom:calc(8px + env(safe-area-inset-bottom))!important;width:calc(100vw - 16px)!important;gap:2px!important;padding:5px!important}
  #featureDock .tab{height:50px!important}
  #featureDock .tab span{font-size:19px!important}
@@ -217,13 +217,13 @@ main>section{width:100%;min-width:0}
 @media(max-width:720px){#panel{z-index:46!important}#panelBackdrop{z-index:45!important}}
 
 /* Direction pad stays fixed to the viewport while the page scrolls */
-#controls{position:fixed!important;left:50%!important;right:auto!important;top:auto!important;bottom:calc(94px + env(safe-area-inset-bottom))!important;transform:translateX(-50%)!important;z-index:35!important;margin:0!important;display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,36px)!important;gap:3px!important;opacity:.96}
+#world #controls{position:absolute!important;left:12px!important;right:auto!important;top:auto!important;bottom:84px!important;transform:none!important;z-index:18!important;margin:0!important;display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,36px)!important;gap:3px!important;opacity:.96}
 #controls button{width:42px;height:36px;touch-action:none!important;user-select:none;-webkit-user-select:none}
-@media(max-width:390px){#controls{bottom:calc(92px + env(safe-area-inset-bottom))!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,33px)!important}#controls button{width:38px;height:33px}}
+@media(max-width:390px){#world #controls{bottom:78px!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,33px)!important}#world #controls button{width:38px;height:33px}}
 
 /* Story navigation and seamless region transitions */
 #regionTransition{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(circle at center,#476b80f5,#101a30 68%,#070d18);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .55s ease,visibility .55s}
-#regionTransition.show{opacity:1;visibility:visible}#regionTransition .transition-mark{font-size:54px;filter:drop-shadow(0 0 20px #ffe6a0);animation:portalPulse 1s ease-in-out infinite alternate}#regionTransition b{font-size:22px;color:#ffe4a0;letter-spacing:2px;text-shadow:0 0 18px #f4d58a}#regionTransition small{font-size:12px;color:#d8e6ee}@keyframes portalPulse{from{transform:scale(.92);filter:drop-shadow(0 0 8px #ffe6a0)}to{transform:scale(1.08);filter:drop-shadow(0 0 28px #fff2b0)}}#worldHint.guide-hint{border:1px solid #ffe58b99;color:#fff1b9;box-shadow:0 0 18px #ffd66b55}
+#regionTransition.show{opacity:1;visibility:visible}#regionTransition .transition-mark{font-size:54px;filter:drop-shadow(0 0 20px #ffe6a0);animation:portalPulse 1s ease-in-out infinite alternate}#regionTransition b{font-size:22px;color:#ffe4a0;letter-spacing:2px;text-shadow:0 0 18px #f4d58a}#regionTransition small{font-size:12px;color:#d8e6ee}@keyframes portalPulse{from{transform:scale(.92);filter:drop-shadow(0 0 8px #ffe6a0)}to{transform:scale(1.08);filter:drop-shadow(0 0 28px #fff2b0)}}#worldHint.guide-hint{border:1px solid #ffe58b99;color:#fff1b9;box-shadow:0 0 18px #ffd66b55}#guideBanner{position:absolute;left:50%;top:52px;transform:translateX(-50%);z-index:11;width:min(360px,calc(100% - 24px));padding:9px 12px;border:1px solid #8eeeffaa;border-radius:13px;background:linear-gradient(100deg,#102b43ef,#173b54ef);color:#baf4ff;font-size:11px;font-weight:900;text-align:center;box-shadow:0 0 20px #51dfff55;pointer-events:none;animation:guideGlow 1.8s ease-in-out infinite alternate}#guideBanner span{color:#fff1b9;font-weight:700}@keyframes guideGlow{to{box-shadow:0 0 26px #65eaff99;border-color:#fff2a0}}
 </style></head>
 <body>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
@@ -236,11 +236,10 @@ main>section{width:100%;min-width:0}
 <div class="mountain m1"></div><div class="mountain m2"></div>
 <div class="tree" style="left:12%;bottom:15%">🌲</div><div class="tree" style="left:29%;bottom:22%">🌳</div><div class="tree" style="right:15%;bottom:13%">🌲</div><div class="tree" style="right:34%;bottom:27%">🌳</div>
 <div class="location" id="loc">📍 貓咪風語草原</div><div id="hero" role="img" aria-label="玩家主角：驚嚇貓" title="驚嚇貓">🐈</div>
-<button class="poi" data-interact="quest" style="left:8%;top:24%">📜 委託</button><button class="poi" data-interact="monster" style="right:8%;top:36%">⚔️ 魔物</button><button class="poi" data-interact="chest" data-chest-id="0" style="right:12%;bottom:22%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="1" style="left:24%;top:43%">🧰 寶箱</button><button class="poi" data-interact="chest" data-chest-id="2" style="left:55%;top:28%">✨ 寶箱</button><button class="poi" data-interact="chest" data-chest-id="3" style="left:72%;bottom:35%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="4" style="left:42%;bottom:18%">🧰 寶箱</button><button id="interactBtn" onclick="interactCurrent()">按 E 互動</button><div class="hint" id="worldHint">移動貓咪靠近委託、魔物或寶箱，再按 E 互動</div></div>
+<button class="poi" data-interact="quest" style="left:8%;top:24%">📜 委託</button><button class="poi" data-interact="monster" style="right:8%;top:36%">⚔️ 魔物</button><button class="poi" data-interact="chest" data-chest-id="0" style="right:12%;bottom:22%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="1" style="left:24%;top:43%">🧰 寶箱</button><button class="poi" data-interact="chest" data-chest-id="2" style="left:55%;top:28%">✨ 寶箱</button><button class="poi" data-interact="chest" data-chest-id="3" style="left:72%;bottom:35%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="4" style="left:42%;bottom:18%">🧰 寶箱</button><button id="interactBtn" onclick="interactCurrent()">按 E 互動</button><div class="hint" id="worldHint">移動貓咪靠近委託、魔物或寶箱，再按 E 互動</div><div id="guideBanner">✦ 冒險導航　<span id="guideText">跟隨發光路線前進</span></div><div id="controls"><button class="up" data-move="0,-5">↑</button><button class="left" data-move="-5,0">←</button><button class="down" data-move="0,5">↓</button><button class="right" data-move="5,0">→</button></div></div>
 
 </section>
-<nav id="featureDock" class="tabrow" aria-label="貓咪世界功能"><button class="tab active" data-tab="home"><span>🐾</span><small>基地</small></button><button class="tab" data-tab="quest"><span>📜</span><small>任務</small></button><button class="tab" data-tab="map"><span>🌏</span><small>地圖</small></button><button class="tab" data-tab="gacha"><span>✨</span><small>祈願</small></button><button class="tab" data-tab="bag"><span>🐈</span><small>圖鑑</small></button><button class="tab" data-tab="party"><span>🐱</span><small>小隊</small></button></nav><div id="panelBackdrop" class="panel-backdrop panel-hidden" onclick="closePanel()" aria-hidden="true"></div><aside id="panel" class="panel-hidden" role="dialog" aria-modal="true" aria-label="遊戲功能面板"><button class="panel-close" type="button" onclick="closePanel()" aria-label="關閉功能面板" title="關閉">✕</button><div id="content" class="content"></div></aside></main>
- <div id="controls"><button class="up" data-move="0,-5">↑</button><button class="left" data-move="-5,0">←</button><button class="down" data-move="0,5">↓</button><button class="right" data-move="5,0">→</button></div>
+<nav id="featureDock" class="tabrow" aria-label="貓咪世界功能"><button class="tab active" data-tab="home"><span>🐾</span><small>基地</small></button><button class="tab" data-tab="quest"><span>📜</span><small>任務</small></button><button class="tab" data-tab="map"><span>🌏</span><small>地圖</small></button><button class="tab" data-tab="gacha"><span>✨</span><small>祈願</small></button><button class="tab" data-tab="bag"><span>🐈</span><small>圖鑑</small></button><button class="tab" data-tab="party"><span>🐱</span><small>小隊</small></button></nav><aside id="panel" class="panel-hidden" role="region" aria-label="遊戲功能內容"><button class="panel-close" type="button" onclick="closePanel()" aria-label="關閉功能面板" title="關閉">✕</button><div id="content" class="content"></div></aside></main>
 <div id="regionTransition" aria-live="polite"><div class="transition-mark">✦</div><b id="transitionName">前往新的星境</b><small id="transitionDesc">星光正在連接下一段旅程……</small></div>
  <div id="cheatModal" class="cheat-modal" onclick="if(event.target===this)closeCheat()"><div class="cheat-box"><button class="cheat-x" onclick="closeCheat()">✕</button><div class="cheat-cat">🐱 ✦ 🐾</div><div class="cheat-title">貓咪秘密補給</div><p>輸入 YIEN 啟動碼，不限次數、無限量領取星石與解鎖貓咪。</p><input id="cheatInput" maxlength="32" autocomplete="off" placeholder="輸入啟動碼"><div id="cheatMessage" class="cheat-message">不限次數・不限量・可重複領取</div><button class="action primary" onclick="redeemCheat()">啟動補給</button></div></div>
 <div id="wishReveal"><div id="wishBox"><div id="wishTitle">✦ 星願降臨 ✦</div><div id="wishSubtitle">命運的星光正在揭曉……</div><div id="wishBeam"></div><div id="wishCards"></div><button id="wishClose" class="action primary" onclick="closeWishReveal()" style="display:none">收下祈願結果</button><button id="wishSkip" class="action" onclick="revealWishCards()">跳過動畫</button></div></div>
@@ -309,9 +308,9 @@ state.party=Array.isArray(state.party)?state.party.filter(n=>newCharacterNames.h
 if(!state.party.length)state.party=['星芽'];
 function characterStats(ch,level=1){const growth=Math.max(0,level-1);return {hp:ch.baseHp+growth*Math.round(ch.baseHp*.08),atk:ch.baseAtk+growth*Math.max(1,Math.round(ch.baseAtk*.09)),def:ch.baseDef+growth*Math.max(1,Math.round(ch.baseDef*.07))};}
 function save(){state.gems=Number(state.gems)||0;state.coins=Number(state.coins)||0;state.primogems=Number(state.primogems)||0;localStorage.setItem('starTraveler',JSON.stringify(state));$('gems').textContent=state.gems;$('coins').textContent=state.coins;$('primogems').textContent=state.primogems}
-function closePanel(){const p=$('panel'),b=$('panelBackdrop');if(p)p.classList.add('panel-hidden');if(b)b.classList.add('panel-hidden')}
+function closePanel(){const p=$('panel');if(p)p.classList.add('panel-hidden')}
 function openPanel(tab){
- const panel=$('panel'),backdrop=$('panelBackdrop');if(panel)panel.classList.remove('panel-hidden');if(backdrop)backdrop.classList.remove('panel-hidden');
+ const panel=$('panel');if(panel)panel.classList.remove('panel-hidden');
  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
  const c=$('content'),owned=characters.filter(ch=>state.owned.includes(ch.name));
  const regionList=[{name:'風語草原',emoji:'🌾',desc:'柔軟草浪與星導石，是小貓冒險的起點。',weather:'微風黃昏'},{name:'蒼翠森林',emoji:'🌲',desc:'巨木、蘑菇與藏在樹影裡的寶物。',weather:'森林薄霧'},{name:'霜晶雪原',emoji:'❄️',desc:'雪花飄落，冰晶深處有稀有素材。',weather:'寒雪冰霧'},{name:'熾焰山脈',emoji:'🌋',desc:'火山岩與熔光交織的高難度區域。',weather:'火山熱浪'}];
@@ -334,7 +333,7 @@ const catMaxHp=()=>180+(state.catLevel-1)*22;const catAttack=()=>32+(state.catLe
 const regionEnemies={'風語草原':{name:'草原史萊姆',emoji:'🟢',hp:150,reward:1},'蒼翠森林':{name:'森林菇獸',emoji:'🍄',hp:230,reward:1.5},'霜晶雪原':{name:'霜晶獸',emoji:'🐺',hp:300,reward:2},'熾焰山脈':{name:'熔岩魔像',emoji:'🗿',hp:420,reward:2.5}};
 let currentEnemy=regionEnemies[state.region]||regionEnemies['風語草原'];
 let hp=currentEnemy.hp,catHp=catMaxHp(),enemyMaxHp=currentEnemy.hp,skillReady=true;
-function refreshStoryHud(){const s=storySteps[state.storyStep]||storySteps[4];const title=$('storyTitle'),objective=$('storyObjective');if(title)title.textContent=s.title;if(objective)objective.textContent=s.objective;}
+function refreshStoryHud(){const s=storySteps[state.storyStep]||storySteps[4];const title=$('storyTitle'),objective=$('storyObjective'),guide=$('guideText');if(title)title.textContent=s.title;if(objective)objective.textContent=s.objective;if(guide)guide.textContent=s.objective;}
 function advanceStory(expected,next,message){if(state.storyStep!==expected)return;state.storyStep=next;save();refreshStoryHud();if(message)$('worldHint').textContent=message;updateGuidePath();}
 function interactStoryStone(){if(state.storyStep===0){advanceStory(0,1,'星導石亮起了！前往附近的魔物，擊敗它。');openPanel('quest')}else{openPanel('quest')}}
 function updateBattleBars(){$('enemyhp').style.width=Math.max(0,hp/enemyMaxHp*100)+'%';$('catHpBar').style.width=Math.max(0,catHp/catMaxHp()*100)+'%';$('catBattleStats').textContent=`🐈 驚嚇貓 HP：${Math.max(0,catHp)} / ${catMaxHp()}`}
@@ -362,7 +361,7 @@ function selectRegion(name){
 function claimDaily(){if(state.dailyWins<3||state.claimedQuests.includes('daily'))return;state.claimedQuests.push('daily');state.primogems+=30;state.gems+=100;save();openPanel('quest');alert('每日委託完成！獲得 30 原石與 100 星石！')}
 function claimChestQuest(){if(state.openedChests.length<5||state.claimedQuests.includes('chest'))return;state.claimedQuests.push('chest');state.primogems+=25;save();openPanel('quest');alert('探索委託完成！獲得 25 原石！')}
 function runAway(){$('battle').style.display='none'}
-function openChest(id,key){const ch=chestCatalog.find(x=>x.id===Number(id));key=key||id;if(!ch||state.openedChests.includes(key))return;state.openedChests.push(key);if(state.storyStep===2)advanceStory(2,3,'補給已取得！接著點擊發光晶礦進行採集。');state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady)buildZone();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
+function openChest(id,key){const ch=chestCatalog.find(x=>x.id===Number(id));key=key||id;if(!ch||state.openedChests.includes(key))return;state.openedChests.push(key);if(state.storyStep===2)advanceStory(2,3,'補給已取得！接著點擊發光晶礦進行採集。');state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady){buildZone();update3DInteraction()}openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
 function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;update3DPlayer();updateNearbyInteraction()}
 const heldKeys=new Set(),heldButtons=new Map();
 let walkDirection=new THREE.Vector2(),walkBlend=0;
@@ -768,8 +767,8 @@ function updateGuidePath(){
  const end=target.position?target.position.clone():new THREE.Vector3(target.x,0,target.z),start=player3d.position.clone();
  start.y=.18;end.y=.18;if(start.distanceTo(end)<.8)return;
  const mid=start.clone().lerp(end,.5);mid.y=.28;
- const curve=new THREE.QuadraticBezierCurve3(start,mid,end),geometry=new THREE.TubeGeometry(curve,48,.11,7,false);
- guidePathMaterial=new THREE.MeshBasicMaterial({color:0x8eeeff,transparent:true,opacity:.88,blending:THREE.AdditiveBlending,depthWrite:false});
+ const curve=new THREE.QuadraticBezierCurve3(start,mid,end),geometry=new THREE.TubeGeometry(curve,64,.19,9,false);
+ guidePathMaterial=new THREE.MeshBasicMaterial({color:0x9ff7ff,transparent:true,opacity:1,blending:THREE.AdditiveBlending,depthTest:false,depthWrite:false});
  guidePathMesh=new THREE.Mesh(geometry,guidePathMaterial);guidePathMesh.renderOrder=8;scene3d.add(guidePathMesh);
 }
 
