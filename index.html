@@ -69,7 +69,7 @@ button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:re
 <aside id="panel"><div class="tabrow"><button class="tab active" data-tab="home">冒險</button><button class="tab" data-tab="gacha">祈願</button><button class="tab" data-tab="bag">角色</button><button class="tab" data-tab="party">隊伍</button><button class="tab" data-tab="quest">任務</button><button class="tab" data-tab="map">世界</button></div><div id="content" class="content"></div></aside></main>
 <div id="wishReveal"><div id="wishBox"><div id="wishTitle">✦ 星願降臨 ✦</div><div id="wishSubtitle">命運的星光正在揭曉……</div><div id="wishBeam"></div><div id="wishCards"></div><button id="wishClose" class="action primary" onclick="closeWishReveal()" style="display:none">收下祈願結果</button><button id="wishSkip" class="action" onclick="revealWishCards()">跳過動畫</button></div></div>
 <div id="battle"><div id="battlebox"><div class="muted">驚嚇貓出擊！</div><h2>史萊姆</h2><div class="enemy">🟢</div><div class="bar"><i id="enemyhp"></i></div><div class="muted" id="catBattleStats">🐈 驚嚇貓 HP：180 / 180</div><div class="catHp"><i id="catHpBar"></i></div><p id="battlemsg">一隻野生史萊姆擋住了去路！</p><button class="action primary" onclick="attack()">🐾 貓掌普通攻擊</button><button class="action" onclick="skill()">✨ 貓咪星光衝擊</button><button class="action" onclick="runAway()">撤退</button></div></div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 let state=JSON.parse(localStorage.getItem('starTraveler')||'null')||{gems:1600,coins:300,primogems:0,owned:['風行者・菲亞'],pity:0,x:50,y:55,chest:false,quest:false};
@@ -210,7 +210,7 @@ function buildZone(){
  scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,28,90);
  scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];
  const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,50,50),mat(look.ground),0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;
- const grid=new THREE.GridHelper(120,60,0xffffff22,0xffffff0c);grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
+ const grid=new THREE.GridHelper(120,60,0x667766,0x91a88b);grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
  for(let i=0;i<42;i++){
   const x=(Math.random()-.5)*82,z=(Math.random()-.5)*82;
   if(Math.abs(x)<5&&Math.abs(z)<5)continue;
