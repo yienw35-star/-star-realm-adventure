@@ -109,18 +109,27 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 <script src="https://cdn.jsdelivr.net/npm/three@0.146.0/examples/js/loaders/GLTFLoader.js"></script>
 <script>
 const $=id=>document.getElementById(id);
+const SAVE_SYSTEM_VERSION='3';
 let state;
-try{state=JSON.parse(localStorage.getItem('starTraveler')||'null')}catch(err){console.warn('舊存檔讀取失敗，已建立新存檔',err);state=null}
-if(!state||typeof state!=='object'||Array.isArray(state))state={gems:1600,coins:300,primogems:0,owned:['星芽'],pity:0,x:50,y:55,chest:false,quest:false};
+if(localStorage.getItem('starTravelerSystemVersion')!==SAVE_SYSTEM_VERSION){
+ // 本次是全新系統：只清除本遊戲舊存檔，不碰瀏覽器其他網站資料
+ localStorage.removeItem('starTraveler');
+ state={gems:1600,coins:300,primogems:0,owned:['星芽'],party:['星芽'],pity:0,x:50,y:55,chest:false,quest:false,catLevel:1,catXp:0,region:'風語草原',dailyWins:0,claimedQuests:[],gatheredNodes:[],materials:{},visitedRegions:['風語草原'],openedChests:[],storyStep:0,characterReworkVersion:3};
+ localStorage.setItem('starTravelerSystemVersion',SAVE_SYSTEM_VERSION);
+ localStorage.setItem('starTraveler',JSON.stringify(state));
+}else{
+ try{state=JSON.parse(localStorage.getItem('starTraveler')||'null')}catch(err){console.warn('存檔讀取失敗，建立全新旅程',err);state=null}
+}
+if(!state||typeof state!=='object'||Array.isArray(state))state={gems:1600,coins:300,primogems:0,owned:['星芽'],party:['星芽'],pity:0,x:50,y:55,chest:false,quest:false,catLevel:1,catXp:0,region:'風語草原',dailyWins:0,claimedQuests:[],gatheredNodes:[],materials:{},visitedRegions:['風語草原'],openedChests:[],storyStep:0,characterReworkVersion:3};
 state.owned=Array.isArray(state.owned)?state.owned:['星芽'];
+state.party=Array.isArray(state.party)?state.party:['星芽'];
 state.pity=Number(state.pity)||0;
 state.x=Number.isFinite(Number(state.x))?Number(state.x):50;
 state.y=Number.isFinite(Number(state.y))?Number(state.y):55;
-// 舊版存檔相容：確保頂部鑽石（星石）永遠是數字
 state.gems=Number.isFinite(Number(state.gems))?Number(state.gems):1600;
 state.coins=Number.isFinite(Number(state.coins))?Number(state.coins):300;
 state.primogems=Number.isFinite(Number(state.primogems))?Number(state.primogems):0;
-state.catLevel=state.catLevel||1;state.catXp=state.catXp||0;
+state.catLevel=Number(state.catLevel)||1;state.catXp=Number(state.catXp)||0;
 state.region=state.region||'風語草原';state.dailyWins=Number(state.dailyWins)||0;
 state.claimedQuests=Array.isArray(state.claimedQuests)?state.claimedQuests:[];
 state.gatheredNodes=Array.isArray(state.gatheredNodes)?state.gatheredNodes:[];
@@ -259,7 +268,7 @@ function buildEnvironmentLighting(region){
  const grad=ctx.createLinearGradient(0,0,0,512);grad.addColorStop(0,p[0]);grad.addColorStop(.52,p[1]);grad.addColorStop(1,'#59615a');ctx.fillStyle=grad;ctx.fillRect(0,0,1024,512);
  const sun=ctx.createRadialGradient(720,150,8,720,150,170);sun.addColorStop(0,'rgba(255,239,197,.62)');sun.addColorStop(.15,'rgba(255,226,177,.22)');sun.addColorStop(1,'rgba(255,226,177,0)');ctx.fillStyle=sun;ctx.fillRect(500,0,450,350);
  for(let i=0;i<180;i++){const x=Math.random()*1024,y=70+Math.random()*280,r=12+Math.random()*40;ctx.fillStyle='rgba(255,255,255,'+(Math.random()*.045)+')';ctx.beginPath();ctx.ellipse(x,y,r,r*.22,0,0,Math.PI*2);ctx.fill()}
- environmentTexture3d=new THREE.CanvasTexture(canvas);environmentTexture3d.mapping=THREE.EquirectangularReflectionMapping;environmentTexture3d.encoding=THREE.sRGBEncoding;environmentTexture3d.needsUpdate=true;scene3d.environment=environmentTexture3d;scene3d.environmentIntensity=.42;
+ environmentTexture3d=new THREE.CanvasTexture(canvas);environmentTexture3d.mapping=THREE.EquirectangularReflectionMapping;environmentTexture3d.encoding=THREE.sRGBEncoding;environmentTexture3d.needsUpdate=true;scene3d.environment=environmentTexture3d;scene3d.environmentIntensity=.15;
 }
 
 function makeTerrainGeometry(region){
@@ -332,45 +341,42 @@ function addGrassField(region){
 function addMesh(parent,geometry,material,x,y,z){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);parent.add(m);return m}
 function makeCat(){
  const g=new THREE.Group();
- const fur=mat(0xf1e7d5,.78),cream=mat(0xfff6e8,.72),pink=mat(0xe9a0a8,.62),ink=mat(0x263347,.42),eye=mat(0x5ad5b2,.22,{emissive:0x16483c,emissiveIntensity:.12}),gold=mat(0xd8ad62,.42,{metalness:.22}),mint=mat(0x6bbba5,.5),capeMat=mat(0x315b69,.82);
- const bodyPivot=new THREE.Group();bodyPivot.position.set(0,.92,0);g.add(bodyPivot);
- const body=addMesh(bodyPivot,new THREE.SphereGeometry(.49,32,24),fur,0,0,0);body.scale.set(.82,1.12,.78);
- const chest=addMesh(bodyPivot,new THREE.SphereGeometry(.31,24,18),cream,0,.02,-.34);chest.scale.set(.9,1.05,.35);
- const headPivot=new THREE.Group();headPivot.position.set(0,1.62,-.12);g.add(headPivot);
- const head=addMesh(headPivot,new THREE.SphereGeometry(.53,32,24),fur,0,0,0);head.scale.set(1.06,.94,.92);
+ // 四足小型旅伴：身體保持水平，四隻腳確實接觸地面
+ const fur=mat(0xf1e7d5,.9),cream=mat(0xfff6e8,.92),pink=mat(0xd98e9b,.88),ink=mat(0x263347,.82),eye=mat(0x54cdb1,.48,{emissive:0x16483c,emissiveIntensity:.06}),gold=mat(0xb99458,.82,{metalness:.12}),capeMat=mat(0x315b69,.94);
+ const bodyPivot=new THREE.Group();bodyPivot.position.set(0,.83,0);g.add(bodyPivot);
+ const torso=addMesh(bodyPivot,new THREE.SphereGeometry(.52,32,24),fur,0,0,.08);torso.scale.set(.78,.78,1.28);
+ const belly=addMesh(bodyPivot,new THREE.SphereGeometry(.39,24,18),cream,0,-.12,-.015);belly.scale.set(.82,.66,1.12);
+ const headPivot=new THREE.Group();headPivot.position.set(0,.12,-.69);bodyPivot.add(headPivot);
+ const head=addMesh(headPivot,new THREE.SphereGeometry(.43,32,24),fur,0,.06,-.06);head.scale.set(1.08,.94,.92);
  const ears=[];
  for(const side of [-1,1]){
-  const ear=addMesh(headPivot,new THREE.ConeGeometry(.19,.48,5),fur,side*.36,.42,-.015);ear.rotation.z=side*-.24;ears.push(ear);
-  const inner=addMesh(headPivot,new THREE.ConeGeometry(.105,.29,5),pink,side*.36,.43,.075);inner.rotation.z=side*-.24;
-  addMesh(headPivot,new THREE.SphereGeometry(.082,16,12),ink,side*.205,.045,-.466);
-  addMesh(headPivot,new THREE.SphereGeometry(.052,16,12),eye,side*.205,.055,-.525);
-  addMesh(headPivot,new THREE.SphereGeometry(.018,10,8),cream,side*.185,.08,-.568);
-  const whisker=addMesh(headPivot,new THREE.CylinderGeometry(.008,.008,.25,6),ink,side*.37,-.08,-.45);whisker.rotation.z=side*.42;
+  const ear=addMesh(headPivot,new THREE.ConeGeometry(.145,.34,7),fur,side*.29,.39,-.045);ear.rotation.z=side*-.18;ears.push(ear);
+  const inner=addMesh(headPivot,new THREE.ConeGeometry(.078,.22,7),pink,side*.29,.39,.035);inner.rotation.z=side*-.18;
+  addMesh(headPivot,new THREE.SphereGeometry(.105,16,12),ink,side*.17,.07,-.445);
+  addMesh(headPivot,new THREE.SphereGeometry(.065,16,12),eye,side*.17,.075,-.497);
+  addMesh(headPivot,new THREE.SphereGeometry(.023,12,8),cream,side*.145,.105,-.54);
+  const whisker=addMesh(headPivot,new THREE.CylinderGeometry(.006,.006,.2,6),ink,side*.34,-.07,-.40);whisker.rotation.z=side*.52;
  }
- const muzzle=addMesh(headPivot,new THREE.SphereGeometry(.16,20,14),cream,0,-.16,-.43);muzzle.scale.set(1.25,.72,.72);
- addMesh(headPivot,new THREE.SphereGeometry(.042,14,10),pink,0,-.095,-.55);
- const mouth=addMesh(headPivot,new THREE.TorusGeometry(.055,.009,6,16,Math.PI),ink,0,-.205,-.54);mouth.rotation.z=Math.PI;
- const starGem=addMesh(headPivot,new THREE.OctahedronGeometry(.105,1),gold,0,.43,-.48);starGem.rotation.z=Math.PI/4;
- const legs=[],arms=[];
- for(const side of [-1,1]){
-  const leg=new THREE.Group();leg.position.set(side*.22,.43,.02);g.add(leg);
-  addMesh(leg,new THREE.CylinderGeometry(.105,.105,.34,12),fur,0,-.14,0);
-  const paw=addMesh(leg,new THREE.SphereGeometry(.13,16,12),cream,0,-.34,-.055);paw.scale.set(1,.68,1.12);legs.push(leg);
-  const arm=new THREE.Group();arm.position.set(side*.39,1.18,-.04);bodyPivot.add(arm);
-  const upper=addMesh(arm,new THREE.CylinderGeometry(.095,.095,.30,12),fur,0,-.15,0);upper.rotation.z=side*.12;
-  addMesh(arm,new THREE.SphereGeometry(.125,16,12),cream,0,-.31,-.04);
-  const cuff=addMesh(arm,new THREE.TorusGeometry(.105,.026,8,16),gold,0,-.24,-.005);cuff.rotation.x=Math.PI/2;
-  arms.push(arm);
+ const muzzle=addMesh(headPivot,new THREE.SphereGeometry(.145,20,14),cream,0,-.105,-.405);muzzle.scale.set(1.22,.7,.78);
+ addMesh(headPivot,new THREE.SphereGeometry(.035,14,10),pink,0,-.045,-.52);
+ const mouth=addMesh(headPivot,new THREE.TorusGeometry(.045,.007,6,14,Math.PI),ink,0,-.145,-.50);mouth.rotation.z=Math.PI;
+ const starGem=addMesh(headPivot,new THREE.OctahedronGeometry(.075,1),gold,0,.39,-.40);starGem.rotation.z=Math.PI/4;
+ const legs=[];
+ for(const x of [-.29,.29]){
+  for(const z of [-.47,.48]){
+   const leg=new THREE.Group();leg.position.set(x,-.16,z);bodyPivot.add(leg);
+   addMesh(leg,new THREE.CylinderGeometry(.085,.095,.43,12),fur,0,-.20,0);
+   const paw=addMesh(leg,new THREE.SphereGeometry(.105,16,12),cream,0,-.405,-.025);paw.scale.set(1,.62,1.18);
+   legs.push(leg);
+  }
  }
- arms[0].rotation.z=-.82;arms[0].rotation.x=-.18;
- arms[1].rotation.z=.24;
- const tailCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.72,.26),new THREE.Vector3(.38,.83,.5),new THREE.Vector3(.62,1.18,.44),new THREE.Vector3(.55,1.42,.18),new THREE.Vector3(.34,1.38,-.02)]);
- const tail=addMesh(g,new THREE.TubeGeometry(tailCurve,32,.09,12,false),fur,0,0,0);
- const cape=addMesh(g,new THREE.ConeGeometry(.48,.88,5,1,true),capeMat,0,1.03,.38);cape.rotation.x=-.22;cape.rotation.z=Math.PI;
- const collar=addMesh(g,new THREE.TorusGeometry(.36,.065,10,28),gold,0,1.32,-.02);collar.rotation.x=Math.PI/2;
- const emblem=addMesh(bodyPivot,new THREE.OctahedronGeometry(.12,1),gold,0,.02,-.49);emblem.rotation.z=Math.PI/4;
- g.userData={legs,arms,body:bodyPivot,head:headPivot,tail,ears,walkPhase:0};
- g.rotation.z=-.045;return g;
+ const tailCurve=new THREE.CatmullRomCurve3([new THREE.Vector3(0,.02,.58),new THREE.Vector3(.02,.2,.86),new THREE.Vector3(.16,.38,1.04),new THREE.Vector3(.12,.57,1.12),new THREE.Vector3(-.02,.63,1.02)]);
+ const tail=addMesh(bodyPivot,new THREE.TubeGeometry(tailCurve,28,.075,10,false),fur,0,0,0);
+ const cape=addMesh(bodyPivot,new THREE.ConeGeometry(.34,.58,6,1,true),capeMat,0,-.02,.34);cape.rotation.x=Math.PI/2.45;cape.rotation.z=Math.PI;
+ const collar=addMesh(bodyPivot,new THREE.TorusGeometry(.27,.045,8,24),gold,0,.04,-.47);collar.rotation.x=Math.PI/2;
+ const emblem=addMesh(bodyPivot,new THREE.OctahedronGeometry(.085,1),gold,0,.18,-.53);emblem.rotation.z=Math.PI/4;
+ g.userData={legs,body:bodyPivot,head:headPivot,tail,ears,walkPhase:0};
+ return g;
 }
 function addTree(x,z,look,scale=1){
  if(natureAssetsReady){const pick=state.region==='霜晶雪原'?'treePine':state.region==='蒼翠森林'?(Math.random()<.58?'treeDetailed':'treeOak'):(Math.random()<.55?'treeOak':'treeDetailed');const model=cloneNatureAsset(pick,(4.8+Math.random()*1.8)*scale);if(model){model.position.x=x;model.position.z=z;model.rotation.y=Math.random()*Math.PI*2;scene3d.add(model);addObstacle(x,z,.72*scale);return}}
@@ -568,9 +574,9 @@ function init3DWorld(){
  if(!window.THREE){activate2DFallback('3D 引擎載入失敗，請確認網路後重新整理。');return}
  try{
  const canvas=$('world3d');scene3d=new THREE.Scene();camera3d=new THREE.PerspectiveCamera(55,1,.1,180);
- renderer3d=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.65));renderer3d.outputEncoding=THREE.sRGBEncoding;renderer3d.toneMapping=THREE.ACESFilmicToneMapping;renderer3d.toneMappingExposure=.84;renderer3d.shadowMap.enabled=true;renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
- scene3d.add(new THREE.HemisphereLight(0xb9cbd9,0x37352f,.82));scene3d.add(new THREE.AmbientLight(0xe2e5e8,.12));
- const sun=new THREE.DirectionalLight(0xffe8c9,1.12);sun.position.set(-24,38,22);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-42;sun.shadow.camera.right=42;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;sun.shadow.camera.near=.5;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene3d.add(sun);
+ renderer3d=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.65));renderer3d.outputEncoding=THREE.sRGBEncoding;renderer3d.toneMapping=THREE.ACESFilmicToneMapping;renderer3d.toneMappingExposure=.48;renderer3d.shadowMap.enabled=true;renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
+ scene3d.add(new THREE.HemisphereLight(0x8293a5,0x242321,.32));scene3d.add(new THREE.AmbientLight(0x9aa5b0,.045));
+ const sun=new THREE.DirectionalLight(0xcbd5e2,.42);sun.position.set(-24,38,22);sun.castShadow=true;sun.shadow.mapSize.set(1536,1536);sun.shadow.camera.left=-42;sun.shadow.camera.right=42;sun.shadow.camera.top=42;sun.shadow.camera.bottom=-42;sun.shadow.camera.near=.5;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;sun.shadow.normalBias=.025;scene3d.add(sun);
  player3d=makeCat();player3d.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene3d.add(player3d);
  buildZone();update3DPlayer();resize3D();threeReady=true;animate3D();loadNatureAssets();
  let dragging=false,lastX=0,lastY=0;
@@ -638,12 +644,12 @@ function animate3D(t=0){
   if(player3d){
    const phase=t*.013,blend=walkBlend,legs=player3d.userData.legs;
    player3d.userData.walkPhase=phase;
-   legs.forEach((leg,i)=>{const offset=(i===0||i===3)?0:Math.PI;leg.rotation.x=Math.sin(phase+offset)*.62*blend});
-   player3d.userData.body.position.y=.92+Math.abs(Math.sin(phase*2))*.045*blend+Math.sin(t*.003)*.009;
-   player3d.userData.head.rotation.x=Math.sin(phase*2)*.025*blend;player3d.userData.arms[0].rotation.z=-.82+Math.sin(t*.002)*.035;player3d.userData.arms[1].rotation.z=.24+Math.sin(t*.0025+1)*.045;
-   player3d.userData.tail.rotation.x=Math.sin(phase*.75)*.12;player3d.userData.tail.rotation.z=Math.sin(t*.0018)*.08;
-   player3d.userData.tail.rotation.z=Math.cos(phase*.75)*.09;
-   player3d.userData.ears.forEach((ear,i)=>ear.rotation.z=(i===0?-.22:.22)+Math.sin(t*.004+i)*.025);
+   // 四足交錯步態：前後腿反相擺動，身體低幅度起伏
+   legs.forEach((leg,i)=>{const offset=(i===0||i===3)?0:Math.PI;leg.rotation.x=Math.sin(phase+offset)*.48*blend});
+   player3d.userData.body.position.y=.83+Math.abs(Math.sin(phase*2))*.022*blend+Math.sin(t*.002)*.004;
+   player3d.userData.head.rotation.x=Math.sin(phase*2)*.018*blend;
+   player3d.userData.tail.rotation.x=Math.sin(phase*.72)*.10;player3d.userData.tail.rotation.z=Math.cos(phase*.72)*.07+Math.sin(t*.0015)*.025;
+   player3d.userData.ears.forEach((ear,i)=>ear.rotation.z=(i===0?-.18:.18)+Math.sin(t*.004+i)*.018);
    player3d.position.y=.015+Math.abs(Math.sin(phase*2))*.025*blend;
    player3d.rotation.z=Math.sin(phase)*.035*blend;
   }
