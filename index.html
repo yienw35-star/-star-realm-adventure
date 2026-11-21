@@ -89,6 +89,9 @@ state.primogems=Number.isFinite(Number(state.primogems))?Number(state.primogems)
 state.catLevel=state.catLevel||1;state.catXp=state.catXp||0;
 state.region=state.region||'風語草原';state.dailyWins=Number(state.dailyWins)||0;
 state.claimedQuests=Array.isArray(state.claimedQuests)?state.claimedQuests:[];
+state.gatheredNodes=Array.isArray(state.gatheredNodes)?state.gatheredNodes:[];
+state.materials=state.materials&&typeof state.materials==='object'?state.materials:{};
+state.visitedRegions=Array.isArray(state.visitedRegions)?state.visitedRegions:['風語草原'];
 const chestCatalog=[{id:0,name:'草叢木箱',emoji:'🧰',gems:80,coins:60,primogems:2},{id:1,name:'星光寶箱',emoji:'✨',gems:140,coins:90,primogems:5},{id:2,name:'古老寶箱',emoji:'🎁',gems:180,coins:120,primogems:8},{id:3,name:'森林寶箱',emoji:'🌿',gems:100,coins:160,primogems:3},{id:4,name:'稀有寶箱',emoji:'💎',gems:260,coins:180,primogems:12}];
 if(!Array.isArray(state.openedChests)){state.openedChests=state.chest?[0]:[];}
 
@@ -119,8 +122,10 @@ function openPanel(tab){document.querySelectorAll('.tab').forEach(b=>b.classList
 if(tab==='gacha')c.innerHTML=`<h2>✦ 星願祈願</h2><div class="card" style="background:linear-gradient(130deg,#514276,#1e4260)"><div style="font-size:12px;color:#f6d58b">期間限定角色祈願</div><div style="font-size:23px;font-weight:900">焰心・露卡</div><div style="font-size:48px">🔥 ⚔️</div><div class="muted">五星火元素角色 · 限定機率提升</div></div><div class="muted">所有祈願結果都是貓咪角色 · 五星 0.6% · 四星 5.1% · 三星 24.3% · 二星 30% · 一星 40% · 十連至少一隻三星以上 · 90 抽五星保底</div><button class="action primary" onclick="wish(1)">祈願一次 · 160 星石</button><button class="action" onclick="wish(10)">祈願十次 · 1600 星石</button><p class="muted">目前距離保底：${state.pity}/90</p>`;
 else if(tab==='bag')c.innerHTML=`<h2>♡ 貓咪角色圖鑑</h2><div class="card" style="border-color:#f4d58a;background:linear-gradient(135deg,#66533b,#263a55)"><div style="font-size:34px">🐈</div><b>驚嚇貓・星境守護者</b><div class="muted">★★★★★ · 主角</div><div class="catStats"><div class="catStat">❤️ 生命值<br><b>${catMaxHp()}</b></div><div class="catStat">🐾 攻擊力<br><b>${catAttack()}</b></div><div class="catStat">🛡️ 防禦力<br><b>${catDefense()}</b></div><div class="catStat">⬆️ 等級<br><b>Lv. ${state.catLevel}</b></div></div><div class="muted">經驗值：${state.catXp} / ${state.catLevel*100}</div></div>${state.owned.map(n=>{let ch=characters.find(x=>x.name===n);if(!ch)return '';let st=characterStats(ch);return `<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><b style="font-size:18px">${ch.emoji} ${ch.name}</b><b style="color:${ch.stars===5?'#f4d58a':ch.stars===4?'#c7a6ed':'#9bc9e8'}">${ch.rarity}</b></div><div class="muted">${ch.element}元素 · ${ch.role}</div><p>${ch.desc}</p><div class="catStats"><div class="catStat">❤️ HP<br><b>${st.hp}</b></div><div class="catStat">🐾 攻擊<br><b>${st.atk}</b></div><div class="catStat">🛡️ 防禦<br><b>${st.def}</b></div><div class="catStat">✨ 技能<br><b>${ch.skill}</b></div></div></div>`}).join('')}` 
 else if(tab==='party')c.innerHTML=`<h2>⚔️ 冒險隊伍</h2><p class="muted">選擇最多 4 位已獲得的夥伴同行。</p><div class="card"><b>目前出戰：${state.party.length}/4</b><p class="muted">${state.party.join(' · ')||'尚未編隊'}</p></div>${characters.filter(ch=>state.owned.includes(ch.name)).map(ch=>`<div class="card" style="display:flex;align-items:center;gap:9px"><span style="font-size:27px">${ch.emoji}</span><div style="flex:1"><b>${ch.name}</b><div class="muted">${ch.rarity} · ${ch.element} · ${ch.role}</div></div><button class="action ${state.party.includes(ch.name)?'':'primary'}" style="width:auto;margin:0" onclick="toggleParty('${ch.name}')">${state.party.includes(ch.name)?'退出隊伍':'加入隊伍'}</button></div>`).join('')}`;
-else if(tab==='map')c.innerHTML=`<h2>🗺️ 星境大陸</h2><p class="muted">選擇探索區域。不同區域有不同魔物與冒險獎勵。</p>${[{name:'風語草原',emoji:'🌿',desc:'新手冒險地，適合熟悉戰鬥。'},{name:'蒼翠森林',emoji:'🌲',desc:'樹影深處有魔物守護古老遺跡。'},{name:'霜晶雪原',emoji:'❄️',desc:'寒風凜冽，冰屬性魔物出沒。'},{name:'熾焰山脈',emoji:'🌋',desc:'火山地帶，強敵與珍貴素材並存。'}].map(r=>`<div class="card"><b>${r.emoji} ${r.name} ${state.region===r.name?'· 正在探索':''}</b><p class="muted">${r.desc}</p><button class="action ${state.region===r.name?'':'primary'}" onclick="selectRegion('${r.name}')">${state.region===r.name?'目前區域':'前往探索'}</button></div>`).join('')}`;
-else if(tab==='quest')c.innerHTML=`<h2>📜 冒險委託</h2><div class="card"><b>主線・初次相遇</b><p>擊敗魔物，了解星境大陸的危機。</p><span class="muted">獎勵：原石 × 40、摩拉 × 100（首次）</span><button class="action primary" onclick="startBattle()">前往討伐</button></div><div class="card"><b>每日委託・清理魔物</b><p>目前進度：${Math.min(state.dailyWins,3)} / 3</p><div class="catHp"><i style="width:${Math.min(state.dailyWins/3*100,100)}%"></i></div><span class="muted">獎勵：原石 × 30、星石 × 100</span><button class="action ${state.claimedQuests.includes('daily')?'':'primary'}" onclick="claimDaily()" ${state.dailyWins<3||state.claimedQuests.includes('daily')?'disabled':''}>${state.claimedQuests.includes('daily')?'已領取':'完成後領取'}</button></div><div class="card"><b>探索委託・寶箱獵人</b><p>開啟全部 5 個草原寶箱：${state.openedChests.length}/5</p><span class="muted">獎勵：原石 × 25</span><button class="action ${state.claimedQuests.includes('chest')?'':'primary'}" onclick="claimChestQuest()" ${state.openedChests.length<5||state.claimedQuests.includes('chest')?'disabled':''}>${state.claimedQuests.includes('chest')?'已領取':'完成後領取'}</button></div>`;
+else if(tab==='map')c.innerHTML=`<h2>🗺️ 星境大陸</h2><p class="muted">選擇地區即可傳送。每張地圖都有專屬景觀、氣候、資源與魔物。已探索：${state.visitedRegions.length}/4</p>
+<div class="card" style="background:linear-gradient(120deg,#243a42,#17232d)"><b>📍 目前所在：${state.region}</b><p class="muted">本區域採集：${state.gatheredNodes.filter(k=>k.startsWith(state.region+'-')).length}/3 · 地區素材：${state.materials[state.region]||0}</p></div>
+${[{name:'風語草原',emoji:'🌾',desc:'黃昏草浪、古老石柱與微風水晶。推薦新手探索。',look:'linear-gradient(135deg,#68734b,#263a35)',weather:'微風・黃昏'},{name:'蒼翠森林',emoji:'🌲',desc:'幽暗林冠、巨木、蘑菇與被遺忘的遺跡。',look:'linear-gradient(135deg,#315b45,#142b28)',weather:'濃霧・林蔭'},{name:'霜晶雪原',emoji:'❄️',desc:'冷藍冰原、冰柱群與沉睡在雪中的水晶。',look:'linear-gradient(135deg,#637e8d,#273c4b)',weather:'寒雪・冰霧'},{name:'熾焰山脈',emoji:'🌋',desc:'暗紅火山岩、熔岩裂縫與焦黑山脊。',look:'linear-gradient(135deg,#75473b,#241e27)',weather:'火山灰・熱浪'}].map(r=>`<div class="card regionCard" style="background:${r.look};border-color:#ffffff24"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">${r.emoji} ${r.name}</b><span class="muted">${state.region===r.name?'探索中':state.visitedRegions.includes(r.name)?'已到訪':'未到訪'}</span></div><p class="muted">${r.desc}</p><small style="color:#e5d7b8">${r.weather} · 採集 ${state.gatheredNodes.filter(k=>k.startsWith(r.name+'-')).length}/3</small><button class="action ${state.region===r.name?'':'primary'}" onclick="selectRegion('${r.name}')">${state.region===r.name?'目前區域':'傳送至此地'}</button></div>`).join('')}`;
+else if(tab==='quest')c.innerHTML=`<h2>📜 冒險委託</h2><div class="card"><b>主線・初次相遇</b><p>擊敗魔物，了解星境大陸的危機。</p><span class="muted">獎勵：原石 × 40、摩拉 × 100（首次）</span><button class="action primary" onclick="startBattle()">前往討伐</button></div><div class="card"><b>每日委託・清理魔物</b><p>目前進度：${Math.min(state.dailyWins,3)} / 3</p><div class="catHp"><i style="width:${Math.min(state.dailyWins/3*100,100)}%"></i></div><span class="muted">獎勵：原石 × 30、星石 × 100</span><button class="action ${state.claimedQuests.includes('daily')?'':'primary'}" onclick="claimDaily()" ${state.dailyWins<3||state.claimedQuests.includes('daily')?'disabled':''}>${state.claimedQuests.includes('daily')?'已領取':'完成後領取'}</button></div><div class="card"><b>世界探索・晶礦採集</b><p>在四張地圖尋找發光的地區晶礦：${state.gatheredNodes.length} / 12</p><span class="muted">獎勵：星石 × 80、原石 × 20</span><button class="action ${state.claimedQuests.includes('gather')?'':'primary'}" onclick="claimGatherQuest()" ${state.gatheredNodes.length<12||state.claimedQuests.includes('gather')?'disabled':''}>${state.claimedQuests.includes('gather')?'已領取':'完成後領取'}</button></div><div class="card"><b>探索委託・寶箱獵人</b><p>開啟全部 5 個草原寶箱：${state.openedChests.length}/5</p><span class="muted">獎勵：原石 × 25</span><button class="action ${state.claimedQuests.includes('chest')?'':'primary'}" onclick="claimChestQuest()" ${state.openedChests.length<5||state.claimedQuests.includes('chest')?'disabled':''}>${state.claimedQuests.includes('chest')?'已領取':'完成後領取'}</button></div>`;
 else if(tab==='chest')c.innerHTML=`<h2>🎁 草原寶箱探索</h2><p class="muted">地圖上藏著 5 個寶箱，找到並開啟它們，收集星石、摩拉與原石！</p><div class="card"><b>已開啟 ${state.openedChests.length} / ${chestCatalog.length}</b><div class="catHp"><i style="width:${state.openedChests.length/chestCatalog.length*100}%"></i></div></div>${chestCatalog.map(ch=>{let opened=state.openedChests.includes(ch.id);return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${ch.emoji} ${ch.name}</b><span class="muted">${opened?'已開啟':'尚未開啟'}</span></div><p class="muted">💎 ${ch.gems} 星石 · 🪙 ${ch.coins} 摩拉 · ⭐ ${ch.primogems} 原石</p><button class="action ${opened?'':'primary'}" onclick="openChest(${ch.id})" ${opened?'disabled':''}>${opened?'已領取獎勵':'開啟寶箱'}</button></div>`}).join('')}` ;
 else c.innerHTML=`<h2>🌿 風語草原</h2><p>歡迎來到星境大陸！在這片遼闊的草原上，傳說七種元素守護著世界的平衡。</p><div class="card"><b>目前目標</b><br>探索草原、打倒史萊姆，並尋找古老寶箱。</div><button class="action primary" onclick="openPanel('quest')">查看冒險委託</button><button class="action" onclick="openPanel('gacha')">前往角色祈願</button>`;
 }
@@ -138,7 +143,13 @@ function attack(){if(hp<=0||catHp<=0)return;let dmg=catAttack();hp-=dmg;afterHit
 function skill(){if(hp<=0||catHp<=0)return;if(!skillReady){$('battlemsg').textContent='星光衝擊還在蓄力，這回合先用貓掌攻擊吧！';return}let dmg=Math.round(catAttack()*1.8);hp-=dmg;skillReady=false;afterHit(`✨ 貓咪星光衝擊造成 ${dmg} 點傷害！`)}
 function afterHit(msg){if(hp<=0){hp=0;updateBattleBars();const rewardScale=currentEnemy.reward;state.coins+=Math.round(100*rewardScale);state.primogems+=Math.round(20*rewardScale);state.gems=(Number(state.gems)||0)+Math.round(40*rewardScale);state.catXp+=Math.round(35*rewardScale);state.dailyWins++;$('battlemsg').textContent='勝利！獲得 '+Math.round(100*rewardScale)+' 摩拉、'+Math.round(40*rewardScale)+' 鑽石、'+Math.round(20*rewardScale)+' 原石與 '+Math.round(35*rewardScale)+' 經驗值！';if(state.catXp>=state.catLevel*100){state.catXp-=state.catLevel*100;state.catLevel++;alert('驚嚇貓升級了！目前等級 Lv.'+state.catLevel+'！生命、攻擊與防禦都提升了！')}save();setTimeout(()=>{$('battle').style.display='none';if(!state.quest){state.quest=true;state.primogems+=40;save();alert('委託完成！額外獲得 40 原石！')}},1300)}else{let retaliation=Math.max(3,16-catDefense()*.35);catHp=Math.max(0,catHp-Math.round(retaliation));skillReady=true;updateBattleBars();if(catHp<=0){$('battlemsg').textContent='驚嚇貓累倒了！先撤退休息，再來挑戰吧。'}else{$('battlemsg').textContent=msg+` 史萊姆剩餘 ${hp} HP。史萊姆反擊，驚嚇貓受到 ${Math.round(retaliation)} 點傷害。`}}}
 function toggleParty(name){if(state.party.includes(name))state.party=state.party.filter(n=>n!==name);else if(state.party.length<4)state.party.push(name);else alert('隊伍最多只能有 4 位夥伴！');save();openPanel('party')}
-function selectRegion(name){state.region=name;state.x=50;state.y=55;save();$('hero').style.left='50%';$('hero').style.top='55%';updateWorldBackground();updateNearbyInteraction();openPanel('map');alert('已前往'+name+'！新的地區景色與魔物已載入。')}
+function selectRegion(name){
+ if(!zoneLooks[name])return;
+ state.region=name;if(!state.visitedRegions.includes(name))state.visitedRegions.push(name);
+ state.x=50;state.y=55;cameraYaw=0;cameraDistance=10;save();
+ $('hero').style.left='50%';$('hero').style.top='55%';updateWorldBackground();updateNearbyInteraction();openPanel('map');
+ $('worldHint').textContent='已抵達 '+name+'！探索地區晶礦、寶箱與魔物。';
+}
 function claimDaily(){if(state.dailyWins<3||state.claimedQuests.includes('daily'))return;state.claimedQuests.push('daily');state.primogems+=30;state.gems+=100;save();openPanel('quest');alert('每日委託完成！獲得 30 原石與 100 星石！')}
 function claimChestQuest(){if(state.openedChests.length<5||state.claimedQuests.includes('chest'))return;state.claimedQuests.push('chest');state.primogems+=25;save();openPanel('quest');alert('探索委託完成！獲得 25 原石！')}
 function runAway(){$('battle').style.display='none'}
@@ -155,10 +166,10 @@ const regionBackgrounds={
 
 let scene3d,camera3d,renderer3d,player3d,worldObjects=[],cameraYaw=0,cameraDistance=10,cameraPitch=.48,threeReady=false,lastFrame=0;
 const zoneLooks={
-'風語草原':{ground:0x72a95c,sky:0x8bc9ed,fog:0xb8d9d0,tree:0x347d48,accent:0xf3d27c},
-'蒼翠森林':{ground:0x386e48,sky:0x7eaa91,fog:0x779b83,tree:0x174b36,accent:0x9de2a7},
-'霜晶雪原':{ground:0xc9e3ec,sky:0x9bc8e9,fog:0xc6e2f3,tree:0x547f9d,accent:0xa8eaff},
-'熾焰山脈':{ground:0x59413e,sky:0x503b4b,fog:0x765047,tree:0x643b32,accent:0xff9b45}
+'風語草原':{ground:0x526d3f,sky:0x667f91,fog:0x82918a,tree:0x2e583c,accent:0xb99a58},
+'蒼翠森林':{ground:0x263f32,sky:0x344e49,fog:0x52675b,tree:0x153c2d,accent:0x8da878},
+'霜晶雪原':{ground:0x829aa5,sky:0x687f91,fog:0xa1b4bd,tree:0x466575,accent:0xa6cbd5},
+'熾焰山脈':{ground:0x382c2d,sky:0x3c3039,fog:0x684b45,tree:0x56332e,accent:0xc66d3f}
 };
 function mat(color,roughness=.85,extra={}){return new THREE.MeshStandardMaterial({color,roughness,...extra})}
 function addMesh(parent,geometry,material,x,y,z){const m=new THREE.Mesh(geometry,material);m.position.set(x,y,z);parent.add(m);return m}
@@ -223,17 +234,39 @@ function addMonster(x,z,look){
  const aura=addMesh(g,new THREE.TorusGeometry(.85,.035,6,32),mat(look.accent,.4,{emissive:look.accent}),0,.08,0);aura.rotation.x=Math.PI/2;
  g.position.set(x,0,z);g.userData={kind:'monster'};scene3d.add(g);worldObjects.push(g);
 }
+function addResourceNode(x,z,id,look){
+ const key=state.region+'-'+id;if(state.gatheredNodes.includes(key))return;
+ const g=new THREE.Group(),crystalColor=state.region==='霜晶雪原'?0x9bd9e8:state.region==='熾焰山脈'?0xd66b43:state.region==='蒼翠森林'?0x91bd79:0xd0b06a;
+ const crystal=addMesh(g,new THREE.OctahedronGeometry(.48,1),mat(crystalColor,.3,{emissive:crystalColor,emissiveIntensity:.16}),0,.72,0);crystal.scale.set(.8,1.5,.8);
+ const shard=addMesh(g,new THREE.OctahedronGeometry(.25,0),mat(look.accent,.25,{emissive:look.accent}),.42,.4,.08);shard.rotation.z=.5;
+ const ring=addMesh(g,new THREE.TorusGeometry(.72,.025,6,24),mat(look.accent,.4,{emissive:look.accent}),0,.08,0);ring.rotation.x=Math.PI/2;
+ g.position.set(x,0,z);g.userData={kind:'resource',id,key};scene3d.add(g);worldObjects.push(g);
+}
 function buildZone(){
  const look=zoneLooks[state.region]||zoneLooks['風語草原'];
- scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,28,90);
+ scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,18,66);
  scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];
- const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,50,50),mat(look.ground),0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;
- const grid=new THREE.GridHelper(120,60,0x667766,0x91a88b);grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
- for(let i=0;i<42;i++){
+ const ground=addMesh(scene3d,new THREE.PlaneGeometry(120,120,50,50),mat(look.ground,1),0,-.08,0);ground.rotation.x=-Math.PI/2;ground.userData.zoneObject=true;
+ const grid=new THREE.GridHelper(120,30,0x46574d,0x596b5c);grid.material.transparent=true;grid.material.opacity=.12;grid.position.y=-.065;grid.userData.zoneObject=true;scene3d.add(grid);
+ for(let i=0;i<48;i++){
   const x=(Math.random()-.5)*82,z=(Math.random()-.5)*82;
-  if(Math.abs(x)<5&&Math.abs(z)<5)continue;
-  if(state.region==='熾焰山脈')addRock(x,z,look,.7+Math.random()*1.8);
-  else if(Math.random()<.7)addTree(x,z,look,.7+Math.random()*.8);else addRock(x,z,look,.4+Math.random()*.8);
+  if(Math.abs(x)<7&&Math.abs(z)<7)continue;
+  if(state.region==='熾焰山脈'){
+   if(Math.random()<.58)addRock(x,z,look,.8+Math.random()*2);else{
+    const crack=addMesh(scene3d,new THREE.BoxGeometry(.12+Math.random()*.22,.035,1.2+Math.random()*2.2),mat(0x9a4934,.45,{emissive:0x4a160d}),x,.015,z);crack.rotation.y=Math.random()*Math.PI;
+   }
+  }else if(state.region==='霜晶雪原'){
+   if(Math.random()<.62)addRock(x,z,look,.5+Math.random()*1.5);
+   const ice=addMesh(scene3d,new THREE.ConeGeometry(.35+Math.random()*.5,1.2+Math.random()*2.5,5),mat(0x9bbbc6,.35,{metalness:.12}),x,.55,z);ice.rotation.z=(Math.random()-.5)*.18;
+  }else if(state.region==='蒼翠森林'){
+   if(Math.random()<.72)addTree(x,z,look,.75+Math.random()*.95);else{
+    const stem=addMesh(scene3d,new THREE.CylinderGeometry(.09,.12,.38,7),mat(0xc3a47b),x,.19,z);
+    addMesh(scene3d,new THREE.SphereGeometry(.3,10,8),mat(0x9d655d),x,.42,z);
+   }
+  }else{
+   if(Math.random()<.7)addTree(x,z,look,.7+Math.random()*.8);else addRock(x,z,look,.4+Math.random()*.8);
+   if(Math.random()<.42){const tuft=addMesh(scene3d,new THREE.ConeGeometry(.18,.55,5),mat(0x9b9b62),x,.25,z);tuft.rotation.z=(Math.random()-.5)*.7}
+  }
  }
  for(let i=0;i<9;i++){
   const a=i*Math.PI*2/9,r=33+Math.random()*8;
@@ -261,14 +294,16 @@ function buildZone(){
  }
  // 小型發光水晶與道路石塊
  for(let i=0;i<16;i++){const x=(Math.random()-.5)*48,z=(Math.random()-.5)*48;const crystal=addMesh(scene3d,new THREE.OctahedronGeometry(.25+Math.random()*.25),mat(look.accent,.3,{emissive:look.accent}),x,.35,z);crystal.userData.zoneObject=true}
+ const resourceSpots=[[-18,18],[18,-22],[-28,-5]];
+ resourceSpots.forEach((p,i)=>addResourceNode(p[0],p[1],i,look));
 }
 function init3DWorld(){
  if(!window.THREE){activate2DFallback('3D 引擎載入失敗，請確認網路後重新整理。');return}
  try{
  const canvas=$('world3d');scene3d=new THREE.Scene();camera3d=new THREE.PerspectiveCamera(55,1,.1,180);
  renderer3d=new THREE.WebGLRenderer({canvas,antialias:false,alpha:false,powerPreference:'low-power'});renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,1.35));renderer3d.shadowMap.enabled=false;
- scene3d.add(new THREE.HemisphereLight(0xffffff,0x65745b,2));
- const sun=new THREE.DirectionalLight(0xfff0d5,2.1);sun.position.set(-12,25,10);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene3d.add(sun);
+ scene3d.add(new THREE.HemisphereLight(0xc8d4df,0x343b35,1.05));
+ const sun=new THREE.DirectionalLight(0xd9d1bd,.82);sun.position.set(-12,25,10);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene3d.add(sun);
  player3d=makeCat();player3d.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});scene3d.add(player3d);
  buildZone();update3DPlayer();resize3D();threeReady=true;animate3D();
  let dragging=false,lastX=0,lastY=0;
@@ -285,17 +320,22 @@ function update3DPlayer(){if(!player3d)return;player3d.position.set((state.x-50)
 function update3DInteraction(){
  if(!threeReady)return;
  const px=player3d.position.x,pz=player3d.position.z;let best=Infinity,nearest=null;
- for(const obj of worldObjects){if(obj.userData.kind==='chest'&&state.openedChests.includes(obj.userData.id))continue;const d=Math.hypot(obj.position.x-px,obj.position.z-pz);if(d<best){best=d;nearest=obj}}
- const close=best<3.3;
- const btns=[...document.querySelectorAll('[data-interact]')];
- btns.forEach(b=>b.classList.remove('nearby'));
+ for(const obj of worldObjects){
+  if(obj.userData.kind==='chest'&&state.openedChests.includes(obj.userData.id))continue;
+  if(obj.userData.kind==='resource'&&state.gatheredNodes.includes(obj.userData.key))continue;
+  const d=Math.hypot(obj.position.x-px,obj.position.z-pz);if(d<best){best=d;nearest=obj}
+ }
+ const close=best<3.3,btns=[...document.querySelectorAll('[data-interact]')];btns.forEach(b=>b.classList.remove('nearby'));
  if(close&&nearest){
-  const type=nearest.userData.kind;
-  nearbyPoi=btns.find(b=>b.dataset.interact===type&&(type!=='chest'||Number(b.dataset.chestId)===nearest.userData.id))||null;
+  if(nearest.userData.kind==='resource')nearbyPoi=nearest;
+  else{const type=nearest.userData.kind;nearbyPoi=btns.find(b=>b.dataset.interact===type&&(type!=='chest'||Number(b.dataset.chestId)===nearest.userData.id))||null}
  }else nearbyPoi=null;
- if(nearbyPoi)nearbyPoi.classList.add('nearby');
+ if(nearbyPoi&&nearbyPoi.classList)nearbyPoi.classList.add('nearby');
  $('interactBtn').classList.toggle('show',!!nearbyPoi);
- $('worldHint').textContent=nearbyPoi?'已靠近：'+(nearbyPoi.dataset.interact==='quest'?'冒險委託':nearbyPoi.dataset.interact==='monster'?'魔物':'寶箱')+' · 按 E 互動':'探索 3D 世界，走近發光物件或魔物後按 E';
+ const kind=nearbyPoi?.userData?.kind||nearbyPoi?.dataset?.interact;
+ const labels={quest:'冒險委託',monster:'地區魔物',chest:'寶箱',resource:'地區晶礦'};
+ $('interactBtn').textContent=kind==='resource'?'按 E 採集':'按 E 互動';
+ $('worldHint').textContent=nearbyPoi?'已靠近：'+(labels[kind]||'探索目標')+' · '+(kind==='resource'?'按 E 採集':'按 E 互動'):'探索 '+state.region+'，尋找寶箱、魔物與發光晶礦';
 }
 function updateNearbyInteraction(){if(threeReady)update3DInteraction();else{$('worldHint').textContent='3D 世界載入中……'}}
 function animate3D(t=0){
@@ -347,7 +387,19 @@ function updateWorldBackground(){if(threeReady){buildZone();update3DPlayer();upd
 
 let nearbyPoi=null;
 function updateNearbyInteraction(){if(threeReady){update3DInteraction();return}const buttons=[...document.querySelectorAll('[data-interact]')];let closest=null,best=Infinity;buttons.forEach(btn=>{const x=parseFloat(btn.style.left||(btn.style.right?100-parseFloat(btn.style.right):50));const y=parseFloat(btn.style.top||(btn.style.bottom?100-parseFloat(btn.style.bottom):50));const d=Math.hypot(state.x-x,state.y-y);btn.classList.toggle('nearby',d<=13);if(d<best){best=d;closest=btn}});nearbyPoi=best<=13?closest:null;$('interactBtn').classList.toggle('show',!!nearbyPoi);$('worldHint').textContent=nearbyPoi?'已靠近：'+(nearbyPoi.dataset.interact==='quest'?'冒險委託':nearbyPoi.dataset.interact==='monster'?'魔物':'寶箱')+' · 按 E 或點擊互動':'移動貓咪靠近委託、魔物或寶箱，再按 E 互動'}
-function interactCurrent(){if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}const type=nearbyPoi.dataset.interact;if(type==='quest')openPanel('quest');else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))}
+function interactCurrent(){
+ if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}
+ if(nearbyPoi.userData?.kind==='resource'){gatherResource(nearbyPoi.userData.id);return}
+ const type=nearbyPoi.dataset.interact;if(type==='quest')openPanel('quest');else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))
+}
+function gatherResource(id){
+ const key=state.region+'-'+id;if(state.gatheredNodes.includes(key))return;
+ state.gatheredNodes.push(key);state.materials[state.region]=(Number(state.materials[state.region])||0)+1;
+ const gems=35,coins=25,primogems=2;state.gems+=gems;state.coins+=coins;state.primogems+=primogems;
+ save();if(threeReady)buildZone();update3DInteraction();
+ $('worldHint').textContent='採集成功！獲得地區晶礦、'+gems+' 星石、'+coins+' 摩拉與 '+primogems+' 原石。';
+}
+function claimGatherQuest(){if(state.gatheredNodes.length<12||state.claimedQuests.includes('gather'))return;state.claimedQuests.push('gather');state.gems+=80;state.primogems+=20;save();openPanel('quest');alert('世界探索完成！獲得 80 星石與 20 原石！')}
 document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('click',()=>{if(btn.classList.contains('nearby')){nearbyPoi=btn;interactCurrent()}else{$('worldHint').textContent='還太遠了！請先走近這個標記。'}}));
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
 document.querySelectorAll('[data-move]').forEach(b=>{const [x,y]=b.dataset.move.split(',').map(Number);const id=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);heldButtons.set(id,{x:Math.sign(x),z:Math.sign(y)})});const stop=()=>heldButtons.delete(id);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)});
