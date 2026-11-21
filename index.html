@@ -269,8 +269,13 @@ main>section{width:100%;min-width:0}
  #soundToggle,#cheatOpen{max-width:132px!important;font-size:9px!important}
 }#travelSignpostBtn{position:fixed;left:50%;bottom:calc(94px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:68;border:1px solid #f6dc9a;background:linear-gradient(135deg,#735338,#d7ae68);color:#fff8e7;border-radius:22px;padding:10px 17px;font-weight:900;font-size:13px;box-shadow:0 5px 20px #0008;white-space:nowrap}
 @media(max-width:720px){#travelSignpostBtn{bottom:calc(91px + env(safe-area-inset-bottom));font-size:12px;padding:9px 13px;z-index:68}}
-</style></head>
-<body>
+#soundToggle,#cheatOpen,.world-help,#guideBanner{display:none!important}
+#settingsOpen{position:fixed;right:12px;top:66px;z-index:85;border:1px solid #e4c47eaa;border-radius:22px;background:#10243bef;color:#ffe7b0;padding:9px 13px;font-size:13px;font-weight:800;box-shadow:0 4px 18px #0006}
+#settingsModal{display:none;position:fixed;inset:0;z-index:95;background:#050d19df;align-items:center;justify-content:center;padding:18px}#settingsModal.show{display:flex}
+.settings-box{position:relative;width:min(390px,100%);max-height:78dvh;overflow:auto;padding:22px 18px;border-radius:20px;border:1px solid #e4c47e88;background:linear-gradient(145deg,#293d58,#121e32);color:#f4f0e5;box-shadow:0 18px 55px #000b}
+.settings-box h2{margin:0 0 5px;color:#ffe2a2;font-size:21px}.settings-sub{margin:0 0 16px;color:#c4d0dc;font-size:12px;line-height:1.6}.settings-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-top:1px solid #ffffff20}.settings-row strong{display:block;font-size:13px}.settings-row small{display:block;color:#bdcbd8;font-size:11px;margin-top:3px;line-height:1.5}.settings-action{flex:0 0 auto;border:1px solid #e4c47e88;border-radius:12px;padding:9px 12px;background:#b98b4d;color:#1d2b3a;font-weight:900;font-size:12px}.settings-x{position:absolute;right:12px;top:10px;border:0;background:transparent;color:#fff;font-size:22px}
+@media(max-width:720px){#settingsOpen{top:9px;right:9px;padding:8px 11px;font-size:12px}.settings-box{padding:20px 15px}}</style></head>
+<body><button id="settingsOpen" type="button" onclick="openSettings()">⚙ 設定</button><div id="settingsModal" onclick="if(event.target===this)closeSettings()"><div class="settings-box"><button class="settings-x" type="button" onclick="closeSettings()">✕</button><h2>⚙ 遊戲設定</h2><p class="settings-sub">常用功能與操作提示集中在這裡，讓冒險畫面保持清爽。</p><div class="settings-row"><div><strong>🎵 背景音樂</strong><small id="settingsMusicStatus"></small></div><button class="settings-action" id="settingsMusicBtn" onclick="toggleGameSound();updateSettingsMusic()">切換音樂</button></div><div class="settings-row"><div><strong>🎟 兌換碼</strong><small>輸入 YIEN 領取星石並解鎖貓咪</small></div><button class="settings-action" onclick="closeSettings();openCheat()">開啟兌換</button></div><div class="settings-row"><div><strong>🖐 轉動視角</strong><small>在地圖空白處按住並拖曳，即可旋轉觀察方向。</small></div></div><div class="settings-row"><div><strong>🐾 移動與互動</strong><small>使用左下方向鍵移動；靠近物件後點擊互動按鈕。</small></div></div><div class="settings-row"><div><strong>✦ 冒險導航</strong><small id="settingsGuideText">跟隨地圖中的發光路線前進。</small></div></div></div></div>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
 <button id="travelSignpostBtn" type="button" onclick="playGameSound('region');openPanel('map')">🪧 前往其他地圖</button><button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">♫ 點擊播放背景音樂</button><main><section>
 <div id="world">
@@ -350,6 +355,9 @@ function startIdleMusic(){
  },620);
  setMusicLevel(.34);
 }
+function openSettings(){const m=$('settingsModal');if(m){m.classList.add('show');updateSettingsMusic();const g=$('guideText'),t=$('settingsGuideText');if(g&&t&&g.textContent.trim())t.textContent=g.textContent.trim()}}
+function closeSettings(){const m=$('settingsModal');if(m)m.classList.remove('show')}
+function updateSettingsMusic(){const s=$('settingsMusicStatus'),b=$('settingsMusicBtn');if(s)s.textContent=audioMuted?'目前已關閉':'背景音樂播放中';if(b)b.textContent=audioMuted?'開啟音樂':'關閉音樂'}
 function toggleGameSound(){
  const b=$('soundToggle');
  if(audioMuted){
