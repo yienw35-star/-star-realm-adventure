@@ -214,6 +214,20 @@ const zoneLooks={
 function mat(color,roughness=.85,extra={}){return new THREE.MeshStandardMaterial({color,roughness,...extra})}
 
 
+
+let environmentTexture3d=null;
+function buildEnvironmentLighting(region){
+ if(environmentTexture3d)environmentTexture3d.dispose();
+ const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=512;
+ const ctx=canvas.getContext('2d');
+ const palettes={'風語草原':['#6e9db5','#d5c59b'],'蒼翠森林':['#315b58','#a6b99a'],'霜晶雪原':['#6c98b4','#e3f0f4'],'熾焰山脈':['#493b55','#df9567']};
+ const p=palettes[region]||palettes['風語草原'];
+ const grad=ctx.createLinearGradient(0,0,0,512);grad.addColorStop(0,p[0]);grad.addColorStop(.52,p[1]);grad.addColorStop(1,'#59615a');ctx.fillStyle=grad;ctx.fillRect(0,0,1024,512);
+ const sun=ctx.createRadialGradient(720,150,8,720,150,170);sun.addColorStop(0,'rgba(255,239,197,.95)');sun.addColorStop(.15,'rgba(255,226,177,.38)');sun.addColorStop(1,'rgba(255,226,177,0)');ctx.fillStyle=sun;ctx.fillRect(500,0,450,350);
+ for(let i=0;i<180;i++){const x=Math.random()*1024,y=70+Math.random()*280,r=12+Math.random()*40;ctx.fillStyle='rgba(255,255,255,'+(Math.random()*.045)+')';ctx.beginPath();ctx.ellipse(x,y,r,r*.22,0,0,Math.PI*2);ctx.fill()}
+ environmentTexture3d=new THREE.CanvasTexture(canvas);environmentTexture3d.mapping=THREE.EquirectangularReflectionMapping;environmentTexture3d.encoding=THREE.sRGBEncoding;environmentTexture3d.needsUpdate=true;scene3d.environment=environmentTexture3d;scene3d.environmentIntensity=.72;
+}
+
 function makeTerrainGeometry(region){
  const size=120,segments=96,geo=new THREE.PlaneGeometry(size,size,segments,segments);
  const pos=geo.attributes.position;
@@ -440,6 +454,7 @@ function addSkyClouds(region){
 }
 function buildZone(){
  const look=zoneLooks[state.region]||zoneLooks['風語草原'];
+ buildEnvironmentLighting(state.region);
  scene3d.background=new THREE.Color(look.sky);scene3d.fog=new THREE.Fog(look.fog,18,66);
  scene3d.children.slice().forEach(o=>{if(o!==player3d&&!o.isLight)scene3d.remove(o)});worldObjects=[];worldObstacles.length=0;
  const groundTexture=makeGroundTexture(state.region);const groundMat=new THREE.MeshStandardMaterial({color:0xffffff,map:groundTexture,roughness:.94});const ground=addMesh(scene3d,makeTerrainGeometry(state.region),groundMat,0,-.08,0);ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;ground.userData.zoneObject=true;addSkyDome(state.region);addDistantRidges(state.region);addBiomeWater(state.region);addSkyClouds(state.region);
