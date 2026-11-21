@@ -354,10 +354,10 @@ function makeCat(){
  const legs=[],arms=[];
  for(const side of [-1,1]){
   const leg=new THREE.Group();leg.position.set(side*.22,.43,.02);g.add(leg);
-  addMesh(leg,new THREE.CapsuleGeometry(.105,.29,4,10),fur,0,-.14,0);
+  addMesh(leg,new THREE.CylinderGeometry(.105,.105,.34,12),fur,0,-.14,0);
   const paw=addMesh(leg,new THREE.SphereGeometry(.13,16,12),cream,0,-.34,-.055);paw.scale.set(1,.68,1.12);legs.push(leg);
   const arm=new THREE.Group();arm.position.set(side*.39,1.18,-.04);bodyPivot.add(arm);
-  const upper=addMesh(arm,new THREE.CapsuleGeometry(.095,.25,4,10),fur,0,-.15,0);upper.rotation.z=side*.12;
+  const upper=addMesh(arm,new THREE.CylinderGeometry(.095,.095,.30,12),fur,0,-.15,0);upper.rotation.z=side*.12;
   addMesh(arm,new THREE.SphereGeometry(.125,16,12),cream,0,-.31,-.04);
   const cuff=addMesh(arm,new THREE.TorusGeometry(.105,.026,8,16),gold,0,-.24,-.005);cuff.rotation.x=Math.PI/2;
   arms.push(arm);
