@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#172b45"><title>星境旅人｜開放世界 RPG</title>
+<style>
+:root{--gold:#f4d58a;--panel:#14283ddd;--line:#ffffff35}*{box-sizing:border-box}
+body{margin:0;background:#101d2b;color:#fff;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;overflow-x:hidden}
+header{height:54px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center;background:#0c1826eF;border-bottom:1px solid var(--line);position:relative;z-index:2}
+.brand{font-weight:900;letter-spacing:2px;color:var(--gold)}.stats{font-size:13px;display:flex;gap:12px}
+main{max-width:1000px;margin:auto;padding:12px;display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:12px}
+#world{height:min(66vh,570px);min-height:370px;position:relative;overflow:hidden;border:1px solid #ffffff45;border-radius:17px;background:linear-gradient(#7db3c2 0%,#b4d0bd 47%,#658b67 48%,#284b42 100%)}
+#world:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 20% 30%,#fff7 0 2%,transparent 25%),linear-gradient(130deg,transparent 35%,#ffffff12 36% 37%,transparent 38%);pointer-events:none}
+.mountain{position:absolute;bottom:40%;width:0;height:0;border-left:130px solid transparent;border-right:130px solid transparent;border-bottom:190px solid #627e86;filter:drop-shadow(0 7px 0 #506d67)}
+.m1{left:-35px}.m2{right:-55px;transform:scale(1.3);border-bottom-color:#718b91}
+.tree{position:absolute;font-size:42px;filter:drop-shadow(2px 4px 2px #183b2c99)}
+#hero{position:absolute;left:50%;top:55%;transform:translate(-50%,-50%);font-size:43px;filter:drop-shadow(0 5px 3px #1225);z-index:1;transition:left .12s,top .12s}
+#hero:after{content:"";position:absolute;width:34px;height:8px;background:#10251c66;border-radius:50%;bottom:-1px;left:5px;z-index:-1}
+.location{position:absolute;top:12px;left:12px;background:#102238b9;padding:7px 11px;border-radius:9px;font-size:13px}
+.hint{position:absolute;bottom:10px;left:10px;right:10px;text-align:center;background:#102238a9;padding:7px;border-radius:9px;font-size:12px}
+.poi{position:absolute;border:0;background:#f5d78c;color:#263448;border-radius:20px;padding:6px 10px;font-weight:800;box-shadow:0 3px 10px #1425}
+#panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:13px;min-height:370px}
+h2{font-size:17px;margin:0 0 10px;color:var(--gold)}.muted{color:#b9c8d4;font-size:12px}
+button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.tab,.action{border:1px solid var(--line);background:#ffffff12;color:white;border-radius:9px;padding:9px 5px;font-size:13px}
+.tab.active,.action.primary{background:linear-gradient(120deg,#b98b4d,#e4c47e);color:#263448;border:0;font-weight:800}
+.content{font-size:13px;line-height:1.6}.action{width:100%;margin-top:7px}
+.card{background:#ffffff10;border:1px solid var(--line);border-radius:10px;padding:9px;margin:7px 0}
+#controls{display:none;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,48px);gap:5px;justify-content:center;margin:12px auto}
+#controls button{border-radius:12px;background:#14283ddd;color:white;border:1px solid #ffffff66;font-size:20px;touch-action:none}
+#controls .up{grid-column:2}.down{grid-column:2}.left{grid-column:1;grid-row:2}.right{grid-column:3;grid-row:2}
+#battle{display:none;position:fixed;inset:0;background:#081321eF;z-index:5;align-items:center;justify-content:center;padding:18px}
+#battlebox{max-width:420px;width:100%;background:linear-gradient(145deg,#253d5b,#17233a);border:1px solid #ffffff55;border-radius:18px;padding:20px;text-align:center}
+.enemy{font-size:75px;margin:10px}.bar{height:9px;background:#ffffff25;border-radius:10px;overflow:hidden}.bar i{display:block;height:100%;background:#e77e70;width:100%}
+@media(max-width:720px){main{display:flex;flex-direction:column;padding:8px}#world{height:48vh;min-height:310px}#panel{min-height:0}#controls{display:grid}.stats{gap:7px;font-size:12px}}
+</style></head>
+<body>
+<header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
+<main><section>
+<div id="world">
+<div class="mountain m1"></div><div class="mountain m2"></div>
+<div class="tree" style="left:12%;bottom:15%">🌲</div><div class="tree" style="left:29%;bottom:22%">🌳</div><div class="tree" style="right:15%;bottom:13%">🌲</div><div class="tree" style="right:34%;bottom:27%">🌳</div>
+<div class="location" id="loc">📍 風語草原</div><div id="hero">🧙🏻‍♀️</div>
+<button class="poi" style="left:8%;top:24%" onclick="openPanel('quest')">📜 委託</button>
+<button class="poi" style="right:8%;top:36%" onclick="startBattle()">⚔️ 魔物</button>
+<button class="poi" style="right:12%;bottom:22%" onclick="openPanel('chest')">🎁 寶箱</button>
+<div class="hint">使用方向鍵探索世界 · 靠近標記可進行互動</div></div>
+<div id="controls"><button class="up" data-move="0,-5">↑</button><button class="left" data-move="-5,0">←</button><button class="down" data-move="0,5">↓</button><button class="right" data-move="5,0">→</button></div>
+</section>
+<aside id="panel"><div class="tabrow"><button class="tab active" data-tab="home">冒險</button><button class="tab" data-tab="gacha">祈願</button><button class="tab" data-tab="bag">角色</button></div><div id="content" class="content"></div></aside></main>
+<div id="battle"><div id="battlebox"><div class="muted">遭遇魔物！</div><h2>史萊姆</h2><div class="enemy">🟢</div><div class="bar"><i id="enemyhp"></i></div><p id="battlemsg">一隻野生史萊姆擋住了去路！</p><button class="action primary" onclick="attack()">⚔️ 普通攻擊</button><button class="action" onclick="skill()">✨ 元素戰技</button><button class="action" onclick="runAway()">撤退</button></div></div>
+<script>
+const $=id=>document.getElementById(id);
+let state=JSON.parse(localStorage.getItem('starTraveler')||'null')||{gems:1600,coins:300,primogems:0,owned:['風行者・菲亞'],pity:0,x:50,y:55,chest:false,quest:false};
+const characters=[
+{name:'風行者・菲亞',rarity:'★★★★★',element:'風',emoji:'🧝🏻‍♀️',desc:'自由的風之弓手'},
+{name:'焰心・露卡',rarity:'★★★★★',element:'火',emoji:'🔥',desc:'熱情的火焰劍士'},
+{name:'潮汐・艾琳',rarity:'★★★★',element:'水',emoji:'🧜🏻‍♀️',desc:'能治癒同伴的水元素法師'},
+{name:'霜鈴・雪',rarity:'★★★★',element:'冰',emoji:'❄️',desc:'冷靜的冰元素術士'},
+{name:'雷鳴・凜',rarity:'★★★★',element:'雷',emoji:'⚡',desc:'迅捷的雷元素刺客'}];
+function save(){localStorage.setItem('starTraveler',JSON.stringify(state));$('gems').textContent=state.gems;$('coins').textContent=state.coins;$('primogems').textContent=state.primogems}
+function openPanel(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));let c=$('content');
+if(tab==='gacha')c.innerHTML=`<h2>✦ 星願祈願</h2><div class="card" style="background:linear-gradient(130deg,#514276,#1e4260)"><div style="font-size:12px;color:#f6d58b">期間限定角色祈願</div><div style="font-size:23px;font-weight:900">焰心・露卡</div><div style="font-size:48px">🔥 ⚔️</div><div class="muted">五星火元素角色 · 限定機率提升</div></div><div class="muted">五星基礎機率 0.6% · 四星 5.1% · 90 抽五星保底（原型簡化機制）</div><button class="action primary" onclick="wish(1)">祈願一次 · 160 星石</button><button class="action" onclick="wish(10)">祈願十次 · 1600 星石</button><p class="muted">目前距離保底：${state.pity}/90</p>`;
+else if(tab==='bag')c.innerHTML=`<h2>♡ 角色圖鑑</h2>${state.owned.map(n=>{let a=characters.find(x=>x.name===n);return `<div class="card"><b style="font-size:20px">${a?.emoji||'✨'} ${n}</b><br><span class="muted">${a?.rarity||'★'} · ${a?.element||'冒險'}元素</span><br>${a?.desc||'你的冒險夥伴'}</div>`}).join('')}<div class="muted">角色可在後續版本加入升級、武器與技能系統。</div>`;
+else if(tab==='quest')c.innerHTML=`<h2>📜 冒險委託</h2><div class="card"><b>草原的異動</b><p>擊敗一隻史萊姆，調查附近的魔物活動。</p><span class="muted">獎勵：原石 × 40、摩拉 × 100</span></div><button class="action primary" onclick="startBattle()">前往討伐</button>`;
+else if(tab==='chest')c.innerHTML=`<h2>🎁 古老寶箱</h2><div class="card" style="text-align:center;font-size:48px">🧰</div><p>${state.chest?'這個寶箱已經被打開了。':'草叢後藏著一個古老的寶箱。'}</p><button class="action primary" onclick="openChest()" ${state.chest?'disabled':''}>開啟寶箱</button>`;
+else c.innerHTML=`<h2>🌿 風語草原</h2><p>歡迎來到星境大陸！在這片遼闊的草原上，傳說七種元素守護著世界的平衡。</p><div class="card"><b>目前目標</b><br>探索草原、打倒史萊姆，並尋找古老寶箱。</div><button class="action primary" onclick="openPanel('quest')">查看冒險委託</button><button class="action" onclick="openPanel('gacha')">前往角色祈願</button>`;
+}
+function wish(n){let cost=n*160;if(state.gems<cost){alert('星石不足！先完成委託或開寶箱吧。');return}state.gems-=cost;let got=[];for(let i=0;i<n;i++){state.pity++;let r=Math.random(),ch;if(state.pity>=90||r<.006){ch=characters[1];state.pity=0}else if(r<.057)ch=characters[2+Math.floor(Math.random()*3)];else ch={name:'見習冒險者',emoji:'🧑🏻‍🎓',rarity:'★★★',element:'無',desc:'旅途中的新夥伴'};if(!state.owned.includes(ch.name))state.owned.push(ch.name);got.push(ch)}save();alert('祈願結果：\\n'+got.map(x=>x.emoji+' '+x.name+' '+x.rarity).join('\\n'));openPanel('gacha')}
+let hp=100;
+function startBattle(){hp=100;$('enemyhp').style.width='100%';$('battlemsg').textContent='一隻野生史萊姆擋住了去路！';$('battle').style.display='flex'}
+function attack(){hp-=22;afterHit('普通攻擊造成 22 點傷害！')}
+function skill(){hp-=42;afterHit('元素戰技造成 42 點風元素傷害！')}
+function afterHit(msg){if(hp<=0){$('enemyhp').style.width='0%';$('battlemsg').textContent='勝利！獲得 100 摩拉與 20 原石。';state.coins+=100;state.primogems+=20;save();setTimeout(()=>{$('battle').style.display='none';if(!state.quest){state.quest=true;state.primogems+=40;save();alert('委託完成！額外獲得 40 原石！')}},1000)}else{$('enemyhp').style.width=hp+'%';$('battlemsg').textContent=msg+' 史萊姆剩餘 '+hp+' HP。'}}
+function runAway(){$('battle').style.display='none'}
+function openChest(){if(state.chest)return;state.chest=true;state.gems+=320;state.primogems+=20;save();openPanel('chest')}
+function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';if(state.x>80&&state.y<35)$('loc').textContent='📍 風語村';else if(state.y<25)$('loc').textContent='📍 蒼翠山徑';else $('loc').textContent='📍 風語草原';}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
+document.querySelectorAll('[data-move]').forEach(b=>{let [x,y]=b.dataset.move.split(',').map(Number);b.addEventListener('pointerdown',e=>{e.preventDefault();move(x,y)})});
+document.addEventListener('keydown',e=>{if(['ArrowUp','w'].includes(e.key))move(0,-4);if(['ArrowDown','s'].includes(e.key))move(0,4);if(['ArrowLeft','a'].includes(e.key))move(-4,0);if(['ArrowRight','d'].includes(e.key))move(4,0)});
+$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';save();openPanel('home');
+</script></body></html>
