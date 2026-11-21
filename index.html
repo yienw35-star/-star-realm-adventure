@@ -217,7 +217,7 @@ main>section{width:100%;min-width:0}
 @media(max-width:720px){#panel{z-index:46!important}#panelBackdrop{z-index:45!important}}
 
 /* Direction pad stays fixed to the viewport while the page scrolls */
-#world #controls{position:absolute!important;left:12px!important;right:auto!important;top:auto!important;bottom:84px!important;transform:none!important;z-index:18!important;margin:0!important;display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,36px)!important;gap:3px!important;opacity:.96}
+#world #controls{position:absolute!important;left:12px!important;right:auto!important;top:auto!important;bottom:calc(min(42dvh,360px) + 82px)!important;transform:none!important;z-index:18!important;margin:0!important;display:grid!important;grid-template-columns:repeat(3,42px)!important;grid-template-rows:repeat(2,36px)!important;gap:3px!important;opacity:.96}
 #controls button{width:42px;height:36px;touch-action:none!important;user-select:none;-webkit-user-select:none}
 @media(max-width:390px){#world #controls{bottom:78px!important;grid-template-columns:repeat(3,38px)!important;grid-template-rows:repeat(2,33px)!important}#world #controls button{width:38px;height:33px}}
 
@@ -865,5 +865,5 @@ document.addEventListener('keyup',e=>heldKeys.delete(e.key.toLowerCase()));
 window.addEventListener('blur',()=>{heldKeys.clear();heldButtons.clear()});
 $('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';
 try{init3DWorld()}catch(err){console.error('遊戲世界初始化失敗：',err);activate2DFallback('世界載入失敗，已啟用安全模式。')}
-try{updateWorldBackground();updateNearbyInteraction();save();refreshStoryHud();openPanel('home')}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
+try{updateWorldBackground();updateNearbyInteraction();save();refreshStoryHud();closePanel()}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
 </script></body></html>
