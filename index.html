@@ -78,8 +78,6 @@ state.gems=Number.isFinite(Number(state.gems))?Number(state.gems):1600;
 state.coins=Number.isFinite(Number(state.coins))?Number(state.coins):300;
 state.primogems=Number.isFinite(Number(state.primogems))?Number(state.primogems):0;
 state.catLevel=state.catLevel||1;state.catXp=state.catXp||0;
-state.party=Array.isArray(state.party)?state.party:['咪露','沫沫','雪糕'];
-state.party=state.party.filter(n=>characters.some(ch=>ch.name===n)&&state.owned.includes(n)).slice(0,4);
 state.region=state.region||'風語草原';state.dailyWins=Number(state.dailyWins)||0;
 state.claimedQuests=Array.isArray(state.claimedQuests)?state.claimedQuests:[];
 const chestCatalog=[{id:0,name:'草叢木箱',emoji:'🧰',gems:80,coins:60,primogems:2},{id:1,name:'星光寶箱',emoji:'✨',gems:140,coins:90,primogems:5},{id:2,name:'古老寶箱',emoji:'🎁',gems:180,coins:120,primogems:8},{id:3,name:'森林寶箱',emoji:'🌿',gems:100,coins:160,primogems:3},{id:4,name:'稀有寶箱',emoji:'💎',gems:260,coins:180,primogems:12}];
@@ -104,6 +102,8 @@ const characters=[
 {name:'石球',rarity:'★★',stars:2,element:'岩',emoji:'🐹',role:'防守手',desc:'背著小石盾的可靠夥伴。',skill:'岩壁防護',baseHp:155,baseAtk:14,baseDef:20},
 {name:'奶糖',rarity:'★',stars:1,element:'草',emoji:'🐇',role:'新手',desc:'喜歡花草，會努力幫忙的小夥伴。',skill:'嫩芽拍擊',baseHp:112,baseAtk:12,baseDef:10}
 ];
+state.party=Array.isArray(state.party)?state.party:['咪露','沫沫','雪糕'];
+state.party=state.party.filter(n=>characters.some(ch=>ch.name===n)&&state.owned.includes(n)).slice(0,4);
 function characterStats(ch,level=1){const growth=Math.max(0,level-1);return {hp:ch.baseHp+growth*Math.round(ch.baseHp*.08),atk:ch.baseAtk+growth*Math.max(1,Math.round(ch.baseAtk*.09)),def:ch.baseDef+growth*Math.max(1,Math.round(ch.baseDef*.07))};}
 function save(){state.gems=Number(state.gems)||0;state.coins=Number(state.coins)||0;state.primogems=Number(state.primogems)||0;localStorage.setItem('starTraveler',JSON.stringify(state));$('gems').textContent=state.gems;$('coins').textContent=state.coins;$('primogems').textContent=state.primogems}
 function openPanel(tab){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));let c=$('content');
