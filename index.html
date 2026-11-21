@@ -56,6 +56,40 @@ button{font:inherit;cursor:pointer}.tabrow{display:grid;grid-template-columns:re
 @keyframes wishPop{to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:480px){#wishCards{grid-template-columns:repeat(2,minmax(0,1fr))}.wishCard{min-height:145px}}
 
+
+/* 任務中心：分區、進度條與獎勵狀態 */
+.quest-page{display:flex;flex-direction:column;gap:15px;padding:2px 1px 14px}
+.quest-heading{display:flex;align-items:center;justify-content:space-between;padding:5px 2px 2px}
+.quest-eyebrow{font-size:9px;letter-spacing:1.8px;color:#d9bd7c;font-weight:800}
+.quest-heading h2{font-size:22px!important;margin:3px 0!important}
+.quest-heading p{font-size:11px;color:#b8c6d3;margin:0!important}
+.quest-total{width:53px;height:53px;border:1px solid #d8bd7b66;border-radius:14px;background:#d8bd7b12;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.quest-total b{font-size:19px;color:#f4d58a;line-height:1.1}.quest-total small{font-size:9px;color:#c7d1d8}
+.quest-section{border:1px solid #ffffff1c;border-radius:14px;padding:12px;background:linear-gradient(145deg,#ffffff0d,#ffffff05)}
+.quest-section-title{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.quest-section-title>span{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#d8bd7b1c;font-size:16px}
+.quest-section-title div{display:flex;flex-direction:column;gap:2px;flex:1}
+.quest-section-title b{font-size:13px;color:#f5e6c4}.quest-section-title small{font-size:10px;color:#9eafbf}
+.quest-section-title em{font-style:normal;font-size:11px;color:#e6cb8c;font-weight:800}
+.quest-feature{padding:12px;border-radius:11px;background:linear-gradient(135deg,#35483f,#1e3040);border:1px solid #d7bd7840}
+.quest-tag{font-size:9px;letter-spacing:1px;color:#e6c87e;font-weight:800}
+.quest-feature h3{font-size:17px;margin:5px 0;color:#fff1d1}
+.quest-feature p,.quest-task-main p{font-size:11px;line-height:1.55;color:#c3cdd2;margin:4px 0 9px!important}
+.quest-progress{height:6px;border-radius:8px;background:#ffffff1c;overflow:hidden}
+.quest-progress i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#a88a55,#f3d58c)}
+.quest-progress-meta{display:flex;justify-content:space-between;font-size:9px;color:#b8c6d3;margin-top:5px}
+.quest-task{display:flex;align-items:flex-start;gap:9px;padding:10px 0 4px}
+.quest-task-icon{width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:#ffffff10;display:grid;place-items:center;font-size:17px}
+.quest-task-main{flex:1;min-width:0}
+.quest-task-main b{font-size:12px;color:#f2eadb}
+.quest-task-main small{font-size:9px;color:#aebdca;display:block;margin-top:5px}
+.quest-task-state{font-size:9px;color:#d9c38e;background:#d8bd7b15;border-radius:20px;padding:4px 7px;white-space:nowrap}
+.quest-reward-line{font-size:10px;color:#d5c69f;padding:7px 0 1px 43px}
+.quest-task-spaced{margin-top:12px;border-top:1px solid #ffffff18;padding-top:13px}
+.quest-footnote{font-size:10px;line-height:1.5;color:#93a6b8;text-align:center;padding:0 8px}
+.quest-page .action{margin-top:9px!important}
+.quest-page .action:disabled{opacity:.48;filter:saturate(.45);cursor:default}
+
 /* 簡潔清晰的冒險介面 */
 main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding:14px}
 #world{height:min(76vh,760px);min-height:480px;border-radius:20px;border:1px solid #ffffff55;box-shadow:0 18px 50px #07152266}
@@ -74,9 +108,9 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 @media(max-width:900px){main{grid-template-columns:minmax(0,1fr) 260px;gap:10px;padding:10px}#panel{padding:11px}}
 @media(max-width:720px){
  main{display:flex;flex-direction:column;padding:8px;gap:8px}
- #world{height:58vh;min-height:360px;max-height:620px}
+ #world{height:70vh;height:70dvh;min-height:480px;max-height:780px}
  #panel{max-height:none;min-height:0;padding:12px}
- #content{max-height:none;overflow:visible}
+ #content{max-height:none;overflow:visible}#panel{padding:13px}#content{padding-bottom:16px}.quest-page{gap:12px}.quest-section{padding:11px}
  #controls{display:grid}
  .stats{gap:7px;font-size:11px}
  .tab{min-width:72px}
@@ -84,7 +118,7 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
  .world-help{font-size:10px;max-width:190px;text-align:right}
  .hint{font-size:10px}
 }
-@media(max-width:420px){#world{height:54vh;min-height:330px}.brand{font-size:13px}.stats{gap:5px}.stats span{white-space:nowrap}}
+@media(max-width:420px){#world{height:66vh;height:66dvh;min-height:430px;max-height:700px}.brand{font-size:13px}.stats{gap:5px}.stats span{white-space:nowrap}}
 
 </style></head>
 <body>
@@ -175,7 +209,44 @@ else if(tab==='party')c.innerHTML=`<h2>⚔️ 冒險隊伍</h2><p class="muted">
 else if(tab==='map')c.innerHTML=`<h2>🗺️ 星境大陸</h2><p class="muted">選擇地區即可傳送。每張地圖都有專屬景觀、氣候、資源與魔物。已探索：${state.visitedRegions.length}/4</p>
 <div class="card" style="background:linear-gradient(120deg,#243a42,#17232d)"><b>📍 目前所在：${state.region}</b><p class="muted">本區域採集：${state.gatheredNodes.filter(k=>k.startsWith(state.region+'-')).length}/3 · 地區素材：${state.materials[state.region]||0}</p></div>
 ${[{name:'風語草原',emoji:'🌾',desc:'黃昏草浪、古老石柱與微風水晶。推薦新手探索。',look:'linear-gradient(135deg,#68734b,#263a35)',weather:'微風・黃昏'},{name:'蒼翠森林',emoji:'🌲',desc:'幽暗林冠、巨木、蘑菇與被遺忘的遺跡。',look:'linear-gradient(135deg,#315b45,#142b28)',weather:'濃霧・林蔭'},{name:'霜晶雪原',emoji:'❄️',desc:'冷藍冰原、冰柱群與沉睡在雪中的水晶。',look:'linear-gradient(135deg,#637e8d,#273c4b)',weather:'寒雪・冰霧'},{name:'熾焰山脈',emoji:'🌋',desc:'暗紅火山岩、熔岩裂縫與焦黑山脊。',look:'linear-gradient(135deg,#75473b,#241e27)',weather:'火山灰・熱浪'}].map(r=>`<div class="card regionCard" style="background:${r.look};border-color:#ffffff24"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:16px">${r.emoji} ${r.name}</b><span class="muted">${state.region===r.name?'探索中':state.visitedRegions.includes(r.name)?'已到訪':'未到訪'}</span></div><p class="muted">${r.desc}</p><small style="color:#e5d7b8">${r.weather} · 採集 ${state.gatheredNodes.filter(k=>k.startsWith(r.name+'-')).length}/3</small><button class="action ${state.region===r.name?'':'primary'}" onclick="selectRegion('${r.name}')">${state.region===r.name?'目前區域':'傳送至此地'}</button></div>`).join('')}`;
-else if(tab==='quest')c.innerHTML=`<h2>📜 冒險委託</h2><div class="card" style="border-color:#d7bd78;background:linear-gradient(135deg,#34443e,#202b36)"><div style="color:#e6c87e;font-size:11px">✦ 主線劇情 · 第一章</div><b style="font-size:17px">${storySteps[state.storyStep].title}</b><p>${storySteps[state.storyStep].objective}</p><div class="catHp"><i style="width:${state.storyStep/4*100}%"></i></div><small class="muted">劇情進度 ${state.storyStep}/4</small></div><div class="card"><b>主線・初次相遇</b><p>擊敗魔物，了解星境大陸的危機。</p><span class="muted">獎勵：原石 × 40、摩拉 × 100（首次）</span><button class="action primary" onclick="startBattle()">前往討伐</button></div><div class="card"><b>每日委託・清理魔物</b><p>目前進度：${Math.min(state.dailyWins,3)} / 3</p><div class="catHp"><i style="width:${Math.min(state.dailyWins/3*100,100)}%"></i></div><span class="muted">獎勵：原石 × 30、星石 × 100</span><button class="action ${state.claimedQuests.includes('daily')?'':'primary'}" onclick="claimDaily()" ${state.dailyWins<3||state.claimedQuests.includes('daily')?'disabled':''}>${state.claimedQuests.includes('daily')?'已領取':'完成後領取'}</button></div><div class="card"><b>世界探索・晶礦採集</b><p>在四張地圖尋找發光的地區晶礦：${state.gatheredNodes.length} / 12</p><span class="muted">獎勵：星石 × 80、原石 × 20</span><button class="action ${state.claimedQuests.includes('gather')?'':'primary'}" onclick="claimGatherQuest()" ${state.gatheredNodes.length<12||state.claimedQuests.includes('gather')?'disabled':''}>${state.claimedQuests.includes('gather')?'已領取':'完成後領取'}</button></div><div class="card"><b>探索委託・寶箱獵人</b><p>開啟全部 5 個草原寶箱：${state.openedChests.length}/5</p><span class="muted">獎勵：原石 × 25</span><button class="action ${state.claimedQuests.includes('chest')?'':'primary'}" onclick="claimChestQuest()" ${state.openedChests.length<5||state.claimedQuests.includes('chest')?'disabled':''}>${state.claimedQuests.includes('chest')?'已領取':'完成後領取'}</button></div>`;
+else if(tab==='quest')c.innerHTML=`
+ <div class="quest-page">
+  <div class="quest-heading"><div><div class="quest-eyebrow">JOURNEY LOG · 星境旅程</div><h2>冒險任務</h2><p>清楚追蹤目前目標、每日挑戰與探索進度。</p></div><div class="quest-total"><b>${(state.storyStep>=4?1:0)+(state.claimedQuests.length)}</b><small>已完成</small></div></div>
+  <section class="quest-section">
+   <div class="quest-section-title"><span>✦</span><div><b>主線旅程</b><small>推進星境故事</small></div><em>${Math.min(state.storyStep,4)}/4</em></div>
+   <div class="quest-feature">
+    <div class="quest-tag">CHAPTER 01 · 主線</div><h3>${storySteps[state.storyStep].title}</h3><p>${storySteps[state.storyStep].objective}</p>
+    <div class="quest-progress"><i style="width:${state.storyStep/4*100}%"></i></div><div class="quest-progress-meta"><span>第一章進度</span><b>${Math.round(state.storyStep/4*100)}%</b></div>
+    <button class="action primary" onclick="${state.storyStep===1?'startBattle()':"document.getElementById('world').scrollIntoView({behavior:'smooth',block:'start'})"}">${state.storyStep===1?'⚔️ 前往試煉':'返回世界繼續探索'}</button>
+   </div>
+  </section>
+  <section class="quest-section">
+   <div class="quest-section-title"><span>☀️</span><div><b>每日委託</b><small>完成挑戰領取獎勵</small></div><em>${Math.min(state.dailyWins,3)}/3</em></div>
+   <div class="quest-task">
+    <div class="quest-task-icon">⚔️</div><div class="quest-task-main"><b>清理魔物</b><p>擊敗魔物，守護星境大陸。</p><div class="quest-progress"><i style="width:${Math.min(state.dailyWins/3*100,100)}%"></i></div><small>${Math.min(state.dailyWins,3)} / 3 次討伐</small></div>
+    <div class="quest-task-state">${state.claimedQuests.includes('daily')?'已領取':state.dailyWins>=3?'可領取':'進行中'}</div>
+   </div>
+   <div class="quest-reward-line">獎勵　⭐ 原石 × 30　·　💎 星石 × 100</div>
+   <button class="action ${state.claimedQuests.includes('daily')?'':'primary'}" onclick="claimDaily()" ${state.dailyWins<3||state.claimedQuests.includes('daily')?'disabled':''}>${state.claimedQuests.includes('daily')?'✓ 獎勵已領取':state.dailyWins>=3?'領取每日獎勵':'完成 3 次討伐後解鎖'}</button>
+  </section>
+  <section class="quest-section">
+   <div class="quest-section-title"><span>🧭</span><div><b>世界探索</b><small>發現地圖中的寶藏與晶礦</small></div></div>
+   <div class="quest-task">
+    <div class="quest-task-icon">💎</div><div class="quest-task-main"><b>晶礦採集</b><p>探索四大區域，收集發光晶礦。</p><div class="quest-progress"><i style="width:${Math.min(state.gatheredNodes.length/12*100,100)}%"></i></div><small>${Math.min(state.gatheredNodes.length,12)} / 12 個晶礦</small></div>
+    <div class="quest-task-state">${state.claimedQuests.includes('gather')?'已領取':state.gatheredNodes.length>=12?'可領取':'進行中'}</div>
+   </div>
+   <div class="quest-reward-line">獎勵　💎 星石 × 80　·　⭐ 原石 × 20</div>
+   <button class="action ${state.claimedQuests.includes('gather')?'':'primary'}" onclick="claimGatherQuest()" ${state.gatheredNodes.length<12||state.claimedQuests.includes('gather')?'disabled':''}>${state.claimedQuests.includes('gather')?'✓ 獎勵已領取':state.gatheredNodes.length>=12?'領取採集獎勵':'收集 12 個晶礦後解鎖'}</button>
+   <div class="quest-task quest-task-spaced">
+    <div class="quest-task-icon">🎁</div><div class="quest-task-main"><b>草原寶箱獵人</b><p>找出風語草原隱藏的五個寶箱。</p><div class="quest-progress"><i style="width:${Math.min(state.openedChests.length/5*100,100)}%"></i></div><small>${Math.min(state.openedChests.length,5)} / 5 個寶箱</small></div>
+    <div class="quest-task-state">${state.claimedQuests.includes('chest')?'已領取':state.openedChests.length>=5?'可領取':'進行中'}</div>
+   </div>
+   <div class="quest-reward-line">獎勵　⭐ 原石 × 25</div>
+   <button class="action ${state.claimedQuests.includes('chest')?'':'primary'}" onclick="claimChestQuest()" ${state.openedChests.length<5||state.claimedQuests.includes('chest')?'disabled':''}>${state.claimedQuests.includes('chest')?'✓ 獎勵已領取':state.openedChests.length>=5?'領取寶箱獎勵':'開啟 5 個寶箱後解鎖'}</button>
+  </section>
+  <div class="quest-footnote">任務進度會自動保存。完成條件後，記得回到這裡領取獎勵。</div>
+ </div>`;
+
 else if(tab==='chest')c.innerHTML=`<h2>🎁 草原寶箱探索</h2><p class="muted">地圖上藏著 5 個寶箱，找到並開啟它們，收集星石、摩拉與原石！</p><div class="card"><b>已開啟 ${state.openedChests.length} / ${chestCatalog.length}</b><div class="catHp"><i style="width:${state.openedChests.length/chestCatalog.length*100}%"></i></div></div>${chestCatalog.map(ch=>{let opened=state.openedChests.includes(ch.id);return `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${ch.emoji} ${ch.name}</b><span class="muted">${opened?'已開啟':'尚未開啟'}</span></div><p class="muted">💎 ${ch.gems} 星石 · 🪙 ${ch.coins} 摩拉 · ⭐ ${ch.primogems} 原石</p><button class="action ${opened?'':'primary'}" onclick="openChest(${ch.id})" ${opened?'disabled':''}>${opened?'已領取獎勵':'開啟寶箱'}</button></div>`}).join('')}` ;
 else c.innerHTML=`<h2>✦ 冒險指南</h2><div class="card"><div class="muted">目前所在</div><b>📍 ${state.region}</b><p class="muted">跟著畫面左下角的主線提示前進，靠近發光物件後按 E 互動。</p></div><div class="card"><b>今日旅程</b><p class="muted">主線 ${state.storyStep}/4　·　隊伍 ${state.party.length}/4　·　已探索 ${state.visitedRegions.length}/4</p></div><button class="action primary" onclick="openPanel('quest')">📜 繼續主線任務</button><button class="action" onclick="openPanel('map')">🗺️ 選擇探索地區</button><button class="action" onclick="openPanel('gacha')">✦ 前往角色祈願</button>`;
 }
