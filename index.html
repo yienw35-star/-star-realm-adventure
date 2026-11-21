@@ -120,6 +120,60 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 }
 @media(max-width:420px){#world{height:66vh;height:66dvh;min-height:430px;max-height:700px}.brand{font-size:13px}.stats{gap:5px}.stats span{white-space:nowrap}}
 
+
+/* Mobile-first immersive world and compact expandable navigation */
+.storyToggle{float:right;font-size:14px;line-height:12px;padding:0 2px;color:#f2d995}
+@media(max-width:720px){
+ body{padding-bottom:76px;overscroll-behavior-y:contain}
+ main{display:block;padding:5px 5px 0;margin:0;width:100%;max-width:none}
+ main>section{display:block}
+ #world{height:calc(100svh - 116px);height:calc(100dvh - 116px);min-height:430px;max-height:none;width:100%;border-radius:13px;border-left:0;border-right:0}
+ #world3d{width:100%;height:100%;touch-action:pan-y}
+ #panel{position:fixed;left:0;right:0;bottom:0;z-index:30;width:100%;height:72px;min-height:0;max-height:72px;padding:5px 7px calc(5px + env(safe-area-inset-bottom));border-radius:17px 17px 0 0;border:1px solid #ffffff28;background:linear-gradient(180deg,#1b3048f7,#0b1728f9);box-shadow:0 -8px 32px #0008;overflow:hidden;display:flex;flex-direction:column;transition:height .22s ease,max-height .22s ease}
+ #panel.expanded{height:min(64dvh,560px);max-height:min(64dvh,560px);padding-bottom:calc(7px + env(safe-area-inset-bottom))}
+ .tabrow{flex:0 0 60px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;overflow:visible;padding:0 0 5px;margin:0;border-bottom:1px solid #ffffff18}
+ .tab{min-width:0;width:100%;height:54px;padding:4px 1px;border:0;border-radius:10px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:#b9c7d4}
+ .tab span{font-size:21px;line-height:24px;font-weight:500}
+ .tab small{font-size:10px;line-height:14px;white-space:nowrap}
+ .tab.active{background:linear-gradient(180deg,#b98b4d44,#e4c47e12);color:#ffe2a2;border:1px solid #e4c47e55;font-weight:900}
+ #content{display:none;flex:1;overflow-y:auto;min-height:0;padding:10px 5px 18px;overscroll-behavior:contain}
+ #panel.expanded #content{display:block}
+ #panel.expanded .tabrow{flex-basis:57px}
+ #controls{position:fixed;z-index:12;left:13px;bottom:88px;margin:0;display:grid;grid-template-columns:repeat(3,46px);grid-template-rows:repeat(2,42px);gap:4px;opacity:.84}
+ #controls button{background:#0c1b2bbd;border-color:#ffffff55;border-radius:11px;font-size:18px;backdrop-filter:blur(8px)}
+ #storyHud{left:9px;bottom:88px;width:min(190px,54%);padding:7px 9px;border-radius:10px;z-index:6;box-shadow:0 3px 12px #0007;backdrop-filter:blur(10px)}
+ #storyHud .storyKicker{font-size:9px;letter-spacing:.4px}
+ #storyHud b{font-size:11px;margin-top:2px}
+ #storyHud p,#storyHud button{display:none}
+ #storyHud.story-expanded{width:min(245px,72%);padding:10px 11px}
+ #storyHud.story-expanded p{display:block;font-size:10px;margin:4px 0 7px}
+ #storyHud.story-expanded button{display:inline-block;font-size:10px;padding:5px 8px}
+ #storyHud.story-expanded .storyToggle{transform:rotate(45deg)}
+ .compass{width:56px;height:56px;left:8px;top:8px;transform:scale(.9);transform-origin:top left}
+ .compass .north{left:24px}.compass .south{left:24px}.compass .east{right:5px;top:22px}.compass .west{left:5px;top:22px}.compass i{left:24px;top:14px;height:23px}
+ .location{top:8px;left:70px;padding:6px 8px;font-size:10px}
+ .world-help{top:8px;right:8px;max-width:140px;font-size:9px;padding:6px 7px}
+ .hint{bottom:8px;left:8px;right:8px;font-size:9px;padding:6px;background:#0b1b2bbb}
+ #interactBtn{bottom:48px;padding:8px 14px}
+ #content h2{font-size:19px;margin:3px 0 12px}
+ #content .card{padding:13px;margin:9px 0;border-radius:13px}
+ #content .action{padding:11px 12px;font-size:13px;border-radius:10px}
+ .quest-page{gap:13px}
+}
+@media(max-width:390px){
+ #world{height:calc(100svh - 108px);height:calc(100dvh - 108px);min-height:410px}
+ #panel{height:68px;max-height:68px}
+ .tabrow{flex-basis:56px}
+ .tab{height:51px}
+ .tab span{font-size:19px}
+ .tab small{font-size:9px}
+ #storyHud{bottom:82px;width:164px}
+ #controls{bottom:82px;grid-template-columns:repeat(3,42px);grid-template-rows:repeat(2,38px)}
+}
+@media(min-width:721px){
+ .tab span{display:inline-block;margin-right:4px}
+ .tab small{font-size:12px}
+}
 </style></head>
 <body>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
@@ -127,7 +181,7 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 <div id="world">
 <canvas id="world3d" aria-label="星境旅人 3D 冒險世界"></canvas>
 <div class="world-help">WASD 移動 · 拖曳旋轉視角 · 滾輪縮放 · E 互動</div>
-<div id="storyHud"><div class="storyKicker">✦ 主線任務</div><b id="storyTitle">星境的呼喚</b><p id="storyObjective">前往草原中央的星導石，按 E 與它互動。</p><button onclick="openPanel(&quot;quest&quot;)">查看任務</button></div>
+<div id="storyHud" class="story-collapsed" onclick="this.classList.toggle('story-expanded')"><div class="storyKicker">✦ 主線任務 <span class="storyToggle">＋</span></div><b id="storyTitle">星境的呼喚</b><p id="storyObjective">前往草原中央的星導石，按 E 與它互動。</p><button onclick="event.stopPropagation();openPanel('quest')">查看任務</button></div>
 <div class="compass" aria-label="方向羅盤"><div id="compassRose"><span class="north">N</span><span class="east">E</span><span class="south">S</span><span class="west">W</span><i></i></div></div>
 <div class="mountain m1"></div><div class="mountain m2"></div>
 <div class="tree" style="left:12%;bottom:15%">🌲</div><div class="tree" style="left:29%;bottom:22%">🌳</div><div class="tree" style="right:15%;bottom:13%">🌲</div><div class="tree" style="right:34%;bottom:27%">🌳</div>
@@ -135,7 +189,7 @@ main{max-width:1240px;grid-template-columns:minmax(0,1fr) 292px;gap:14px;padding
 <button class="poi" data-interact="quest" style="left:8%;top:24%">📜 委託</button><button class="poi" data-interact="monster" style="right:8%;top:36%">⚔️ 魔物</button><button class="poi" data-interact="chest" data-chest-id="0" style="right:12%;bottom:22%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="1" style="left:24%;top:43%">🧰 寶箱</button><button class="poi" data-interact="chest" data-chest-id="2" style="left:55%;top:28%">✨ 寶箱</button><button class="poi" data-interact="chest" data-chest-id="3" style="left:72%;bottom:35%">🎁 寶箱</button><button class="poi" data-interact="chest" data-chest-id="4" style="left:42%;bottom:18%">🧰 寶箱</button><button id="interactBtn" onclick="interactCurrent()">按 E 互動</button><div class="hint" id="worldHint">移動貓咪靠近委託、魔物或寶箱，再按 E 互動</div></div>
 <div id="controls"><button class="up" data-move="0,-5">↑</button><button class="left" data-move="-5,0">←</button><button class="down" data-move="0,5">↓</button><button class="right" data-move="5,0">→</button></div>
 </section>
-<aside id="panel"><div class="tabrow" aria-label="遊戲功能"><button class="tab active" data-tab="home">🏠 冒險</button><button class="tab" data-tab="quest">📜 任務</button><button class="tab" data-tab="map">🗺️ 地圖</button><button class="tab" data-tab="gacha">✦ 祈願</button><button class="tab" data-tab="bag">🐈 角色</button><button class="tab" data-tab="party">⚔️ 隊伍</button></div><div id="content" class="content"></div></aside></main>
+<aside id="panel"><div class="tabrow" aria-label="遊戲功能"><button class="tab active" data-tab="home"><span>⌂</span><small>冒險</small></button><button class="tab" data-tab="quest"><span>▤</span><small>任務</small></button><button class="tab" data-tab="map"><span>⌖</span><small>地圖</small></button><button class="tab" data-tab="gacha"><span>✧</span><small>祈願</small></button><button class="tab" data-tab="bag"><span>♧</span><small>角色</small></button><button class="tab" data-tab="party"><span>⚔</span><small>隊伍</small></button></div><div id="content" class="content"></div></aside></main>
 <div id="wishReveal"><div id="wishBox"><div id="wishTitle">✦ 星願降臨 ✦</div><div id="wishSubtitle">命運的星光正在揭曉……</div><div id="wishBeam"></div><div id="wishCards"></div><button id="wishClose" class="action primary" onclick="closeWishReveal()" style="display:none">收下祈願結果</button><button id="wishSkip" class="action" onclick="revealWishCards()">跳過動畫</button></div></div>
 <div id="battle"><div id="battlebox"><div class="muted">星芽出擊！</div><h2>史萊姆</h2><div class="enemy">🟢</div><div class="bar"><i id="enemyhp"></i></div><div class="muted" id="catBattleStats">🌟 星芽 HP：180 / 180</div><div class="catHp"><i id="catHpBar"></i></div><p id="battlemsg">一隻野生史萊姆擋住了去路！</p><button class="action primary" onclick="attack()">🐾 貓掌普通攻擊</button><button class="action" onclick="skill()">✨ 貓咪星光衝擊</button><button class="action" onclick="runAway()">撤退</button></div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r146/three.min.js"></script>
@@ -751,7 +805,11 @@ function gatherResource(id){
 }
 function claimGatherQuest(){if(state.gatheredNodes.length<12||state.claimedQuests.includes('gather'))return;state.claimedQuests.push('gather');state.gems+=80;state.primogems+=20;save();openPanel('quest');alert('世界探索完成！獲得 80 星石與 20 原石！')}
 document.querySelectorAll('[data-interact]').forEach(btn=>btn.addEventListener('click',()=>{if(btn.classList.contains('nearby')){nearbyPoi=btn;interactCurrent()}else{$('worldHint').textContent='還太遠了！請先走近這個標記。'}}));
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
+ const panel=$('panel'),isMobile=window.matchMedia('(max-width:720px)').matches,wasActive=b.classList.contains('active')&&panel.classList.contains('expanded');
+ openPanel(b.dataset.tab);
+ if(isMobile){panel.classList.toggle('expanded',!wasActive);if(!wasActive)panel.scrollIntoView({behavior:'smooth',block:'end'});}
+});
 document.querySelectorAll('[data-move]').forEach(b=>{const [x,y]=b.dataset.move.split(',').map(Number);const id=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);heldButtons.set(id,{x:Math.sign(x),z:Math.sign(y)})});const stop=()=>heldButtons.delete(id);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)});
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();heldKeys.add(k)}if(k==='e')interactCurrent()});
 document.addEventListener('keyup',e=>heldKeys.delete(e.key.toLowerCase()));
