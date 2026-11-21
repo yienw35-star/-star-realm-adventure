@@ -95,6 +95,7 @@ state.claimedQuests=Array.isArray(state.claimedQuests)?state.claimedQuests:[];
 state.gatheredNodes=Array.isArray(state.gatheredNodes)?state.gatheredNodes:[];
 state.materials=state.materials&&typeof state.materials==='object'?state.materials:{};
 state.visitedRegions=Array.isArray(state.visitedRegions)?state.visitedRegions:['風語草原'];
+state.openedChests=Array.isArray(state.openedChests)?state.openedChests:[];
 state.storyStep=Math.max(0,Math.min(4,Number(state.storyStep)||0));
 const storySteps=[{title:'星境的呼喚',objective:'前往草原中央的星導石，按 E 與它互動。'},{title:'初次試煉',objective:'擊敗星導石附近的草原魔物，保護這片草原。'},{title:'遺失的補給',objective:'尋找地圖上的寶箱並打開一個，取得旅途補給。'},{title:'星光共鳴',objective:'找到發光晶礦並採集，完成第一次星光共鳴。'},{title:'新的旅程',objective:'主線第一章完成！你已經可以自由探索四大區域。'}];
 const chestCatalog=[{id:0,name:'草叢木箱',emoji:'🧰',gems:80,coins:60,primogems:2},{id:1,name:'星光寶箱',emoji:'✨',gems:140,coins:90,primogems:5},{id:2,name:'古老寶箱',emoji:'🎁',gems:180,coins:120,primogems:8},{id:3,name:'森林寶箱',emoji:'🌿',gems:100,coins:160,primogems:3},{id:4,name:'稀有寶箱',emoji:'💎',gems:260,coins:180,primogems:12}];
@@ -161,7 +162,7 @@ function selectRegion(name){
 function claimDaily(){if(state.dailyWins<3||state.claimedQuests.includes('daily'))return;state.claimedQuests.push('daily');state.primogems+=30;state.gems+=100;save();openPanel('quest');alert('每日委託完成！獲得 30 原石與 100 星石！')}
 function claimChestQuest(){if(state.openedChests.length<5||state.claimedQuests.includes('chest'))return;state.claimedQuests.push('chest');state.primogems+=25;save();openPanel('quest');alert('探索委託完成！獲得 25 原石！')}
 function runAway(){$('battle').style.display='none'}
-function openChest(id){const ch=chestCatalog.find(x=>x.id===Number(id));if(!ch||state.openedChests.includes(ch.id))return;state.openedChests.push(ch.id);if(state.storyStep===2)advanceStory(2,3,'補給已取得！接著尋找發光晶礦並按 E 採集。');state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady)buildZone();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
+function openChest(id,key){const ch=chestCatalog.find(x=>x.id===Number(id));key=key||id;if(!ch||state.openedChests.includes(key))return;state.openedChests.push(key);if(state.storyStep===2)advanceStory(2,3,'補給已取得！接著尋找發光晶礦並按 E 採集。');state.chest=state.openedChests.length>=chestCatalog.length;state.gems+=ch.gems;state.coins+=ch.coins;state.primogems+=ch.primogems;save();if(threeReady)buildZone();openPanel('chest');alert('打開「'+ch.name+'」！獲得 '+ch.gems+' 星石、'+ch.coins+' 摩拉、'+ch.primogems+' 原石！')}
 function move(dx,dy){state.x=Math.max(5,Math.min(95,state.x+dx));state.y=Math.max(12,Math.min(88,state.y+dy));$('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';$('loc').textContent='📍 '+state.region;update3DPlayer();updateNearbyInteraction()}
 const heldKeys=new Set(),heldButtons=new Map();
 let walkDirection=new THREE.Vector2(),walkBlend=0;
@@ -223,13 +224,15 @@ function addRock(x,z,look,scale=1){
  const rock=addMesh(scene3d,new THREE.DodecahedronGeometry(scale,0),mat(colors),x,scale*.55,z);rock.scale.y=.8;addObstacle(x,z,scale*.78);
 }
 function addChest(x,z,id,look){
- const g=new THREE.Group(),wood=mat(0x80502e),gold=mat(look.accent,.4,{metalness:.55}),dark=mat(0x382d2a);
+ const g=new THREE.Group(),wood=mat(0x80502e),gold=mat(look.accent,.4,{metalness:.55}),dark=mat(0x382d2a),key=state.region+'-'+id,opened=state.openedChests.includes(key)||state.openedChests.includes(id);
  addMesh(g,new THREE.BoxGeometry(.95,.58,.68),wood,0,.42,0);
  addMesh(g,new THREE.BoxGeometry(1,.12,.72),gold,0,.68,0);
  const lid=addMesh(g,new THREE.BoxGeometry(.98,.22,.7),wood,0,.82,0);lid.rotation.x=-.12;
  addMesh(g,new THREE.BoxGeometry(.13,.28,.08),gold,0,.56,-.37);
  const ring=addMesh(g,new THREE.TorusGeometry(.62,.025,6,24),mat(look.accent,.4,{emissive:look.accent}),0,.08,0);ring.rotation.x=Math.PI/2;
- g.position.set(x,0,z);addObstacle(x,z,.95);g.userData={kind:'chest',id,opened:state.openedChests.includes(id)};if(g.userData.opened)lid.rotation.x=-.85;scene3d.add(g);worldObjects.push(g);
+ const beacon=addMesh(g,new THREE.CylinderGeometry(.025,.12,2.8,7),new THREE.MeshBasicMaterial({color:look.accent,transparent:true,opacity:.12}),0,2.1,0);beacon.userData.decor=true;
+ const jewel=addMesh(g,new THREE.OctahedronGeometry(.16),mat(look.accent,.25,{emissive:look.accent,emissiveIntensity:.5}),0,3.45,0);jewel.userData.decor=true;
+ g.position.set(x,0,z);addObstacle(x,z,.95);g.userData={kind:'chest',id,key,opened};if(opened){lid.rotation.x=-.85;beacon.visible=false;jewel.visible=false}scene3d.add(g);worldObjects.push(g);
 }
 function addMonster(x,z,look){
  const g=new THREE.Group(),bodyColor=state.region==='熾焰山脈'?0xb95738:state.region==='霜晶雪原'?0x8ed5ee:state.region==='蒼翠森林'?0x9bba5b:0x79c96a;
@@ -249,6 +252,61 @@ function addResourceNode(x,z,id,look){
  const shard=addMesh(g,new THREE.OctahedronGeometry(.25,0),mat(look.accent,.25,{emissive:look.accent}),.42,.4,.08);shard.rotation.z=.5;
  const ring=addMesh(g,new THREE.TorusGeometry(.72,.025,6,24),mat(look.accent,.4,{emissive:look.accent}),0,.08,0);ring.rotation.x=Math.PI/2;
  g.position.set(x,0,z);addObstacle(x,z,.78);g.userData={kind:'resource',id,key};scene3d.add(g);worldObjects.push(g);
+}
+function addTrail(points,color){
+ const curve=new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(p[0],.025,p[1])));
+ const edge=addMesh(scene3d,new THREE.TubeGeometry(curve,80,.42,8,false),mat(0x18231f,.98),0,0,0);edge.userData.zoneObject=true;
+ const center=addMesh(scene3d,new THREE.TubeGeometry(curve,80,.29,8,false),mat(color,.96),0,0,0);center.userData.zoneObject=true;
+ for(let i=0;i<=36;i++){const p=curve.getPoint(i/36);const stone=addMesh(scene3d,new THREE.CylinderGeometry(.16,.2,.055,6),mat(0x8b8979),p.x,.025,p.z);stone.rotation.y=(i%2)*.3;stone.userData.zoneObject=true}
+}
+function addLantern(x,z,color){
+ const g=new THREE.Group();addMesh(g,new THREE.CylinderGeometry(.055,.09,1.1,7),mat(0x49372b),0,.55,0);
+ addMesh(g,new THREE.BoxGeometry(.48,.08,.48),mat(0x59412d),0,1.12,0);
+ addMesh(g,new THREE.SphereGeometry(.19,10,8),new THREE.MeshBasicMaterial({color,transparent:true,opacity:.82}),0,.88,0);
+ addMesh(g,new THREE.ConeGeometry(.28,.18,6),mat(0x715235),0,1.28,0);
+ g.position.set(x,0,z);scene3d.add(g);addObstacle(x,z,.38);
+}
+function addSignpost(x,z,rotation,labelColor){
+ const g=new THREE.Group();addMesh(g,new THREE.CylinderGeometry(.09,.13,2.2,7),mat(0x65472f),0,1.1,0);
+ const board=addMesh(g,new THREE.BoxGeometry(1.25,.42,.13),mat(0x8a633c),0,1.72,0);board.rotation.y=rotation;
+ addMesh(g,new THREE.OctahedronGeometry(.14),mat(labelColor,.3,{emissive:labelColor}),0,2.05,0);
+ g.position.set(x,0,z);scene3d.add(g);addObstacle(x,z,.45);
+}
+function addBiomeLandmark(look){
+ const g=new THREE.Group(),region=state.region;
+ if(region==='風語草原'){
+  for(const x of [-3,3]){addMesh(g,new THREE.CylinderGeometry(.42,.58,5.5,8),mat(0x897d62),x,2.75,0);addMesh(g,new THREE.CylinderGeometry(.56,.56,.28,8),mat(0xb6a47b),x,5.3,0)}
+  addMesh(g,new THREE.BoxGeometry(7,.5,.65),mat(0xa89570),0,5.45,0);
+  addMesh(g,new THREE.TorusGeometry(1.3,.16,8,24),mat(look.accent,.3,{emissive:look.accent,emissiveIntensity:.18}),0,3.2,.2);
+  addMesh(g,new THREE.OctahedronGeometry(.55),mat(0xd6c28a,.3,{emissive:0x8a713c}),0,3.2,.2);
+ }else if(region==='蒼翠森林'){
+  addMesh(g,new THREE.CylinderGeometry(1.2,1.7,7,10),mat(0x493e31),0,3.5,0);
+  for(let i=0;i<7;i++){const a=i*Math.PI*2/7;addMesh(g,new THREE.ConeGeometry(2.5-i*.12,3.6,7),mat(i%2?0x234b37:0x315d43),Math.cos(a)*1.2,6.1+Math.sin(i)*.5,Math.sin(a)*1.2)}
+  for(let i=0;i<4;i++){const vine=addMesh(g,new THREE.CylinderGeometry(.025,.04,2.5,5),mat(0x567449),Math.cos(i*1.57)*1.4,4.4,Math.sin(i*1.57)*1.4);vine.rotation.z=.2}
+ }else if(region==='霜晶雪原'){
+  for(let i=0;i<5;i++){const a=i*1.25;const crystal=addMesh(g,new THREE.ConeGeometry(.65,4.5+(i%2)*1.8,6),mat(0xa9d4e2,.24,{metalness:.18,emissive:0x24495b,emissiveIntensity:.12}),Math.cos(a)*2,2.4,Math.sin(a)*2);crystal.rotation.z=.1*Math.sin(a)}
+  addMesh(g,new THREE.TorusGeometry(2.2,.12,8,32),mat(0x92c4d5,.25,{metalness:.25}),0,.12,0).rotation.x=Math.PI/2;
+ }else{
+  for(let i=0;i<5;i++){const a=i*1.256;addMesh(g,new THREE.ConeGeometry(.85,4.5+(i%2)*2,6),mat(0x403238),Math.cos(a)*2,2.5,Math.sin(a)*2)}
+  addMesh(g,new THREE.TorusGeometry(2.2,.18,8,32),mat(0xb84d32,.35,{emissive:0x6c1e0d,emissiveIntensity:.4}),0,.25,0).rotation.x=Math.PI/2;
+  addMesh(g,new THREE.OctahedronGeometry(.7),mat(0xff8244,.25,{emissive:0xc7441e,emissiveIntensity:.6}),0,2.1,0);
+ }
+ g.position.set(-29,0,-22);scene3d.add(g);addObstacle(-29,-22,3.8);
+}
+function addBiomeDetails(look){
+ const region=state.region;
+ if(region==='風語草原'){
+  for(let i=0;i<38;i++){const x=(Math.random()-.5)*48,z=(Math.random()-.5)*48;if(Math.hypot(x,z)<8)continue;const flower=new THREE.Group();addMesh(flower,new THREE.CylinderGeometry(.018,.025,.28,4),mat(0x71804a),0,.14,0);addMesh(flower,new THREE.SphereGeometry(.11,7,6),mat([0xd9b66f,0xc78c88,0xd6d1a2][i%3]),0,.31,0);flower.position.set(x,0,z);scene3d.add(flower)}
+ }else if(region==='蒼翠森林'){
+  for(let i=0;i<18;i++){const x=(Math.random()-.5)*46,z=(Math.random()-.5)*46;if(Math.hypot(x,z)<8)continue;const m=addMesh(scene3d,new THREE.SphereGeometry(.42+Math.random()*.25,9,7),mat(i%2?0xb06c65:0x9b8a68),x,.32,z);m.scale.y=.65;addMesh(scene3d,new THREE.SphereGeometry(.12,8,6),mat(0xe2c18a),x,.63,z)}
+  for(const p of [[-13,9],[14,-16],[27,12]])addLantern(p[0],p[1],0xd8b56b);
+ }else if(region==='霜晶雪原'){
+  for(let i=0;i<26;i++){const x=(Math.random()-.5)*50,z=(Math.random()-.5)*50;if(Math.hypot(x,z)<8)continue;const drift=addMesh(scene3d,new THREE.ConeGeometry(.22,.9,5),mat(0xe2edf0),x,.4,z);drift.rotation.z=(Math.random()-.5)*.3}
+  for(const p of [[-12,10],[14,-16],[27,12]])addLantern(p[0],p[1],0x8adcf0);
+ }else{
+  for(let i=0;i<22;i++){const x=(Math.random()-.5)*48,z=(Math.random()-.5)*48;if(Math.hypot(x,z)<8)continue;const vent=addMesh(scene3d,new THREE.ConeGeometry(.55,1.4,6),mat(0x403336),x,.55,z);vent.rotation.z=(Math.random()-.5)*.3;const glow=addMesh(scene3d,new THREE.SphereGeometry(.12,8,6),new THREE.MeshBasicMaterial({color:0xff642d}),x,.16,z)}
+  for(const p of [[-13,9],[14,-16],[27,12]])addLantern(p[0],p[1],0xff8042);
+ }
 }
 function buildZone(){
  const look=zoneLooks[state.region]||zoneLooks['風語草原'];
@@ -280,15 +338,13 @@ function buildZone(){
   const a=i*Math.PI*2/9,r=33+Math.random()*8;
   const mountain=addMesh(scene3d,new THREE.ConeGeometry(5+Math.random()*4,12+Math.random()*10,6),mat(state.region==='霜晶雪原'?0xd9eff7:state.region==='熾焰山脈'?0x493b43:0x657f72),Math.cos(a)*r,5,Math.sin(a)*r);mountain.userData.zoneObject=true;
  }
- const spots=[
-  {x:-23.1,z:-14.3,kind:'quest'},
-  {x:23.1,z:-7.7,kind:'monster'},
-  {x:20.9,z:15.4,kind:'chest',id:0},
-  {x:-14.3,z:-3.85,kind:'chest',id:1},
-  {x:2.75,z:-12.1,kind:'chest',id:2},
-  {x:12.1,z:8.25,kind:'chest',id:3},
-  {x:-4.4,z:17.6,kind:'chest',id:4}
- ];
+ const regionSpots={
+ '風語草原':[{x:20,z:15,id:0},{x:-14,z:-4,id:1},{x:3,z:-12,id:2},{x:12,z:8,id:3},{x:-4,z:18,id:4}],
+ '蒼翠森林':[{x:25,z:-17,id:0},{x:-17,z:13,id:1},{x:8,z:24,id:2},{x:-27,z:-2,id:3},{x:15,z:-4,id:4}],
+ '霜晶雪原':[{x:23,z:18,id:0},{x:-19,z:16,id:1},{x:10,z:-25,id:2},{x:-27,z:-5,id:3},{x:18,z:-7,id:4}],
+ '熾焰山脈':[{x:25,z:14,id:0},{x:-18,z:18,id:1},{x:7,z:-26,id:2},{x:-26,z:-3,id:3},{x:17,z:-8,id:4}]
+ };
+ const spots=[{x:-23.1,z:-14.3,kind:'quest'},{x:23.1,z:-7.7,kind:'monster'},...regionSpots[state.region].map(p=>({...p,kind:'chest'}))];
  for(const p of spots){
   if(p.kind==='chest')addChest(p.x,p.z,p.id,look);
   else if(p.kind==='monster')addMonster(p.x,p.z,look);
@@ -300,6 +356,8 @@ function buildZone(){
    q.position.set(p.x,0,p.z);addObstacle(p.x,p.z,.82);q.userData={kind:'quest'};scene3d.add(q);worldObjects.push(q);
   }
  }
+ addTrail([[0,0,4],[-5,-3],[-10,-7],[-15,-10],[-19,-13],[-23,-14]],look.accent);
+ addSignpost(-2,1,.15,look.accent);addBiomeLandmark(look);addBiomeDetails(look);
  // 小型發光水晶與道路石塊
  for(let i=0;i<16;i++){const x=(Math.random()-.5)*48,z=(Math.random()-.5)*48;const crystal=addMesh(scene3d,new THREE.OctahedronGeometry(.25+Math.random()*.25),mat(look.accent,.3,{emissive:look.accent}),x,.35,z);crystal.userData.zoneObject=true}
  const resourceSpots=[[-18,18],[18,-22],[-28,-5]];
@@ -333,21 +391,21 @@ function update3DInteraction(){
  if(!threeReady)return;
  const px=player3d.position.x,pz=player3d.position.z;let best=Infinity,nearest=null;
  for(const obj of worldObjects){
-  if(obj.userData.kind==='chest'&&state.openedChests.includes(obj.userData.id))continue;
+  if(obj.userData.kind==='chest'&&(state.openedChests.includes(obj.userData.key)||state.openedChests.includes(obj.userData.id)))continue;
   if(obj.userData.kind==='resource'&&state.gatheredNodes.includes(obj.userData.key))continue;
   const d=Math.hypot(obj.position.x-px,obj.position.z-pz);if(d<best){best=d;nearest=obj}
  }
  const close=best<3.3,btns=[...document.querySelectorAll('[data-interact]')];btns.forEach(b=>b.classList.remove('nearby'));
  if(close&&nearest){
-  if(nearest.userData.kind==='resource')nearbyPoi=nearest;
-  else{const type=nearest.userData.kind;nearbyPoi=btns.find(b=>b.dataset.interact===type&&(type!=='chest'||Number(b.dataset.chestId)===nearest.userData.id))||null}
+  if(['resource','chest'].includes(nearest.userData.kind))nearbyPoi=nearest;
+  else{const type=nearest.userData.kind;nearbyPoi=btns.find(b=>b.dataset.interact===type)||null}
  }else nearbyPoi=null;
  if(nearbyPoi&&nearbyPoi.classList)nearbyPoi.classList.add('nearby');
  $('interactBtn').classList.toggle('show',!!nearbyPoi);
  const kind=nearbyPoi?.userData?.kind||nearbyPoi?.dataset?.interact;
  const labels={quest:'冒險委託',monster:'地區魔物',chest:'寶箱',resource:'地區晶礦'};
  $('interactBtn').textContent=kind==='resource'?'按 E 採集':'按 E 互動';
- $('worldHint').textContent=nearbyPoi?'已靠近：'+(labels[kind]||'探索目標')+' · '+(kind==='resource'?'按 E 採集':'按 E 互動'):'探索 '+state.region+'，尋找寶箱、魔物與發光晶礦';
+ $('worldHint').textContent=nearbyPoi?'已靠近：'+(labels[kind]||'探索目標')+' · '+(kind==='resource'?'按 E 採集':'按 E 互動'):'沿著地面石徑探索 '+state.region+'，尋找寶箱、魔物與發光晶礦';
 }
 function updateNearbyInteraction(){if(threeReady)update3DInteraction();else{$('worldHint').textContent='3D 世界載入中……'}}
 function animate3D(t=0){
@@ -391,7 +449,7 @@ function animate3D(t=0){
   $('compassRose').style.transform='rotate('+(-cameraYaw*180/Math.PI)+'deg)';
   camera3d.position.set(player3d.position.x+Math.sin(cameraYaw)*cameraDistance,player3d.position.y+cameraDistance*Math.sin(cameraPitch)+1.2,player3d.position.z+Math.cos(cameraYaw)*cameraDistance);
   camera3d.lookAt(player3d.position.x,player3d.position.y+1.05,player3d.position.z);
-  worldObjects.forEach(o=>{if(o.userData.kind==='quest'&&o.children[1])o.children[1].rotation.y+=dt*.9});
+  worldObjects.forEach(o=>{if(o.userData.kind==='quest'&&o.children[1])o.children[1].rotation.y+=dt*.9;if(o.userData.kind==='chest'&&!o.userData.opened){const jewel=o.children[7];if(jewel)jewel.rotation.y+=dt*1.2}});
   renderer3d.render(scene3d,camera3d);
  }catch(err){console.error('3D 畫面執行失敗，切換安全模式：',err);activate2DFallback('3D 顯示發生錯誤，已切換安全模式。')}
 }
@@ -402,6 +460,7 @@ function updateNearbyInteraction(){if(threeReady){update3DInteraction();return}c
 function interactCurrent(){
  if(!nearbyPoi){$('worldHint').textContent='還太遠了！再靠近一點才能互動。';return}
  if(nearbyPoi.userData?.kind==='resource'){gatherResource(nearbyPoi.userData.id);return}
+ if(nearbyPoi.userData?.kind==='chest'){openChest(nearbyPoi.userData.id,nearbyPoi.userData.key);return}
  const type=nearbyPoi.dataset.interact;if(type==='quest')interactStoryStone();else if(type==='monster')startBattle();else if(type==='chest')openChest(Number(nearbyPoi.dataset.chestId))
 }
 function gatherResource(id){
