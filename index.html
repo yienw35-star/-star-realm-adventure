@@ -284,7 +284,16 @@ main>section{width:100%;min-width:0}
  #storyHud.story-expanded p{display:block!important;font-size:10px!important;white-space:normal;line-height:1.4!important}
  #storyHud.story-expanded button{display:inline-block!important}
 }
-@media(max-width:390px){#settingsOpen{top:52px!important}#storyHud{width:124px!important;max-width:124px!important;bottom:82px!important}}</style></head>
+@media(max-width:720px){
+ #storyHud{left:9px!important;right:auto!important;top:auto!important;bottom:calc(116px + env(safe-area-inset-bottom))!important;width:126px!important;max-width:126px!important;height:auto!important;min-height:0!important;max-height:58px!important;overflow:hidden!important;padding:6px 8px!important;border-radius:11px!important;z-index:14!important}
+ #storyHud .storyKicker{font-size:8px!important;line-height:1.2!important}
+ #storyHud b{font-size:10px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+ #storyHud:not(.story-expanded) p,#storyHud:not(.story-expanded) button{display:none!important}
+ #storyHud.story-expanded{width:min(210px,68vw)!important;max-width:min(210px,68vw)!important;max-height:160px!important;padding:9px 10px!important}
+ #storyHud.story-expanded p{display:block!important;font-size:10px!important;white-space:normal!important;line-height:1.4!important;margin:4px 0 7px!important}
+ #storyHud.story-expanded button{display:inline-block!important}
+}
+@media(max-width:390px){#settingsOpen{top:52px!important}#storyHud{width:118px!important;max-width:118px!important;bottom:calc(116px + env(safe-area-inset-bottom))!important}}</style></head>
 <body><button id="settingsOpen" type="button" onclick="openSettings()">⚙ 設定</button><div id="settingsModal" onclick="if(event.target===this)closeSettings()"><div class="settings-box"><button class="settings-x" type="button" onclick="closeSettings()">✕</button><h2>⚙ 遊戲設定</h2><p class="settings-sub">常用功能與操作提示集中在這裡，讓冒險畫面保持清爽。</p><div class="settings-row"><div><strong>🎵 背景音樂</strong><small id="settingsMusicStatus"></small></div><button class="settings-action" id="settingsMusicBtn" onclick="toggleGameSound();updateSettingsMusic()">切換音樂</button></div><div class="settings-row"><div><strong>🎟 兌換碼</strong><small>輸入 YIEN 領取星石並解鎖貓咪</small></div><button class="settings-action" onclick="closeSettings();openCheat()">開啟兌換</button></div><div class="settings-row"><div><strong>🖐 轉動視角</strong><small>在地圖空白處按住並拖曳，即可旋轉觀察方向。</small></div></div><div class="settings-row"><div><strong>🐾 移動與互動</strong><small>使用左下方向鍵移動；靠近物件後點擊互動按鈕。</small></div></div><div class="settings-row"><div><strong>✦ 冒險導航</strong><small id="settingsGuideText">跟隨地圖中的發光路線前進。</small></div></div></div></div>
 <header><div class="brand">✦ 星境旅人</div><div class="stats"><span>💎 <b id="gems">1600</b></span><span>🪙 <b id="coins">300</b></span><span>⭐ <b id="primogems">0</b></span></div></header>
 <button id="travelSignpostBtn" type="button" onclick="playGameSound('region');openPanel('map')">🪧 前往其他地圖</button><button id="soundToggle" type="button" aria-pressed="true" onclick="toggleGameSound()">♫ 點擊播放背景音樂</button><main><section>
@@ -312,12 +321,18 @@ main>section{width:100%;min-width:0}
 const $=id=>document.getElementById(id);
 // 程序合成音效：首次點擊後啟動，無需外部音檔
 let gameAudio=null,audioMuted=false,stepSoundClock=0,bgmNodes=[],bgmTimer=null,bgmStep=0,bgmGain=null,bgmTarget=0,lastGameActivity=0;
+function gamePageIsActive(){return document.visibilityState==='visible'&&document.hasFocus()}
 function ensureGameAudio(){
- if(audioMuted)return null;
+ if(audioMuted||!gamePageIsActive())return null;
  const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
  if(!gameAudio){gameAudio=new AC();lastGameActivity=gameAudio.currentTime}
- if(gameAudio.state==='suspended')gameAudio.resume().then(()=>{startIdleMusic();if(!audioMuted)setMusicLevel(.34)}).catch(()=>{});
+ if(gameAudio.state==='suspended')gameAudio.resume().then(()=>{if(gamePageIsActive()&&!audioMuted){startIdleMusic();setMusicLevel(.34)}else suspendGameAudio()}).catch(()=>{});
  startIdleMusic();return gameAudio;
+}
+function suspendGameAudio(){if(gameAudio&&gameAudio.state==='running')gameAudio.suspend().catch(()=>{})}
+function resumeGameAudio(){
+ if(audioMuted||!gameAudio||!gamePageIsActive())return;
+ gameAudio.resume().then(()=>{if(gamePageIsActive()&&!audioMuted){startIdleMusic();setMusicLevel(.34)}else suspendGameAudio()}).catch(()=>{});
 }
 function markGameActivity(){
  if(!gameAudio||audioMuted)return;
@@ -369,24 +384,21 @@ function openSettings(){const m=$('settingsModal');if(m){m.classList.add('show')
 function closeSettings(){const m=$('settingsModal');if(m)m.classList.remove('show')}
 function updateSettingsMusic(){const s=$('settingsMusicStatus'),b=$('settingsMusicBtn');if(s)s.textContent=audioMuted?'目前已關閉':'背景音樂播放中';if(b)b.textContent=audioMuted?'開啟音樂':'關閉音樂'}
 function toggleGameSound(){
+ audioMuted=!audioMuted;
  const b=$('soundToggle');
  if(audioMuted){
-  audioMuted=false;
+  if(b){b.textContent='🔇 開啟背景音樂';b.setAttribute('aria-pressed','false')}
+  if(bgmGain)setMusicLevel(0);
+  suspendGameAudio();
+ }else{
   if(b){b.textContent='♫ 背景音樂播放中';b.setAttribute('aria-pressed','true')}
-  const ac=ensureGameAudio();
-  if(ac&&ac.state==='suspended')ac.resume().then(()=>{startIdleMusic();setMusicLevel(.82)});
-  else if(ac){startIdleMusic();setMusicLevel(.82)}
-  return;
+  if(gamePageIsActive()){
+   const ac=ensureGameAudio();
+   if(ac&&ac.state==='suspended')resumeGameAudio();
+   else if(ac){startIdleMusic();setMusicLevel(.34)}
+  }
  }
- if(!gameAudio||gameAudio.state==='suspended'){
-  audioMuted=false;const ac=ensureGameAudio();
-  if(ac&&ac.state==='suspended')ac.resume().then(()=>{startIdleMusic();setMusicLevel(.82)});
-  else if(ac){startIdleMusic();setMusicLevel(.82)}
-  if(b){b.textContent='♫ 背景音樂播放中';b.setAttribute('aria-pressed','true')}
-  return;
- }
- audioMuted=true;if(b){b.textContent='🔇 開啟背景音樂';b.setAttribute('aria-pressed','false')}
- if(bgmGain)setMusicLevel(0);
+ updateSettingsMusic();
 }
 function playGameSound(kind='tap'){
  const ac=ensureGameAudio();if(!ac)return;markGameActivity();
@@ -1029,9 +1041,12 @@ document.querySelectorAll('#featureDock [data-tab]').forEach(b=>b.onclick=()=>{p
  document.querySelectorAll('[data-move]').forEach(b=>{const [x,y]=b.dataset.move.split(',').map(Number);const id=b.dataset.move;b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);heldButtons.set(id,{x:Math.sign(x),z:Math.sign(y)})});const stop=()=>heldButtons.delete(id);b.addEventListener('pointerup',stop);b.addEventListener('pointercancel',stop);b.addEventListener('lostpointercapture',stop)});
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k)){e.preventDefault();heldKeys.add(k)}});
 document.addEventListener('keyup',e=>heldKeys.delete(e.key.toLowerCase()));
-window.addEventListener('blur',()=>{heldKeys.clear();heldButtons.clear()});
-document.addEventListener('pointerdown',()=>{if(!audioMuted){ensureGameAudio();markGameActivity()}},{passive:true});
-document.addEventListener('keydown',()=>{if(!audioMuted){ensureGameAudio();markGameActivity()}},{passive:true});
+window.addEventListener('blur',()=>{heldKeys.clear();heldButtons.clear();suspendGameAudio()});
+window.addEventListener('focus',()=>{resumeGameAudio()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')suspendGameAudio();else resumeGameAudio()});
+window.addEventListener('pagehide',suspendGameAudio);
+document.addEventListener('pointerdown',()=>{if(!audioMuted&&gamePageIsActive()){ensureGameAudio();markGameActivity()}},{passive:true});
+document.addEventListener('keydown',()=>{if(!audioMuted&&gamePageIsActive()){ensureGameAudio();markGameActivity()}},{passive:true});
 $('hero').style.left=state.x+'%';$('hero').style.top=state.y+'%';
 try{init3DWorld()}catch(err){console.error('遊戲世界初始化失敗：',err);activate2DFallback('世界載入失敗，已啟用安全模式。')}
 try{updateWorldBackground();updateNearbyInteraction();save();refreshStoryHud();closePanel()}catch(err){console.error('遊戲介面初始化失敗：',err);const content=$('content');if(content)content.innerHTML='<h2>星境旅人</h2><p>遊戲已載入，但部分介面發生錯誤。請重新整理頁面。</p>';}
